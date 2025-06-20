@@ -10,7 +10,7 @@ export function createToken(user) {
       role: user.role 
     },
     JWT_SECRET,
-    { expiresIn: '7d' }
+    { expiresIn: '1d' }
   );
 }
 
