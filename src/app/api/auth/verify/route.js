@@ -4,6 +4,7 @@ import User from '@/models/User';
 import { verifyToken } from '@/lib/auth';
 
 export async function GET(request) {
+  // Extract token from the URL query string: /verify-email?token=xxx
   const { searchParams } = new URL(request.url);
   const token = searchParams.get('token');
   
@@ -15,6 +16,7 @@ export async function GET(request) {
   }
 
   try {
+    // Decode and verify the token using your JWT secret
     const { userId } = verifyToken(token);
     await dbConnect();
     
@@ -27,6 +29,7 @@ export async function GET(request) {
       );
     }
 
+    // Check if the user has already verified their email
     if (user.isEmailVerified) {
       return NextResponse.json({
         message: "Email already verified",
@@ -36,6 +39,7 @@ export async function GET(request) {
       });
     }
 
+    // Update user to mark email as verified and log time
     await User.findByIdAndUpdate(
       userId,
       { 
