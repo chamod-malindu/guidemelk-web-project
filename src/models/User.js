@@ -3,16 +3,24 @@ import mongoose from 'mongoose';
 const userSchema = new mongoose.Schema({
   firstName : { 
     type: String,
-    required: true 
+    required: true,
+    trim: true 
   },
   lastName : { 
     type: String,
-    required: true 
+    required: true,
+    trim: true 
   },
   email : { 
     type: String,
     required: true,
-    unique: true 
+    unique: true,
+    lowercase: true,
+    trim: true,
+    validate: {
+      validator: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), // Validate email format with regex
+      message: "Invalid email format"
+    } 
   },
   password : {
      type: String
@@ -43,14 +51,11 @@ const userSchema = new mongoose.Schema({
   isBlocked : {
     type: Boolean,
     default: false 
-  },
-  createdAt : {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt : {type: Date,
-    default: Date.now
   }
-});
+},
+  {
+    timestamps: true // Automatically adds createdAt and updatedAt fields
+  });
+
 
 export default mongoose.models.User || mongoose.model('User', userSchema);
