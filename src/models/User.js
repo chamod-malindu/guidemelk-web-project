@@ -37,6 +37,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  emailVerifiedAt: {
+    type: Date,
+    default: null
+  },  
   profileImage : {
     type: String,
     default: 'https://cdn-icons-png.flaticon.com/512/147/147144.png'
