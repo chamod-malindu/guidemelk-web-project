@@ -70,3 +70,11 @@ export function middleware(request) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 }
+
+
+// Only run middleware on paths that aren't public/static
+export const config = {
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
+};
