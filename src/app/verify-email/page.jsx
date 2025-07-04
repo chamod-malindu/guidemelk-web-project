@@ -46,7 +46,7 @@ export default function VerifyEmailPage() {
       setCountdown((prev) => {
         if (prev === 1) {
           clearInterval(interval);
-          router.push(`/${role}-dashboard`);
+          router.push(`/${role}/dashboard`);
         }
         return prev - 1;
       });

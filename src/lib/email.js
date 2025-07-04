@@ -1,15 +1,44 @@
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',  
+  service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER,   
-    pass: process.env.EMAIL_PASS,   
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
+
+  port: 587,
+  secure: false,
+  requireTLS: true,
+  tls: {
+    ciphers: 'SSLv3'
+  }
 });
 
+// Test the transporter connection
+export async function testEmailConnection() {
+  try {
+    await transporter.verify();
+    console.log('✅ Email transporter is ready');
+    return true;
+  } catch (error) {
+    console.error('❌ Email transporter error:', error);
+    return false;
+  }
+}
+
 export async function sendVerificationEmail(email, token) {
+  console.log('📧 Attempting to send verification email to:', email);
+  
+  // Test connection first
+  const isReady = await testEmailConnection();
+  if (!isReady) {
+    throw new Error('Email service is not configured correctly');
+  }
+
   const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/verify-email?token=${token}`;
+  
+  console.log('🔗 Verification URL:', verificationUrl);
 
   const emailTemplate = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -42,16 +71,28 @@ export async function sendVerificationEmail(email, token) {
   `;
 
   try {
-    await transporter.sendMail({
+    console.log('Sending email from:', process.env.EMAIL_USER, 'to:', email);
+
+    console.log('📤 Sending email...');
+    
+    const info = await transporter.sendMail({
       from: `"GuideMeLK" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: 'Verify Your Email Address - GuideMeLK',
       html: emailTemplate,
     });
-    console.log(`Verification email sent to: ${email}`);
+    
+    console.log('✅ Email sent successfully:', info.messageId);
+    console.log('📧 Email info:', info);
+    
   } catch (error) {
-    console.error('Error sending verification email:', error);
-    throw new Error('Failed to send verification email');
+    console.error('❌ Email sending failed:', error);
+    console.error('Error details:', {
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode
+    });
+    throw new Error(`Failed to send verification email: ${error.message}`);
   }
 }
-

@@ -23,11 +23,8 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Email is already verified' }, { status: 400 })
     }
 
-    const token = createToken({
-      _id: user._id,
-      email: user.email,
-      role: user.role
-    })
+    const token = createToken(user)
+
 
     await sendVerificationEmail(user.email, token)
 
