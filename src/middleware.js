@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth'; // NextAuth
-import { verifyToken } from '@/lib/auth'; // Your existing custom auth
+import { verifyToken } from '@/lib/auth'; 
 
 const PUBLIC_PATHS = [
   '/', 
@@ -8,11 +8,14 @@ const PUBLIC_PATHS = [
   '/register',
   '/verify-email',
   '/verify-reminder',
-  '/auth/after-google', // Add this line
+  '/auth/after-google',
   '/api/auth/login',
   '/api/auth/register',
   '/api/auth/verify',
-  '/api/auth/resend-verification'
+  '/api/auth/resend-verification',
+  '/forgot-password',
+  '/reset-password',
+  '/api/auth/logout'
 ];
 
 export async function middleware(request) {
@@ -32,7 +35,8 @@ export async function middleware(request) {
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon.ico') ||
-    pathname.startsWith('/images')
+    pathname.startsWith('/images') ||
+    pathname.startsWith('/icons')
   ) {
     return NextResponse.next();
   }
@@ -63,26 +67,43 @@ export async function middleware(request) {
     }
 
     if (
-      (pathname.startsWith('/tourist-dashboard') ||
-       pathname === '/tourist-home') &&
+      (pathname.startsWith('/tourist/dashboard') ||
+       pathname === '/tourist/home') &&
       decoded.role !== 'tourist'
     ) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    if (pathname.startsWith('/guide-dashboard') && decoded.role !== 'guide') {
+    if (pathname.startsWith('/guide/dashboard') && decoded.role !== 'guide') {
       return NextResponse.redirect(new URL('/login', request.url));
     }
+
+    if (pathname === '/login' || pathname === '/register') {
+      const dashboardRoute = `/${decoded.role}-dashboard`;
+      return NextResponse.redirect(new URL(dashboardRoute, request.url));
+    } 
 
     return NextResponse.next();
   } catch (error) {
     console.error('Middleware token error:', error);
-    return NextResponse.redirect(new URL('/login', request.url));
+
+    
+    const response = NextResponse.redirect(new URL('/login', request.url));
+    response.cookies.set('token', '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 0,
+      path: '/'
+    });
+    
+    return response;
   }
 }
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
+    '/((?!_next|favicon.ico|images|icons|api/auth).*)',
+    '/api/auth/(.*)'
+  ]
 };
