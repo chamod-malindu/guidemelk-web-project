@@ -114,7 +114,7 @@ export async function POST(request) {
       message: "Login successful",
       success: true,
       user: userData,
-      redirectTo: `/${role}-dashboard`
+      redirectTo: `/${role}/dashboard`
     });
 
     // Set HTTP-only cookie with the token
