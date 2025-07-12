@@ -10,7 +10,7 @@ export default function GoogleAuthButton({ userRole, disabled }) {
       className="w-full h-12 bg-white"
       onClick={() =>
         signIn("google", {
-          callbackUrl: `/auth/after-google?role=${userRole}`,
+          callbackUrl: `/api/auth/google-callback?role=${userRole}`,
         })
       }
       disabled={disabled}
