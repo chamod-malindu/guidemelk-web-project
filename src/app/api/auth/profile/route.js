@@ -7,8 +7,9 @@ import { verifyToken } from '@/lib/auth';
 export async function GET(request) {
   try {
     // Get token from cookies
-    const cookieStore = cookies();
-    const token = cookieStore.get('token')?.value;
+    const cookieStore = await cookies(request);
+    const token = cookieStore.get("token")?.value;
+
 
     if (!token) {
       return NextResponse.json(
@@ -19,6 +20,8 @@ export async function GET(request) {
 
     // Verify token
     const decoded = verifyToken(token);
+    console.log("Decoded token userId:", decoded.userId);
+
     
     // Connect to database
     await dbConnect();
