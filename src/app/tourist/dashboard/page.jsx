@@ -9,7 +9,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Star, MapPin, Calendar, MessageCircle, Search, Clock, CheckCircle, XCircle } from "lucide-react"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
@@ -17,6 +16,15 @@ import { Navbar } from "@/components/navbar"
 export default function TouristDashboard() {
   const [activeTab, setActiveTab] = useState("bookings") // Tracks selected tab
   const [user, setUser] = useState(null) // Holds current logged-in user profile
+  const [isEditing, setIsEditing] = useState(false)
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    country: ""
+  })
+
 
   // Dummy bookings data
   const [bookings] = useState([
@@ -64,8 +72,10 @@ export default function TouristDashboard() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get("/api/auth/profile")
-        setUser(res.data.user)
+        const res = await axios.get("/api/auth/profile");
+        setUser(res.data.user);
+        setFormData(res.data.user);
+
       } catch (err) {
         console.error("Failed to load user:", err)
       }
@@ -73,6 +83,19 @@ export default function TouristDashboard() {
 
     fetchUser()
   }, [])
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        country: user.country || "",
+      });
+    }
+  }, [user]);
+  
 
   // Status color for each booking
   const getStatusColor = (status) => {
@@ -98,6 +121,27 @@ export default function TouristDashboard() {
 
   // Render nothing until user is fetched
   if (!user) return <div className="p-10">Loading dashboard...</div>
+
+  const handleEditToggle = async () => {
+    if (isEditing) {
+      // Save Changes to backend
+      try {
+        const response = await axios.put('/api/auth/profile', formData)
+        if (response.data.success) {
+          setUser(response.data.user)
+          alert("Profile updated successfully!")
+        } else {
+          alert("Failed to update profile.")
+        }
+      } catch (err) {
+        console.error("Update failed:", err)
+        alert("Error updating profile.")
+      }
+    }
+  
+    setIsEditing(!isEditing)
+  }
+  
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -250,27 +294,61 @@ export default function TouristDashboard() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="firstName">First Name</Label>
-                      <Input id="firstName" value={user.firstName} disabled />
+                      <Input
+                        id="firstName"
+                        value={formData.firstName}
+                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                        disabled={!isEditing}
+                      />
                     </div>
                     <div>
                       <Label htmlFor="lastName">Last Name</Label>
-                      <Input id="lastName" value={user.lastName} disabled />
+                      <Input
+                        id="lastName"
+                        value={formData.lastName}
+                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                        disabled={!isEditing}
+                      />
                     </div>
                   </div>
                   <div>
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" value={user.email} disabled />
+                    <Input 
+                      id="email" 
+                      value={formData.email}
+                      disabled
+                    />
                   </div>
                   <div>
                     <Label htmlFor="phone">Phone</Label>
-                    <Input id="phone" value={user.phone} disabled />
+                    <Input 
+                      id="phone" 
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })} 
+                      disabled={!isEditing} 
+                    />
                   </div>
                   <div>
                     <Label htmlFor="country">Country</Label>
-                    <Input id="country" value={user.country} disabled />
+                    <Input 
+                      id="country" 
+                      value={formData.country}
+                      onChange={(e) => setFormData({ ...formData, country: e.target.value })} 
+                      disabled={!isEditing}
+                     />
                   </div>
                 </CardContent>
               </Card>
+              <div className="mt-2">
+              <Button
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={handleEditToggle}
+              >
+                {isEditing ? "Save Changes" : "Update Profile"}
+              </Button>
+
+              </div>
             </div>
           </TabsContent>
         </Tabs>
