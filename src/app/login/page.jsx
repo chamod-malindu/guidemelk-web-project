@@ -68,11 +68,11 @@ export default function LoginPage() {
         // Redirect based on user role
         setTimeout(() => {
           if (userType === "tourist") {
-            router.push("/tourist-dashboard")
+            router.push("/tourist/dashboard")
           } else if (userType === "guide") {
-            router.push("/guide-dashboard") 
+            router.push("/guide/dashboard") 
           } else if (userType === "admin") {
-            router.push("/admin-dashboard")
+            router.push("/admin/dashboard")
           }
         }, 1000)
         

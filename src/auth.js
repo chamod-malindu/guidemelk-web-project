@@ -18,7 +18,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: process.env.AUTH_SECRET,
   callbacks: {
     async jwt({ token, account, trigger }) {
-      // On sign in, extract the role from the callbackUrl if present
+      // Extract role from callback URL
       if (trigger === "signIn" && account?.callbackUrl) {
         try {
           const url = new URL(account.callbackUrl);
@@ -27,11 +27,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           token.usertype = "tourist";
         }
       }
+
       return token;
     },
+
     async session({ session, token }) {
-      // Save the usertype in the session
-      if (token?.usertype) session.user.usertype = token.usertype;
+      // Just store usertype in session
+      if (token?.usertype) {
+        session.user.usertype = token.usertype;
+      }
       return session;
     },
   },

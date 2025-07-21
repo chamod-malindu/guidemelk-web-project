@@ -7,8 +7,9 @@ import { verifyToken } from '@/lib/auth';
 export async function GET(request) {
   try {
     // Get token from cookies
-    const cookieStore = cookies();
-    const token = cookieStore.get('token')?.value;
+    const cookieStore = await cookies(request);
+    const token = cookieStore.get("token")?.value;
+
 
     if (!token) {
       return NextResponse.json(
@@ -19,6 +20,8 @@ export async function GET(request) {
 
     // Verify token
     const decoded = verifyToken(token);
+    console.log("Decoded token userId:", decoded.userId);
+
     
     // Connect to database
     await dbConnect();
@@ -72,5 +75,39 @@ export async function GET(request) {
       { error: "Failed to fetch profile" },
       { status: 500 }
     );
+  }
+}
+
+export async function PUT(request) {
+  try {
+    // Get token from cookies
+    const cookieStore = await cookies()
+    const token = cookieStore.get("token")?.value
+
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // Verify token and get user
+    const decoded = verifyToken(token)
+
+    // Parse updated data
+    const body = await request.json()
+
+    // Connect to DB
+    await dbConnect()
+
+    // Update user info in MongoDB
+    const updatedUser = await User.findByIdAndUpdate(
+      decoded.userId,
+      { ...body },
+      { new: true }
+    ).select("-password")
+
+    return NextResponse.json({ success: true, user: updatedUser })
+
+  } catch (error) {
+    console.error("Profile update error:", error)
+    return NextResponse.json({ error: "Update failed" }, { status: 500 })
   }
 }
