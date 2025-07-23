@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input"
 import { Star, MapPin, Calendar, MessageCircle, Search, Clock, CheckCircle, XCircle } from "lucide-react"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
+import { useRouter } from "next/navigation"
+
 
 export default function TouristDashboard() {
   const [activeTab, setActiveTab] = useState("bookings") // Tracks selected tab
@@ -24,6 +26,9 @@ export default function TouristDashboard() {
     phone: "",
     country: ""
   })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  const router = useRouter()
 
 
   // Dummy bookings data
@@ -71,18 +76,32 @@ export default function TouristDashboard() {
   // Get logged-in user's profile from /api/auth/profile
   useEffect(() => {
     const fetchUser = async () => {
+      setLoading(true)
+      setError("");
       try {
         const res = await axios.get("/api/auth/profile");
         setUser(res.data.user);
         setFormData(res.data.user);
+        setLoading(false);
 
       } catch (err) {
+        setLoading(false);
         console.error("Failed to load user:", err)
+
+        if (err.response && err.response.status === 401) {
+          setError("Your session has expired. Redirecting to login...");
+          setTimeout(() => {
+            router.replace("/login");
+          }, 2000); // Delay lets user read message
+        } else {
+          setError("Unable to load your dashboard. Please try again later.");
+        }
+        
       }
     }
 
     fetchUser()
-  }, [])
+  }, [router])
 
   useEffect(() => {
     if (user) {
@@ -120,7 +139,9 @@ export default function TouristDashboard() {
   }
 
   // Render nothing until user is fetched
-  if (!user) return <div className="p-10">Loading dashboard...</div>
+  if (loading) return <div className="p-10 text-center">Loading dashboard...</div>
+  if (error) return <div className="p-10 text-center text-red-600">{error}</div>
+  if (!user) return null
 
   const handleEditToggle = async () => {
     if (isEditing) {
