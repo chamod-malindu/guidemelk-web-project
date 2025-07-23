@@ -28,6 +28,7 @@ export default function TouristDashboard() {
   })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [loggingOut, setLoggingOut] = useState(false);
   const router = useRouter()
 
 
@@ -162,6 +163,23 @@ export default function TouristDashboard() {
   
     setIsEditing(!isEditing)
   }
+
+  const handleLogout = async () => {
+    if (loggingOut) return; 
+    setLoggingOut(true);
+    try {
+      await axios.post("/api/auth/logout");
+      // Clear user data immediately for fast UI feedback
+      setUser(null);
+      alert("Logged out successfully.");
+      router.replace("/login"); // Redirect cleanly to login
+    } catch (error) {
+      console.error("Logout failed:", error);
+      alert("Logout failed. Please try again.");
+    } finally {
+      setLoggingOut(false);
+    }
+  };
   
 
   return (
@@ -367,6 +385,15 @@ export default function TouristDashboard() {
                 onClick={handleEditToggle}
               >
                 {isEditing ? "Save Changes" : "Update Profile"}
+              </Button>
+
+              <Button
+                size="sm"
+                className="bg-red-600 hover:bg-red-700 text-white m-1"
+                onClick={handleLogout}
+                disabled={loggingOut} // Disable while logout in progress
+              >
+                {loggingOut ? "Logging out..." : "Log Out"}
               </Button>
 
               </div>
