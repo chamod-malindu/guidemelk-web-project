@@ -5,19 +5,22 @@ import GuideImage from '@/models/GuideImage';
 import Review from '@/models/Review';
 import mongoose from 'mongoose';
 
-export async function GET(request, { params }) {
+export const dynamic = 'force-dynamic';
+
+export async function GET(request, context) {
   try {
     await dbConnect();
 
-    // Convert string ID to ObjectId
+    const params = await context.params;  // <-- KEY LINE
+    const { id } = params;
+
     let objectId;
     try {
-      objectId = new mongoose.Types.ObjectId(params.id);
+      objectId = new mongoose.Types.ObjectId(id);
     } catch (err) {
       return NextResponse.json({ error: 'Invalid guide ID' }, { status: 400 });
     }
 
-    // Fetch guide data with correct field names from your schema
     const guide = await User.findOne({ _id: objectId, role: 'guide' }).select(
       'firstName lastName profileImage location languages experience isEmailVerified specialties pricePerDay bio'
     );
@@ -26,52 +29,38 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: 'Guide not found' }, { status: 404 });
     }
 
-    // Fetch guide images (if GuideImage collection exists)
-    let images = [];
-    try {
-      images = await GuideImage.find({ guide: objectId }).sort({ uploadedAt: -1 });
-    } catch (err) {
-      console.log('GuideImage collection not found or error fetching images:', err.message);
-    }
+    const images = await GuideImage.find({ guide: objectId }).sort({ uploadedAt: -1 }).catch(() => []);
+    const reviews = await Review.find({ guide: objectId })
+      .populate('tourist', 'firstName lastName profileImage')
+      .sort({ createdAt: -1 })
+      .catch(() => []);
 
-    // Fetch reviews with tourist details (if Review collection exists)
-    let reviews = [];
-    try {
-      reviews = await Review.find({ guide: objectId })
-        .populate('tourist', 'firstName lastName profileImage')
-        .sort({ createdAt: -1 });
-    } catch (err) {
-      console.log('Review collection not found or error fetching reviews:', err.message);
-    }
-
-    // Calculate average rating
-    const averageRating = reviews.length > 0 
-      ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
+    const averageRating = reviews.length > 0
+      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
       : 0;
 
-    // Format the response
-    const guideData = {
-      ...guide.toObject(),
-      gallery: images.map(img => ({
-        url: img.url,
-        description: img.description,
-        title: img.description || 'Tour Photo'
-      })),
-      reviews: reviews.map(review => ({
-        name: `${review.tourist.firstName} ${review.tourist.lastName}`,
-        avatar: review.tourist.profileImage,
-        rating: review.rating,
-        text: review.text,
-        date: new Date(review.createdAt).toLocaleDateString(),
-        tourType: 'General Tour' // You can add this field to Review schema if needed
-      })),
-      rating: averageRating,
-      totalReviews: reviews.length
-    };
-
-    return NextResponse.json({ guide: guideData });
+    return NextResponse.json({
+      guide: {
+        ...guide.toObject(),
+        gallery: images.map(img => ({
+          url: img.url,
+          description: img.description,
+          title: img.description || 'Tour Photo',
+        })),
+        reviews: reviews.map(review => ({
+          name: `${review.tourist.firstName} ${review.tourist.lastName}`,
+          avatar: review.tourist.profileImage,
+          rating: review.rating,
+          text: review.text,
+          date: new Date(review.createdAt).toLocaleDateString(),
+          tourType: 'General Tour',
+        })),
+        rating: averageRating,
+        totalReviews: reviews.length,
+      },
+    });
   } catch (error) {
-    console.error('Failed to fetch guide profile:', error);
+    console.error('Error in GET /api/guides/[id]:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
