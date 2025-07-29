@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import axios from "axios"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -97,6 +97,15 @@ export default function TouristDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [loggingOut, setLoggingOut] = useState(false);
+<<<<<<< HEAD
+=======
+  const router = useRouter()
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const fileInputRef = useRef();
+  const [photoPreview, setPhotoPreview] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+>>>>>>> e3c5a4b2fe5e0e007f3efe43f42eca27c3932f51
 
   // Dummy bookings data for demonstration
   const [bookings] = useState([
@@ -232,6 +241,7 @@ export default function TouristDashboard() {
     if (isEditing) {
       // Logic to save changes to the backend
       try {
+<<<<<<< HEAD
         // In a real application, you'd send formData to your backend for update
         // const response = await axios.put('/api/auth/profile', formData)
         // if (response.data.success) {
@@ -245,6 +255,38 @@ export default function TouristDashboard() {
       } catch (err) {
         console.error("Update failed:", err)
         alert("Error updating profile. (Simulated error)");
+=======
+        let profileImageUrl = user.profileImage;
+
+        if (selectedFile) {
+          const formData = new FormData();
+          formData.append("file", selectedFile);
+  
+          const res = await fetch('/api/tourist/profileImage', {
+            method: 'POST',
+            body: formData,
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Image upload failed");
+          profileImageUrl = data.imageUrl;
+        }
+        const response = await axios.put('/api/auth/profile', {
+          ...formData,
+          profileImage: profileImageUrl,
+        });
+  
+        if (response.data.success) {
+          setUser(response.data.user);
+          setPhotoPreview("");
+          setSelectedFile(null);
+          alert("Profile updated successfully!");
+        } else {
+          alert("Failed to update profile.");
+        }
+      } catch (err) {
+        console.error("Update failed:", err);
+        alert(err.message || "Error updating profile.");
+>>>>>>> e3c5a4b2fe5e0e007f3efe43f42eca27c3932f51
       }
     }
     setIsEditing(!isEditing) // Toggle edit mode
@@ -268,7 +310,41 @@ export default function TouristDashboard() {
       setLoggingOut(false); // Reset logging out state
     }
   };
+<<<<<<< HEAD
 
+=======
+  
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    setSelectedFile(file || null);
+    setPhotoPreview(file ? URL.createObjectURL(file) : "");
+  };
+  
+  const handlePhotoUpload = async () => {
+    const file = fileInputRef.current.files[0];
+    if (!file) return;
+    setUploading(true);
+    setUploadError("");
+  
+    const formData = new FormData();
+    formData.append("file", file);
+  
+    try {
+      const res = await fetch('/api/tourist/profileImage', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Upload failed");
+      setUser({ ...user, profileImage: data.imageUrl }); // update local profile
+      setPhotoPreview("");
+    } catch (err) {
+      setUploadError(err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+>>>>>>> e3c5a4b2fe5e0e007f3efe43f42eca27c3932f51
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-50 font-inter">
@@ -433,7 +509,30 @@ export default function TouristDashboard() {
                   <CardTitle className="text-gray-800 dark:text-gray-100">Personal Information</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+<<<<<<< HEAD
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+=======
+
+                  <div className="flex items-center mb-4 gap-4">
+                    <Avatar className="w-24 h-24">
+                      <AvatarImage src={photoPreview || user.profileImage || "/placeholder.svg"} />
+                      <AvatarFallback>
+                        {user.firstName?.[0]?.toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/*"
+                      className="block"
+                      onChange={handlePhotoChange}
+                      disabled={!isEditing} // Only editable when editing
+                    />
+                  </div>
+
+
+                  <div className="grid grid-cols-2 gap-4">
+>>>>>>> e3c5a4b2fe5e0e007f3efe43f42eca27c3932f51
                     <div>
                       <Label htmlFor="firstName" className="text-gray-700 dark:text-gray-300">First Name</Label>
                       <LocalInput // Using LocalInput to avoid conflict
