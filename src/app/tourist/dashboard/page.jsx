@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import axios from "axios"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -30,6 +30,11 @@ export default function TouristDashboard() {
   const [error, setError] = useState("")
   const [loggingOut, setLoggingOut] = useState(false);
   const router = useRouter()
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const fileInputRef = useRef();
+  const [photoPreview, setPhotoPreview] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
 
 
   // Dummy bookings data
@@ -148,16 +153,36 @@ export default function TouristDashboard() {
     if (isEditing) {
       // Save Changes to backend
       try {
-        const response = await axios.put('/api/auth/profile', formData)
+        let profileImageUrl = user.profileImage;
+
+        if (selectedFile) {
+          const formData = new FormData();
+          formData.append("file", selectedFile);
+  
+          const res = await fetch('/api/tourist/profileImage', {
+            method: 'POST',
+            body: formData,
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Image upload failed");
+          profileImageUrl = data.imageUrl;
+        }
+        const response = await axios.put('/api/auth/profile', {
+          ...formData,
+          profileImage: profileImageUrl,
+        });
+  
         if (response.data.success) {
-          setUser(response.data.user)
-          alert("Profile updated successfully!")
+          setUser(response.data.user);
+          setPhotoPreview("");
+          setSelectedFile(null);
+          alert("Profile updated successfully!");
         } else {
-          alert("Failed to update profile.")
+          alert("Failed to update profile.");
         }
       } catch (err) {
-        console.error("Update failed:", err)
-        alert("Error updating profile.")
+        console.error("Update failed:", err);
+        alert(err.message || "Error updating profile.");
       }
     }
   
@@ -181,6 +206,36 @@ export default function TouristDashboard() {
     }
   };
   
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    setSelectedFile(file || null);
+    setPhotoPreview(file ? URL.createObjectURL(file) : "");
+  };
+  
+  const handlePhotoUpload = async () => {
+    const file = fileInputRef.current.files[0];
+    if (!file) return;
+    setUploading(true);
+    setUploadError("");
+  
+    const formData = new FormData();
+    formData.append("file", file);
+  
+    try {
+      const res = await fetch('/api/tourist/profileImage', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Upload failed");
+      setUser({ ...user, profileImage: data.imageUrl }); // update local profile
+      setPhotoPreview("");
+    } catch (err) {
+      setUploadError(err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -330,6 +385,25 @@ export default function TouristDashboard() {
                   <CardTitle>Personal Information</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+
+                  <div className="flex items-center mb-4 gap-4">
+                    <Avatar className="w-24 h-24">
+                      <AvatarImage src={photoPreview || user.profileImage || "/placeholder.svg"} />
+                      <AvatarFallback>
+                        {user.firstName?.[0]?.toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/*"
+                      className="block"
+                      onChange={handlePhotoChange}
+                      disabled={!isEditing} // Only editable when editing
+                    />
+                  </div>
+
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="firstName">First Name</Label>
