@@ -12,6 +12,7 @@ import {
   Award,
   Clock,
 } from "lucide-react";
+import Image from "next/image";
 
 export default function GuideProfilePage() {
   const { id } = useParams();
@@ -109,11 +110,15 @@ export default function GuideProfilePage() {
             <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
               <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
                 <div className="relative">
-                  <img
+                
+                  <Image
                     src={guide.profileImage || "/placeholder.svg"}
                     alt={`${guide.firstName} ${guide.lastName}`}
-                    className="w-24 h-24 rounded-full border-4 border-white shadow-lg object-cover"
+                    width={96} // w-24 = 96px
+                    height={96} // h-24 = 96px
+                    className="rounded-full border-4 border-white shadow-lg object-cover"
                   />
+
                   <div className="absolute -bottom-2 -right-2 bg-blue-600 text-white rounded-full p-1">
                     <Award className="h-4 w-4" />
                   </div>
@@ -225,11 +230,15 @@ export default function GuideProfilePage() {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {guide.gallery.map((photo, index) => (
                     <div key={index} className="relative group cursor-pointer">
-                      <img
-                        src={photo.url}
-                        alt={photo.title || 'Tour photo'}
-                        className="w-full h-32 object-cover rounded-lg transition-transform group-hover:scale-105"
-                      />
+
+                      <Image
+                          src={photo.url}
+                          alt={photo.title || 'Tour photo'}
+                          width={400}
+                          height={200}
+                          className="w-full h-32 object-cover rounded-lg transition-transform group-hover:scale-105"
+                        />
+
                       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded-lg"></div>
                       {photo.description && (
                         <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 text-white p-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
@@ -274,11 +283,15 @@ export default function GuideProfilePage() {
                       className="border-b border-gray-200 pb-6 last:border-b-0"
                     >
                       <div className="flex items-start space-x-4">
-                        <img
+
+                        <Image
                           src={review.avatar || "/placeholder.svg"}
                           alt={review.name}
-                          className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                          width={48} // equals w-12
+                          height={48} // equals h-12
+                          className="rounded-full object-cover border-2 border-gray-200"
                         />
+                        
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-2">
                             <div>
