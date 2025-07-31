@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { MapPin, Users, Languages } from "lucide-react";
+import Image from "next/image";
 
 export default function FindGuidePage() {
   const [guides, setGuides] = useState([]);
@@ -44,12 +45,15 @@ export default function FindGuidePage() {
             href={`/guides/${guide._id}`}
             className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-300 p-6 flex flex-col items-center text-center cursor-pointer"
           >
-            <img
+    
+            <Image
               src={guide.profileImage || "/placeholder.svg"}
               alt={`${guide.firstName} ${guide.lastName}`}
-              className="w-28 h-28 rounded-full object-cover mb-4 border-2 border-blue-600"
-              loading="lazy"
+              width={112} // w-28 = 112px
+              height={112}
+              className="rounded-full object-cover mb-4 border-2 border-blue-600"
             />
+
             <h2 className="text-xl font-semibold text-gray-900 mb-1">
               {guide.firstName} {guide.lastName}
             </h2>
