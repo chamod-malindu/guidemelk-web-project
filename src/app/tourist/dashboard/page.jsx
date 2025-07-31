@@ -13,6 +13,7 @@ import { Star, MapPin, Calendar, MessageCircle, Search, Clock, CheckCircle, XCir
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
 import { useRouter } from "next/navigation"
+import AuthWrapper from "@/components/AuthWrapper"
 
 
 export default function TouristDashboard() {
@@ -238,6 +239,7 @@ export default function TouristDashboard() {
   };
 
   return (
+    <AuthWrapper requiredRole="tourist">
     <div className="min-h-screen bg-gray-50">
       {/* Top Navigation Bar */}
       <Navbar user={user} />
@@ -476,5 +478,6 @@ export default function TouristDashboard() {
         </Tabs>
       </div>
     </div>
+    </AuthWrapper>
   )
 }

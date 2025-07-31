@@ -78,17 +78,8 @@ export async function POST(request) {
       );
     }
 
-    // Create JWT token with additional user info
-    const tokenPayload = {
-      userId: user._id,
-      email: user.email,
-      role: user.role,
-      emailVerified: user.isEmailVerified,
-      firstName: user.firstName,
-      lastName: user.lastName
-    };
-
-    const token = createToken(tokenPayload);
+    // Create JWT token with user object directly
+    const token = createToken(user);
 
     // Prepare user data for response (excluding sensitive info)
     const userData = {
@@ -109,12 +100,12 @@ export async function POST(request) {
       country: user.country
     };
 
-    // Create response with user data
+    // Create response with user data - FIXED: Use correct dashboard route format
     const response = NextResponse.json({
       message: "Login successful",
       success: true,
       user: userData,
-      redirectTo: `/${role}/dashboard`
+      redirectTo: `/${role}/dashboard` // This matches your folder structure
     });
 
     // Set HTTP-only cookie with the token
