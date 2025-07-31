@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth'; // NextAuth
-import { verifyToken } from '@/lib/auth'; 
 
 const PUBLIC_PATHS = [
   '/', 
@@ -47,58 +46,14 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
-  // ✅ Check custom JWT token (for email users)
+  // ✅ For protected routes, just check if token exists
   const token = request.cookies.get('token')?.value;
   if (!token) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  try {
-    const decoded = verifyToken(token);
-    
-    // ✅ Unverified users go to verify-reminder
-    if (!decoded.emailVerified && pathname !== '/verify-reminder') {
-      return NextResponse.redirect(new URL('/verify-reminder', request.url));
-    }
-
-    // ✅ Role-based route protection
-    if (pathname.startsWith('/admin-dashboard') && decoded.role !== 'admin') {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-
-    if (
-      (pathname.startsWith('/tourist/dashboard') ||
-       pathname === '/tourist/home') &&
-      decoded.role !== 'tourist'
-    ) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-
-    if (pathname.startsWith('/guide/dashboard') && decoded.role !== 'guide') {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-
-    if (pathname === '/login' || pathname === '/register') {
-      const dashboardRoute = `/${decoded.role}-dashboard`;
-      return NextResponse.redirect(new URL(dashboardRoute, request.url));
-    } 
-
-    return NextResponse.next();
-  } catch (error) {
-    console.error('Middleware token error:', error);
-
-    
-    const response = NextResponse.redirect(new URL('/login', request.url));
-    response.cookies.set('token', '', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 0,
-      path: '/'
-    });
-    
-    return response;
-  }
+  // Let the dashboard pages handle the actual token verification
+  return NextResponse.next();
 }
 
 export const config = {
