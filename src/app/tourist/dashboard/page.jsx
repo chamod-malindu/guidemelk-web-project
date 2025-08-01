@@ -10,33 +10,14 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Label } from "@/components/ui/label"
 import { Star, MapPin, Calendar, MessageCircle, Search, Clock, CheckCircle, XCircle, Sun, Moon, LogOut } from "lucide-react"
 
+
+
 function Navbar({ user }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      setIsDarkMode(true);
-      document.documentElement.classList.add('dark');
-    } else {
-      setIsDarkMode(false);
-      document.documentElement.classList.remove('dark');
-    }
-  }, []);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    if (!isDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  };
-
-  return (
-    <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm py-4 px-6 md:px-12 flex justify-between items-center rounded-b-xl">
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm py-4 px-6 md:px-12 flex justify-between items-center rounded-b-xl">
       <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">Guidemelk</div>
       <nav className="hidden md:flex space-x-6">
         <a href="/" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">Home</a>
@@ -59,8 +40,9 @@ function Navbar({ user }) {
         )}
       </div>
     </header>
-  );
-}
+})
+};
+
 
 const LocalInput = ({ className, type, ...props }) => {
   return (
@@ -218,7 +200,9 @@ export default function TouristDashboard() {
 
 
   return (
+    <AuthWrapper>
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-50 font-inter">
+
       <Navbar user={user} />
 
       <div className="container mx-auto px-4 py-8">
@@ -449,5 +433,6 @@ export default function TouristDashboard() {
         </Tabs>
       </div>
     </div>
+    </AuthWrapper>
   )
 }

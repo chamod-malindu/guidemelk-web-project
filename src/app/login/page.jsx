@@ -70,7 +70,7 @@ export default function LoginPage() {
           if (userType === "tourist") {
             router.push("/tourist/dashboard")
           } else if (userType === "guide") {
-            router.push("/guide/dashboard") 
+            router.push("/guide/dashboard")
           } else if (userType === "admin") {
             router.push("/admin/dashboard")
           }
