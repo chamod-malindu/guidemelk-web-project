@@ -1,72 +1,61 @@
-"use client"; // This directive marks the component as a Client Component
-
+"use client";
 import { useState, useEffect } from 'react';
-import { Sun, Moon, MapPin, BookOpen, ShieldCheck, CalendarDays } from 'lucide-react'; // Importing icons, added CalendarDays
-import Link from 'next/link'; // Import Link component for client-side navigation
+import { Sun, Moon, MapPin, BookOpen, ShieldCheck, CalendarDays } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Home() {
-  // State to manage dark mode
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Effect to initialize dark mode from local storage on component mount
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
       setIsDarkMode(true);
-      document.documentElement.classList.add('dark'); // Apply dark class to html element
+      document.documentElement.classList.add('dark');
     } else {
       setIsDarkMode(false);
-      document.documentElement.classList.remove('dark'); // Remove dark class from html element
+      document.documentElement.classList.remove('dark');
     }
   }, []);
 
-  // Function to toggle dark mode
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
     if (!isDarkMode) {
       document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark'); // Save dark theme preference
+      localStorage.setItem('theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light'); // Save light theme preference
+      localStorage.setItem('theme', 'light');
     }
   };
 
   return (
-    // Main container with dynamic dark mode class and default font
     <div className={`${isDarkMode ? 'dark' : ''} min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-50 font-inter`}>
-      {/* Header Section */}
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm py-4 px-6 md:px-12 flex justify-between items-center rounded-b-xl">
-        {/* Logo/Site Title */}
         <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">Guidemelk</div>
-        {/* Navigation Links (hidden on small screens) */}
         <nav className="hidden md:flex space-x-6">
           <Link href="/" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">Home</Link>
           <Link href="/find-guide" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">Find a Guide</Link>
           <Link href="/become-guide" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">Become a Guide</Link>
           <Link href="/about" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">About Us</Link>
         </nav>
-        {/* Dark Mode Toggle and Login/Sign Up Button */}
         <div className="flex items-center space-x-4">
           <button
             onClick={toggleDarkMode}
             className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             aria-label="Toggle dark mode"
           >
-            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />} {/* Display Sun or Moon icon based on theme */}
+            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
           </button>
           <Link href="/login" className="px-5 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-all duration-300 ease-in-out transform hover:scale-105 shadow-md">Login / Sign Up</Link>
         </div>
       </header>
 
       <main>
-        {/* Hero Section - Main visual and call to action */}
         <section
           className="relative h-[70vh] flex items-center justify-center text-center overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-800 dark:to-purple-900 shadow-lg rounded-b-3xl mx-4 mt-4 bg-cover bg-center"
-          style={{ backgroundImage: `url('/img/girl.jpg')` }} // Added background image here
+          style={{ backgroundImage: `url('/img/girl.jpg')` }}
         >
-          {/* Animated background blobs for visual attraction */}
-          <div className="absolute inset-0 z-0 opacity-20 bg-black/30 dark:bg-black/50"> {/* Added overlay for better text readability */}
+          <div className="absolute inset-0 z-0 opacity-20 bg-black/30 dark:bg-black/50">
             <div className="absolute w-64 h-64 bg-white rounded-full mix-blend-overlay animate-blob top-0 left-1/4"></div>
             <div className="absolute w-96 h-96 bg-yellow-300 rounded-full mix-blend-overlay animate-blob animation-delay-2000 bottom-0 right-1/3"></div>
             <div className="absolute w-72 h-72 bg-pink-300 rounded-full mix-blend-overlay animate-blob animation-delay-4000 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
@@ -80,11 +69,9 @@ export default function Home() {
               Connect with passionate local guides for authentic and unforgettable experiences.
             </p>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6 animate-fade-in-up animation-delay-600">
-              {/* MODIFIED: Find Your Guide button now navigates to /login with type=tourist */}
               <Link href="/login?type=tourist" className="px-8 py-3 bg-white text-indigo-600 font-semibold rounded-full shadow-lg hover:bg-gray-100 transition-all duration-300 ease-in-out transform hover:scale-105">
                 Find Your Guide
               </Link>
-              {/* MODIFIED: Become a Guide button now navigates to /login with type=guide */}
               <Link href="/login?type=guide" className="px-8 py-3 border-2 border-white text-white font-semibold rounded-full shadow-lg hover:bg-white hover:text-indigo-600 transition-all duration-300 ease-in-out transform hover:scale-105">
                 Become a Guide
               </Link>
@@ -92,13 +79,11 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Features Section - Highlighting key benefits */}
         <section className="py-16 px-6 md:px-12 bg-white dark:bg-gray-900">
           <h2 className="text-4xl font-bold text-center mb-12 text-gray-800 dark:text-gray-100 animate-fade-in">
             Why Choose Guidemelk?
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
-            {/* Feature Card 1: Local Expertise */}
             <div className="bg-gray-100 dark:bg-gray-800 p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-2 animate-fade-in animation-delay-200">
               <div className="flex justify-center mb-4">
                 <MapPin size={48} className="text-indigo-500 dark:text-indigo-400" />
@@ -108,7 +93,6 @@ export default function Home() {
                 Discover hidden gems and authentic experiences with guides who know Sri Lanka inside out.
               </p>
             </div>
-            {/* Feature Card 2: Tailored Experiences */}
             <div className="bg-gray-100 dark:bg-gray-800 p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-2 animate-fade-in animation-delay-400">
               <div className="flex justify-center mb-4">
                 <BookOpen size={48} className="text-green-500 dark:text-green-400" />
@@ -118,7 +102,6 @@ export default function Home() {
                 Customize your tours based on your interests, language, and pace.
               </p>
             </div>
-            {/* Feature Card 3: Secure & Verified */}
             <div className="bg-gray-100 dark:bg-gray-800 p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-2 animate-fade-in animation-delay-600">
               <div className="flex justify-center mb-4">
                 <ShieldCheck size={48} className="text-red-500 dark:text-red-400" />
@@ -131,13 +114,11 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Most Traveled Places Section */}
         <section className="py-16 px-6 md:px-12 bg-gray-50 dark:bg-gray-900">
           <h2 className="text-4xl font-bold text-center mb-12 text-gray-800 dark:text-gray-100 animate-fade-in">
             Explore Sri Lanka's Most Popular Destinations
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-            {/* Place Card: Kandy */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 animate-fade-in animation-delay-200">
               <img src="/img/kandy.jpg" alt="Kandy, Sri Lanka" className="w-full h-48 object-cover" />
               <div className="p-6">
@@ -148,7 +129,6 @@ export default function Home() {
                 <Link href="/login?type=tourist&location=kandy" className="mt-4 inline-block text-indigo-600 dark:text-indigo-400 hover:underline">Find Guides in Kandy &rarr;</Link>
               </div>
             </div>
-            {/* Place Card: Galle */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 animate-fade-in animation-delay-400">
               <img src="/img/galle.jpg" alt="Galle, Sri Lanka" className="w-full h-48 object-cover" />
               <div className="p-6">
@@ -159,7 +139,6 @@ export default function Home() {
                 <Link href="/login?type=tourist&location=galle" className="mt-4 inline-block text-indigo-600 dark:text-indigo-400 hover:underline">Find Guides in Galle &rarr;</Link>
               </div>
             </div>
-            {/* Place Card: Nuwara Eliya */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 animate-fade-in animation-delay-600">
               <img src="/img/nuwaraeliya.jpg" alt="Nuwara Eliya, Sri Lanka" className="w-full h-48 object-cover" />
               <div className="p-6">
@@ -170,7 +149,6 @@ export default function Home() {
                 <Link href="/login?type=tourist&location=nuwaraeliya" className="mt-4 inline-block text-indigo-600 dark:text-indigo-400 hover:underline">Find Guides in Nuwara Eliya &rarr;</Link>
               </div>
             </div>
-            {/* Place Card: Anuradhapura */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 animate-fade-in animation-delay-800">
               <img src="/img/anuradhapura.jpg" alt="Anuradhapura, Sri Lanka" className="w-full h-48 object-cover" />
               <div className="p-6">
@@ -184,13 +162,11 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Upcoming Events Section */}
         <section className="py-16 px-6 md:px-12 bg-white dark:bg-gray-900">
           <h2 className="text-4xl font-bold text-center mb-12 text-gray-800 dark:text-gray-100 animate-fade-in">
             Upcoming Events in Sri Lanka (August 2025)
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Event Card: Kandy Esala Perahera */}
             <div className="bg-gray-100 dark:bg-gray-800 p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-2 animate-fade-in animation-delay-200">
               <div className="flex justify-center mb-4">
                 <CalendarDays size={48} className="text-purple-500 dark:text-purple-400" />
@@ -202,7 +178,7 @@ export default function Home() {
               <p className="text-center text-gray-600 dark:text-gray-300">
                 Sri Lanka's grandest Buddhist festival, featuring elaborate processions of dancers, musicians, and decorated elephants, culminating in the magnificent Randoli Perahera.
               </p>
-              <div className="flex justify-center space-x-2 mt-4"> {/* Added flex container for buttons */}
+              <div className="flex justify-center space-x-2 mt-4">
                 <Link href="https://kandyesalaperahera.com/" className="px-4 py-2 border border-indigo-600 text-indigo-600 dark:text-indigo-400 rounded-full hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-400 dark:hover:text-gray-900 transition-colors duration-300 text-sm">
                   Learn More
                 </Link>
@@ -212,7 +188,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Event Card: Kataragama Esala Festival */}
             <div className="bg-gray-100 dark:bg-gray-800 p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-2 animate-fade-in animation-delay-400">
               <div className="flex justify-center mb-4">
                 <CalendarDays size={48} className="text-orange-500 dark:text-orange-400" />
@@ -224,7 +199,7 @@ export default function Home() {
               <p className="text-center text-gray-600 dark:text-gray-300">
                 A unique multi-religious festival at the sacred Kataragama shrine, known for its devotional practices including firewalking.
               </p>
-              <div className="flex justify-center space-x-2 mt-4"> {/* Added flex container for buttons */}
+              <div className="flex justify-center space-x-2 mt-4">
                 <Link href="https://rmkd.lk/kataragama-esala-festival/" className="px-4 py-2 border border-indigo-600 text-indigo-600 dark:text-indigo-400 rounded-full hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-400 dark:hover:text-gray-900 transition-colors duration-300 text-sm">
                   Learn More
                 </Link>
@@ -234,7 +209,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Event Card: Elephant Gathering */}
             <div className="bg-gray-100 dark:bg-gray-800 p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-2 animate-fade-in animation-delay-600">
               <div className="flex justify-center mb-4">
                 <CalendarDays size={48} className="text-teal-500 dark:text-teal-400" />
@@ -246,7 +220,7 @@ export default function Home() {
               <p className="text-center text-gray-600 dark:text-gray-300">
                 Witness hundreds of Asian elephants converge at Minneriya and Kaudulla National Parks, a truly spectacular wildlife event.
               </p>
-              <div className="flex justify-center space-x-2 mt-4"> {/* Added flex container for buttons */}
+              <div className="flex justify-center space-x-2 mt-4">
                 <Link href="https://www.lovesrilanka.org/all-about-the-gathering/" className="px-4 py-2 border border-indigo-600 text-indigo-600 dark:text-indigo-400 rounded-full hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-400 dark:hover:text-gray-900 transition-colors duration-300 text-sm">
                   Learn More
                 </Link>
@@ -258,8 +232,6 @@ export default function Home() {
           </div>
         </section>
 
-
-        {/* Call to Action Section - Encourage sign-ups */}
         <section className="py-16 px-6 md:px-12 bg-indigo-50 dark:bg-gray-800 rounded-t-3xl mx-4 mb-4 shadow-inner">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl font-bold text-indigo-800 dark:text-indigo-200 mb-6 animate-fade-in">
@@ -280,15 +252,12 @@ export default function Home() {
         </section>
       </main>
 
-      {/* Footer Section */}
       <footer className="bg-gray-800 dark:bg-gray-950 text-gray-300 py-8 px-6 md:px-12 rounded-t-xl">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Footer Column 1: Site Info */}
           <div>
             <h3 className="text-xl font-bold text-white mb-4">Guidemelk</h3>
             <p className="text-gray-400">Your gateway to authentic Sri Lankan experiences.</p>
           </div>
-          {/* Footer Column 2: Quick Links */}
           <div>
             <h3 className="text-xl font-bold text-white mb-4">Quick Links</h3>
             <ul className="space-y-2">
@@ -298,7 +267,6 @@ export default function Home() {
               <li><Link href="/about" className="hover:text-indigo-400 transition-colors duration-300">Contact Us</Link></li>
             </ul>
           </div>
-          {/* Footer Column 3: Social Media Links */}
           <div>
             <h3 className="text-xl font-bold text-white mb-4">Connect</h3>
             <ul className="space-y-2">
@@ -308,7 +276,6 @@ export default function Home() {
             </ul>
           </div>
         </div>
-        {/* Copyright Information */}
         <div className="border-t border-gray-700 mt-8 pt-6 text-center text-gray-500">
           &copy; {new Date().getFullYear()} Guidemelk. All rights reserved.
         </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import React, { useEffect, useState } from "react"
 import axios from "axios"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,15 +8,8 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Label } from "@/components/ui/label"
-// The original error suggested commenting out 'Input' if it's imported from components/ui/input.
-// If you are using shadcn/ui and have generated these components, you should uncomment this line
-// and remove the local 'LocalInput' definition below.
-// import { Input } from "@/components/ui/input"
 import { Star, MapPin, Calendar, MessageCircle, Search, Clock, CheckCircle, XCircle, Sun, Moon, LogOut } from "lucide-react"
 
-// A basic Navbar component for demonstration if not already defined.
-// In a real Next.js app, this would typically be a shared component in components/navbar.jsx
-// and imported from there.
 function Navbar({ user }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -69,9 +62,6 @@ function Navbar({ user }) {
   );
 }
 
-// A basic Input component defined locally and renamed to LocalInput to avoid naming conflicts.
-// If you are using shadcn/ui and have generated its Input component, you should use that instead
-// by uncommenting the import at the top and removing this local definition.
 const LocalInput = ({ className, type, ...props }) => {
   return (
     <input
@@ -82,10 +72,9 @@ const LocalInput = ({ className, type, ...props }) => {
   );
 };
 
-
 export default function TouristDashboard() {
-  const [activeTab, setActiveTab] = useState("bookings") // Tracks selected tab
-  const [user, setUser] = useState(null) // Holds current logged-in user profile
+  const [activeTab, setActiveTab] = useState("bookings")
+  const [user, setUser] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
     firstName: "",
@@ -97,17 +86,7 @@ export default function TouristDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [loggingOut, setLoggingOut] = useState(false);
-<<<<<<< HEAD
-=======
-  const router = useRouter()
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState("");
-  const fileInputRef = useRef();
-  const [photoPreview, setPhotoPreview] = useState("");
-  const [selectedFile, setSelectedFile] = useState(null);
->>>>>>> e3c5a4b2fe5e0e007f3efe43f42eca27c3932f51
 
-  // Dummy bookings data for demonstration
   const [bookings] = useState([
     {
       id: 1,
@@ -127,7 +106,6 @@ export default function TouristDashboard() {
     }
   ])
 
-  // Dummy messages data for demonstration
   const [messages] = useState([
     {
       id: 1,
@@ -138,7 +116,6 @@ export default function TouristDashboard() {
     }
   ])
 
-  // Dummy reviews data for demonstration
   const [reviews] = useState([
     {
       id: 1,
@@ -149,19 +126,11 @@ export default function TouristDashboard() {
     }
   ])
 
-  // Get logged-in user's profile. This is currently simulated.
-  // In a real application, you would fetch this data from your backend API.
   useEffect(() => {
     const fetchUser = async () => {
       setLoading(true)
       setError("");
       try {
-        // Example of fetching real user data with axios (uncomment and replace with your actual API endpoint)
-        // const res = await axios.get("/api/auth/profile");
-        // setUser(res.data.user);
-        // setFormData(res.data.user);
-
-        // For now, simulate a logged-in user for frontend development
         const dummyUser = {
           firstName: "Tourist",
           lastName: "User",
@@ -170,32 +139,19 @@ export default function TouristDashboard() {
           country: "Sri Lanka"
         };
         setUser(dummyUser);
-        setFormData(dummyUser); // Initialize form data with dummy user data
+        setFormData(dummyUser);
         setLoading(false);
 
       } catch (err) {
         setLoading(false);
         console.error("Failed to load user:", err)
-
-        // Example of handling authentication errors and redirecting to login (uncomment in real app)
-        // if (err.response && err.response.status === 401) {
-        //    setError("Your session has expired. Redirecting to login...");
-        //    setTimeout(() => {
-        //      window.location.href = "/login"; // Use window.location.href for direct navigation
-        //    }, 2000); // Delay lets user read message
-        // } else {
-        //    setError("Unable to load your dashboard. Please try again later.");
-        // }
-
-        // For dummy user, just set a simulated error message
         setError("Unable to load your dashboard. (Simulated error)");
       }
     }
 
     fetchUser()
-  }, []) // Empty dependency array means this effect runs once on component mount
+  }, [])
 
-  // Update form data when user state changes (e.g., after fetching user data)
   useEffect(() => {
     if (user) {
       setFormData({
@@ -208,8 +164,6 @@ export default function TouristDashboard() {
     }
   }, [user]);
 
-
-  // Helper function to determine status badge color
   const getStatusColor = (status) => {
     switch (status) {
       case "confirmed": return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
@@ -220,7 +174,6 @@ export default function TouristDashboard() {
     }
   }
 
-  // Helper function to determine status icon
   const getStatusIcon = (status) => {
     switch (status) {
       case "confirmed": return <CheckCircle className="h-4 w-4" />
@@ -231,134 +184,49 @@ export default function TouristDashboard() {
     }
   }
 
-  // Render loading or error state until user data is fetched
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-50">Loading dashboard...</div>
   if (error) return <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 text-red-600 dark:text-red-400">{error}</div>
-  if (!user) return null // Should not happen if loading/error handled correctly, but good for safety
+  if (!user) return null
 
-  // Handles toggling edit mode and saving changes
   const handleEditToggle = async () => {
     if (isEditing) {
-      // Logic to save changes to the backend
       try {
-<<<<<<< HEAD
-        // In a real application, you'd send formData to your backend for update
-        // const response = await axios.put('/api/auth/profile', formData)
-        // if (response.data.success) {
-        //    setUser(response.data.user) // Update user state with fresh data from backend
-        //    alert("Profile updated successfully!")
-        // } else {
-        //    alert("Failed to update profile.")
-        // }
-        alert("Profile update simulated successfully!"); // Simulated success message
-        setUser(formData); // Update local state to reflect changes immediately
+        alert("Profile update simulated successfully!");
+        setUser(formData);
       } catch (err) {
         console.error("Update failed:", err)
         alert("Error updating profile. (Simulated error)");
-=======
-        let profileImageUrl = user.profileImage;
-
-        if (selectedFile) {
-          const formData = new FormData();
-          formData.append("file", selectedFile);
-  
-          const res = await fetch('/api/tourist/profileImage', {
-            method: 'POST',
-            body: formData,
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || "Image upload failed");
-          profileImageUrl = data.imageUrl;
-        }
-        const response = await axios.put('/api/auth/profile', {
-          ...formData,
-          profileImage: profileImageUrl,
-        });
-  
-        if (response.data.success) {
-          setUser(response.data.user);
-          setPhotoPreview("");
-          setSelectedFile(null);
-          alert("Profile updated successfully!");
-        } else {
-          alert("Failed to update profile.");
-        }
-      } catch (err) {
-        console.error("Update failed:", err);
-        alert(err.message || "Error updating profile.");
->>>>>>> e3c5a4b2fe5e0e007f3efe43f42eca27c3932f51
       }
     }
-    setIsEditing(!isEditing) // Toggle edit mode
+    setIsEditing(!isEditing)
   }
 
-  // Handles user logout
   const handleLogout = async () => {
-    if (loggingOut) return; // Prevent multiple logout clicks
+    if (loggingOut) return;
     setLoggingOut(true);
     try {
-      // In a real application, you'd call your logout API endpoint
-      // await axios.post("/api/auth/logout");
-      // Clear user data immediately for fast UI feedback
       setUser(null);
       alert("Logged out successfully.");
-      window.location.href = "/login"; // Redirect cleanly to login page
+      window.location.href = "/login";
     } catch (error) {
       console.error("Logout failed:", error);
       alert("Logout failed. Please try again. (Simulated error)");
     } finally {
-      setLoggingOut(false); // Reset logging out state
+      setLoggingOut(false);
     }
   };
-<<<<<<< HEAD
 
-=======
-  
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
-    setSelectedFile(file || null);
-    setPhotoPreview(file ? URL.createObjectURL(file) : "");
-  };
-  
-  const handlePhotoUpload = async () => {
-    const file = fileInputRef.current.files[0];
-    if (!file) return;
-    setUploading(true);
-    setUploadError("");
-  
-    const formData = new FormData();
-    formData.append("file", file);
-  
-    try {
-      const res = await fetch('/api/tourist/profileImage', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Upload failed");
-      setUser({ ...user, profileImage: data.imageUrl }); // update local profile
-      setPhotoPreview("");
-    } catch (err) {
-      setUploadError(err.message);
-    } finally {
-      setUploading(false);
-    }
-  };
->>>>>>> e3c5a4b2fe5e0e007f3efe43f42eca27c3932f51
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-50 font-inter">
-      {/* Top Navigation Bar */}
       <Navbar user={user} />
 
       <div className="container mx-auto px-4 py-8">
-        {/* Greeting Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50 mb-2">Welcome back, {user.firstName}!</h1>
           <p className="text-gray-600 dark:text-gray-300">Manage your bookings and explore Sri Lanka.</p>
         </div>
 
-        {/* Tab Section */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-4 w-full mb-6 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-sm">
             <TabsTrigger value="bookings" className="data-[state=active]:bg-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-md dark:data-[state=active]:bg-indigo-600 dark:data-[state=active]:text-white">My Bookings</TabsTrigger>
@@ -367,14 +235,12 @@ export default function TouristDashboard() {
             <TabsTrigger value="profile" className="data-[state=active]:bg-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-md dark:data-[state=active]:bg-indigo-600 dark:data-[state=active]:text-white">Profile</TabsTrigger>
           </TabsList>
 
-          {/* Bookings Tab Content */}
           <TabsContent value="bookings" className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
             <div className="grid gap-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">My Bookings</h2>
                 <Button asChild className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md">
-                  {/* UPDATED PATH HERE: /findguide */}
-                  <a href="/findguide">
+                  <a href="/findGuide">
                     <Search className="mr-2 h-4 w-4" />
                     Find New Guide
                   </a>
@@ -433,7 +299,6 @@ export default function TouristDashboard() {
             </div>
           </TabsContent>
 
-          {/* Messages Tab Content */}
           <TabsContent value="messages" className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
             <div className="grid gap-4">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">Messages</h2>
@@ -462,7 +327,6 @@ export default function TouristDashboard() {
             </div>
           </TabsContent>
 
-          {/* Reviews Tab Content */}
           <TabsContent value="reviews" className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
             <div className="grid gap-4">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">My Reviews</h2>
@@ -484,8 +348,8 @@ export default function TouristDashboard() {
                             <Star
                               key={i}
                               className={`h-4 w-4 ${i < review.rating ? "text-yellow-400" : "text-gray-300 dark:text-gray-500"}`}
-                              fill={i < review.rating ? "currentColor" : "none"} // Fill stars
-                              stroke={i < review.rating ? "currentColor" : "currentColor"} // Outline for unfilled
+                              fill={i < review.rating ? "currentColor" : "none"}
+                              stroke={i < review.rating ? "currentColor" : "currentColor"}
                             />
                           ))}
                         </div>
@@ -500,7 +364,6 @@ export default function TouristDashboard() {
             </div>
           </TabsContent>
 
-          {/* Profile Tab Content */}
           <TabsContent value="profile" className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
             <div className="grid gap-6">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">Profile Settings</h2>
@@ -509,33 +372,10 @@ export default function TouristDashboard() {
                   <CardTitle className="text-gray-800 dark:text-gray-100">Personal Information</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-<<<<<<< HEAD
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-=======
-
-                  <div className="flex items-center mb-4 gap-4">
-                    <Avatar className="w-24 h-24">
-                      <AvatarImage src={photoPreview || user.profileImage || "/placeholder.svg"} />
-                      <AvatarFallback>
-                        {user.firstName?.[0]?.toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      accept="image/*"
-                      className="block"
-                      onChange={handlePhotoChange}
-                      disabled={!isEditing} // Only editable when editing
-                    />
-                  </div>
-
-
-                  <div className="grid grid-cols-2 gap-4">
->>>>>>> e3c5a4b2fe5e0e007f3efe43f42eca27c3932f51
                     <div>
                       <Label htmlFor="firstName" className="text-gray-700 dark:text-gray-300">First Name</Label>
-                      <LocalInput // Using LocalInput to avoid conflict
+                      <LocalInput
                         id="firstName"
                         value={formData.firstName}
                         onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
@@ -545,7 +385,7 @@ export default function TouristDashboard() {
                     </div>
                     <div>
                       <Label htmlFor="lastName" className="text-gray-700 dark:text-gray-300">Last Name</Label>
-                      <LocalInput // Using LocalInput to avoid conflict
+                      <LocalInput
                         id="lastName"
                         value={formData.lastName}
                         onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
@@ -556,7 +396,7 @@ export default function TouristDashboard() {
                   </div>
                   <div>
                     <Label htmlFor="email" className="text-gray-700 dark:text-gray-300">Email</Label>
-                    <LocalInput // Using LocalInput to avoid conflict
+                    <LocalInput
                       id="email"
                       value={formData.email}
                       disabled
@@ -565,7 +405,7 @@ export default function TouristDashboard() {
                   </div>
                   <div>
                     <Label htmlFor="phone" className="text-gray-700 dark:text-gray-300">Phone</Label>
-                    <LocalInput // Using LocalInput to avoid conflict
+                    <LocalInput
                       id="phone"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -575,7 +415,7 @@ export default function TouristDashboard() {
                   </div>
                   <div>
                     <Label htmlFor="country" className="text-gray-700 dark:text-gray-300">Country</Label>
-                    <LocalInput // Using LocalInput to avoid conflict
+                    <LocalInput
                       id="country"
                       value={formData.country}
                       onChange={(e) => setFormData({ ...formData, country: e.target.value })}
@@ -598,7 +438,7 @@ export default function TouristDashboard() {
                   size="sm"
                   className="bg-red-600 hover:bg-red-700 text-white shadow-md transition-colors duration-200"
                   onClick={handleLogout}
-                  disabled={loggingOut} // Disable while logout in progress
+                  disabled={loggingOut}
                 >
                   {loggingOut ? "Logging out..." : "Log Out"}
                 </Button>
