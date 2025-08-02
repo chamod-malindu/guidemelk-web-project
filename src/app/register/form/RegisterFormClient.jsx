@@ -14,8 +14,36 @@ import { Eye, EyeOff, ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
 
-export default function RegisterFormClient() {
+// Sri Lankan districts data
+const sriLankanDistricts = [
+  "Colombo", "Gampaha", "Kalutara", "Kandy", "Matale", "Nuwara Eliya", 
+  "Galle", "Matara", "Hambantota", "Jaffna", "Kilinochchi", "Mannar", 
+  "Mullaitivu", "Vavuniya", "Trincomalee", "Batticaloa", "Ampara", 
+  "Kurunegala", "Puttalam", "Anuradhapura", "Polonnaruwa", "Badulla", 
+  "Monaragala", "Ratnapura", "Kegalle"
+]
 
+// World languages data
+const worldLanguages = [
+  "English", "Sinhala", "Tamil", "Spanish", "French", "German", "Italian", 
+  "Portuguese", "Russian", "Chinese (Mandarin)", "Japanese", "Korean", 
+  "Arabic", "Hindi", "Dutch", "Swedish", "Norwegian", "Danish", "Finnish", 
+  "Polish", "Czech", "Hungarian", "Greek", "Turkish", "Hebrew", "Thai", 
+  "Vietnamese", "Indonesian", "Malay", "Swahili", "Romanian", "Bulgarian", 
+  "Croatian", "Serbian", "Ukrainian", "Lithuanian", "Latvian", "Estonian"
+]
+
+// Tour specialties data
+const tourSpecialties = [
+  "Cultural Tours", "Historical Tours", "Nature Tours", "Adventure Tours", 
+  "Food Tours", "Religious Tours", "Beach Tours", "Mountain Tours", 
+  "Wildlife Tours", "Photography Tours", "Cycling Tours", "Hiking Tours", 
+  "City Tours", "Village Tours", "Tea Plantation Tours", "Spice Garden Tours", 
+  "Archaeological Tours", "Temple Tours", "Ayurveda Tours", "Surf Tours", 
+  "Bird Watching", "Whale Watching", "Gem Mining Tours", "Train Journey Tours"
+]
+
+export default function RegisterFormClient() {
   const searchParams = useSearchParams()
   const userType = searchParams.get("type") || "tourist"
 
@@ -28,7 +56,6 @@ export default function RegisterFormClient() {
   const router = useRouter()
 
   useEffect(() => {
-
     console.log("Auth status:", status)
     console.log("Session user:", session?.user)
     
@@ -236,14 +263,14 @@ export default function RegisterFormClient() {
           <div className="mb-4">
             <Navbar />
           </div>
-          <div className="flex items-center justify-center mb-4">
-            <Link href="/register" className="mr-4">
+          <div className="relative flex items-center justify-center mb-4">
+            <Link href="/register" className="absolute left-0">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </Button>
             </Link>
-            <div>
+            <div className="text-center">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 {userType === "tourist" ? "Join as Tourist" : "Join as Guide"}
               </h1>
@@ -471,30 +498,94 @@ export default function RegisterFormClient() {
                 {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
               </div>
 
+              {/* Location Dropdown using native select */}
               <div>
-                <Label htmlFor="guide-location">Location</Label>
-                <Input
+                <Label htmlFor="guide-location">Location (District)</Label>
+                <select
                   id="guide-location"
-                  placeholder="e.g., Kandy, Sri Lanka"
                   value={guideForm.location}
                   onChange={(e) => setGuideForm({ ...guideForm, location: e.target.value })}
-                  className={errors.location ? "border-red-500" : ""}
-                />
+                  className={`w-full h-10 px-3 py-2 text-sm bg-background border rounded-md border-input ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${errors.location ? "border-red-500" : ""}`}
+                >
+                  <option value="">Select your district</option>
+                  {sriLankanDistricts.map((district) => (
+                    <option key={district} value={district}>
+                      {district}
+                    </option>
+                  ))}
+                </select>
                 {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location}</p>}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="guide-languages">Languages</Label>
-                  <Input
-                    id="guide-languages"
-                    placeholder="e.g., English, Sinhala"
-                    value={guideForm.languages}
-                    onChange={(e) => setGuideForm({ ...guideForm, languages: e.target.value })}
-                    className={errors.languages ? "border-red-500" : ""}
-                  />
-                  {errors.languages && <p className="text-red-500 text-sm mt-1">{errors.languages}</p>}
+              {/* Languages with checkboxes */}
+              <div>
+                <Label>Languages (Select multiple)</Label>
+                <div className="grid grid-cols-3 gap-2 mt-2 max-h-32 overflow-y-auto border rounded-md p-3">
+                  {worldLanguages.map((language) => (
+                    <label key={language} className="flex items-center space-x-2 text-sm">
+                      <input
+                        type="checkbox"
+                        value={language}
+                        checked={guideForm.languages.includes(language)}
+                        onChange={(e) => {
+                          const currentLangs = guideForm.languages.split(',').map(l => l.trim()).filter(l => l)
+                          if (e.target.checked) {
+                            const newLangs = [...currentLangs, language].join(', ')
+                            setGuideForm({ ...guideForm, languages: newLangs })
+                          } else {
+                            const newLangs = currentLangs.filter(l => l !== language).join(', ')
+                            setGuideForm({ ...guideForm, languages: newLangs })
+                          }
+                        }}
+                        className="rounded"
+                      />
+                      <span>{language}</span>
+                    </label>
+                  ))}
                 </div>
+                {guideForm.languages && (
+                  <p className="text-xs text-gray-600 mt-1">
+                    Selected: {guideForm.languages}
+                  </p>
+                )}
+                {errors.languages && <p className="text-red-500 text-sm mt-1">{errors.languages}</p>}
+              </div>
+
+              {/* Specialties with checkboxes */}
+              <div>
+                <Label>Tour Specialties (Select multiple)</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2 max-h-32 overflow-y-auto border rounded-md p-3">
+                  {tourSpecialties.map((specialty) => (
+                    <label key={specialty} className="flex items-center space-x-2 text-sm">
+                      <input
+                        type="checkbox"
+                        value={specialty}
+                        checked={guideForm.specialties.includes(specialty)}
+                        onChange={(e) => {
+                          const currentSpecs = guideForm.specialties.split(',').map(s => s.trim()).filter(s => s)
+                          if (e.target.checked) {
+                            const newSpecs = [...currentSpecs, specialty].join(', ')
+                            setGuideForm({ ...guideForm, specialties: newSpecs })
+                          } else {
+                            const newSpecs = currentSpecs.filter(s => s !== specialty).join(', ')
+                            setGuideForm({ ...guideForm, specialties: newSpecs })
+                          }
+                        }}
+                        className="rounded"
+                      />
+                      <span>{specialty}</span>
+                    </label>
+                  ))}
+                </div>
+                {guideForm.specialties && (
+                  <p className="text-xs text-gray-600 mt-1">
+                    Selected: {guideForm.specialties}
+                  </p>
+                )}
+                {errors.specialties && <p className="text-red-500 text-sm mt-1">{errors.specialties}</p>}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="guide-experience">Years of Experience</Label>
                   <Input
@@ -506,20 +597,6 @@ export default function RegisterFormClient() {
                     className={errors.experience ? "border-red-500" : ""}
                   />
                   {errors.experience && <p className="text-red-500 text-sm mt-1">{errors.experience}</p>}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="guide-specialties">Tour Specialties</Label>
-                  <Input
-                    id="guide-specialties"
-                    placeholder="e.g., Cultural, Nature"
-                    value={guideForm.specialties}
-                    onChange={(e) => setGuideForm({ ...guideForm, specialties: e.target.value })}
-                    className={errors.specialties ? "border-red-500" : ""}
-                  />
-                  {errors.specialties && <p className="text-red-500 text-sm mt-1">{errors.specialties}</p>}
                 </div>
                 <div>
                   <Label htmlFor="guide-pricePerDay">Price per Day (USD)</Label>
@@ -637,6 +714,4 @@ export default function RegisterFormClient() {
       </div>
     </div>
   )
-  
 }
-
