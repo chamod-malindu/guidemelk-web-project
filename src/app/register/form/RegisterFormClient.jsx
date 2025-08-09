@@ -59,10 +59,18 @@ export default function RegisterFormClient() {
     console.log("Auth status:", status)
     console.log("Session user:", session?.user)
     
-    // Redirect to dashboard if already signed in
+    // Redirect to appropriate dashboard if already signed in
     if (status === "authenticated" && session?.user?.usertype) {
       const role = session.user.usertype
-      router.push(`/${role}/dashboard`)
+      if (role === 'tourist') {
+        router.push('/tourist')
+      } else if (role === 'guide') {
+        router.push('/guide/dashboard')
+      } else if (role === 'admin') {
+        router.push('/admin/dashboard')
+      } else {
+        router.push(`/${role}/dashboard`)
+      }
     }
   }, [status, session, router])
 

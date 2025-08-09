@@ -12,6 +12,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import GoogleAuthButton from "@/components/GoogleAuthButton"
+import { redirectByRole } from "@/lib/redirectByRole"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -67,14 +68,8 @@ export default function LoginPage() {
         
         // Redirect based on user role
         setTimeout(() => {
-          if (userType === "tourist") {
-            router.push("/tourist/dashboard")
-          } else if (userType === "guide") {
-            router.push("/guide/dashboard")
-          } else if (userType === "admin") {
-            router.push("/admin/dashboard")
-          }
-        }, 1000)
+          redirectByRole(router, data.user.role);
+        }, 1000);
         
       } else {
         // Handle specific error cases

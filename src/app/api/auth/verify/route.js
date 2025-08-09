@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
-import { verifyToken } from '@/lib/auth';
+import { verifyToken, createToken } from '@/lib/auth';
 
 export async function GET(request) {
-  // Extract token from the URL query string: /verify-email?token=xxx
   const { searchParams } = new URL(request.url);
   const token = searchParams.get('token');
-  
+
   if (!token) {
     return NextResponse.json(
       { error: "Verification token is required" },
@@ -16,12 +15,13 @@ export async function GET(request) {
   }
 
   try {
-    // Decode and verify the token using your JWT secret
+    // Decode and verify the token from the verification link
     const { userId } = verifyToken(token);
+    
     await dbConnect();
-    
+
     const user = await User.findById(userId);
-    
+
     if (!user) {
       return NextResponse.json(
         { error: "User account not found" },
@@ -29,30 +29,44 @@ export async function GET(request) {
       );
     }
 
-    // Check if the user has already verified their email
+    // If already verified, issue fresh token and set cookie
     if (user.isEmailVerified) {
-      return NextResponse.json({
-        message: "Email already verified",
-        success: true,
-        role: user.role,
-        alreadyVerified: true
+      const newToken = createToken(user);
+      const response = NextResponse.redirect(new URL('/after-email-verification?role=' + user.role, request.url));
+      response.cookies.set('token', newToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 24, // 24 hours
+        path: '/',
       });
+      return response;
     }
 
-    // Update user to mark email as verified and log time
-    await User.findByIdAndUpdate(
+    // Update user to mark email as verified
+    const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { 
+      {
         isEmailVerified: true,
-        emailVerifiedAt: new Date()
-      }
+        emailVerifiedAt: new Date(),
+      },
+      { new: true }
     );
 
-    return NextResponse.json({ 
-      message: "Email verified successfully",
-      success: true,
-      role: user.role
+    // Create JWT token for authenticated session
+    const newToken = createToken(updatedUser);
+
+    // Redirect with token cookie set to after-email-verification page
+    const response = NextResponse.redirect(new URL('/after-email-verification?role=' + updatedUser.role, request.url));
+    response.cookies.set('token', newToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24, // 24 hours
+      path: '/',
     });
+
+    return response;
 
   } catch (error) {
     console.error('Verification error:', error);

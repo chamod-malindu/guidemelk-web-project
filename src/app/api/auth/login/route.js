@@ -100,12 +100,28 @@ export async function POST(request) {
       country: user.country
     };
 
-    // Create response with user data - FIXED: Use correct dashboard route format
+    // Determine redirect path based on user role
+    let redirectTo;
+    switch (role) {
+      case 'tourist':
+        redirectTo = '/tourist';
+        break;
+      case 'guide':
+        redirectTo = '/guide/dashboard';
+        break;
+      case 'admin':
+        redirectTo = '/admin/dashboard';
+        break;
+      default:
+        redirectTo = `/${role}/dashboard`;
+    }
+
+    // Create response with user data
     const response = NextResponse.json({
       message: "Login successful",
       success: true,
       user: userData,
-      redirectTo: `/${role}/dashboard` // This matches your folder structure
+      redirectTo: redirectTo
     });
 
     // Set HTTP-only cookie with the token

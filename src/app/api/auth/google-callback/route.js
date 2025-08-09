@@ -3,7 +3,6 @@ import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import { createToken } from '@/lib/auth';
-import { cookies } from 'next/headers';
 
 export async function GET(req) {
   try {
@@ -11,13 +10,15 @@ export async function GET(req) {
     const session = await auth();
 
     if (!session || !session.user || !session.user.email) {
-      return NextResponse.json({ error: 'No session found' }, { status: 401 });
+      // Redirect to login if no valid session
+      return NextResponse.redirect(new URL('/login', req.url));
     }
 
     console.log("🌐 Session user:", session.user);
 
     const email = session.user.email;
-    const role = session.user.usertype || 'tourist'; // role comes from session.jwt -> token.usertype
+    // Initial role from session token (fallback to tourist)
+    let role = session.user.usertype || 'tourist';
 
     // Connect to DB
     await dbConnect();
@@ -26,13 +27,13 @@ export async function GET(req) {
     let user = await User.findOne({ email });
 
     if (!user) {
-      // Create new user
+      // Create new user with the role passed from session JWT
       user = await User.create({
         firstName: session.user.name?.split(" ")[0] || '',
-        lastName: session.user.name?.split(" ")[1] || '',
+        lastName: session.user.name?.split(" ").slice(1).join(" ") || '',
         email,
         role,
-        phone: "Not Provided", // ✅ <-- this line fixes it!
+        phone: "Not Provided",
         isEmailVerified: true,
         emailVerifiedAt: new Date(),
         profileImage: session.user.image || '',
@@ -43,13 +44,33 @@ export async function GET(req) {
       console.log("✅ New user created via Google:", user._id);
     } else {
       console.log("✅ Existing user logged in:", user._id);
+      // Override role from DB record to ensure correctness
+      role = user.role;
     }
 
-    // Create token
+    // Create JWT token
     const token = createToken(user);
 
-    // Set token cookie
-    const response = NextResponse.redirect(new URL(`/${role}/dashboard`, req.url));
+    // Determine redirect path strictly from the resolved role
+    let redirectTo;
+    switch (role) {
+      case 'tourist':
+        redirectTo = '/tourist';
+        break;
+      case 'guide':
+        redirectTo = '/guide/dashboard';
+        break;
+      case 'admin':
+        redirectTo = '/admin/dashboard';
+        break;
+      default:
+        redirectTo = `/${role}/dashboard`;
+    }
+
+    console.log(`➡️ Redirecting to ${redirectTo}`);
+
+    // Create response with redirect and set token cookie
+    const response = NextResponse.redirect(new URL(redirectTo, req.url));
     response.cookies.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -60,13 +81,9 @@ export async function GET(req) {
 
     return response;
 
-    // Redirect to role-based dashboard
-    const redirectTo = `/${role}/dashboard`;
-    console.log(`➡️ Redirecting to ${redirectTo}`);
-    return NextResponse.redirect(new URL(redirectTo, req.url));
-
   } catch (error) {
     console.error("🔥 Google callback error:", error);
-    return NextResponse.json({ error: 'Server error', details: error.message }, { status: 500 });
+    // Redirect to login on error
+    return NextResponse.redirect(new URL('/login', req.url));
   }
 }

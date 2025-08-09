@@ -1,127 +1,141 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { CheckCircle, Mail, AlertTriangle, RefreshCw } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, XCircle, Loader2, Mail } from "lucide-react";
+import { redirectByRole } from "@/lib/redirectByRole";
 
 export default function VerifyEmailPage() {
+  const [status, setStatus] = useState("checking"); // checking, verifying, success, error, no-token
+  const [message, setMessage] = useState("");
   const searchParams = useSearchParams();
-  const token = searchParams.get('token');
   const router = useRouter();
-  const [status, setStatus] = useState('loading');
-  const [countdown, setCountdown] = useState(3);
 
   useEffect(() => {
-    // If no token, this is the "check your email" page
+    const token = searchParams.get("token");
+
     if (!token) {
-      setStatus('waiting');
+      setStatus("no-token");
+      setMessage("Please check your email and click the verification link to activate your account.");
       return;
     }
 
-    // If token exists, verify the email
-    async function verify() {
+    async function verifyAndRedirect() {
       try {
-        const res = await fetch(`/api/auth/verify?token=${token}`);
-        const data = await res.json();
+        setStatus("verifying");
+        setMessage("Verifying your email address...");
 
-        if (data.alreadyVerified) {
-          setStatus('already');
-          startCountdown(data.role);
-        } else if (data.success) {
-          setStatus('verified');
-          startCountdown(data.role);
-        } else {
-          setStatus('error');
+        // 1️⃣ Call backend to verify email (this sets the JWT cookie if successful)
+        const verifyRes = await fetch(`/api/auth/verify?token=${encodeURIComponent(token)}`, {
+          credentials: "include",
+        });
+
+        if (!verifyRes.ok) {
+          throw new Error("Verification failed");
         }
-      } catch {
-        setStatus('error');
+
+        // 2️⃣ Fetch the user profile using the newly set cookie
+        const profileRes = await fetch("/api/auth/profile", { credentials: "include" });
+        if (!profileRes.ok) throw new Error("Unable to fetch profile");
+        const { user } = await profileRes.json();
+
+        // 3️⃣ Save user in localStorage for client auth checks
+        localStorage.setItem("user", JSON.stringify(user));
+
+        setStatus("success");
+        setMessage("Email verified successfully!");
+
+        // 4️⃣ Redirect by role after short delay
+        setTimeout(() => {
+          redirectByRole(router, user.role);
+        }, 2000);
+      } catch (err) {
+        console.error("Email verification error:", err);
+        setStatus("error");
+        setMessage("Email verification failed. Please try again.");
       }
     }
 
-    verify();
-  }, [token]);
+    verifyAndRedirect();
+  }, [searchParams, router]);
 
-  function startCountdown(role) {
-    const interval = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev === 1) {
-          clearInterval(interval);
-          router.push(`/${role}/dashboard`);
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }
+  const handleManualRedirect = () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (user && user.role) {
+        redirectByRole(router, user.role);
+      } else {
+        router.push("/login");
+      }
+    } catch {
+      router.push("/login");
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-blue-50 flex items-center justify-center px-4">
-      <div className="max-w-md w-full">
-        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-          
-          {/* Loading State */}
-          {status === 'loading' && (
-            <div>
-              <RefreshCw className="w-12 h-12 text-blue-500 mx-auto mb-4 animate-spin" />
-              <h1 className="text-2xl font-bold text-gray-800 mb-2">Verifying...</h1>
-              <p className="text-gray-600">Please wait while we verify your email address.</p>
-            </div>
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="flex items-center justify-center gap-2">
+            {status === "checking" && <Loader2 className="h-5 w-5 animate-spin" />}
+            {status === "verifying" && <Loader2 className="h-5 w-5 animate-spin" />}
+            {status === "success" && <CheckCircle className="h-5 w-5 text-green-600" />}
+            {status === "error" && <XCircle className="h-5 w-5 text-red-600" />}
+            {status === "no-token" && <Mail className="h-5 w-5 text-blue-600" />}
+
+            {status === "checking" && "Checking..."}
+            {status === "verifying" && "Verifying Email..."}
+            {status === "success" && "Email Verified!"}
+            {status === "error" && "Verification Failed"}
+            {status === "no-token" && "Check Your Email"}
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent className="text-center space-y-4">
+          <p className="text-gray-600">{message}</p>
+
+          {status === "success" && (
+            <>
+              <p className="text-sm text-gray-500">
+                Redirecting to your dashboard in 2 seconds...
+              </p>
+              <Button onClick={handleManualRedirect} className="w-full">
+                Go to Dashboard Now
+              </Button>
+            </>
           )}
 
-          {/* Waiting for Email Click */}
-          {status === 'waiting' && (
-            <div>
-              <Mail className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-              <h1 className="text-2xl font-bold text-gray-800 mb-4">Check Your Email</h1>
-              <p className="text-gray-600 mb-4">
-                We've sent a verification link to your email address. Please click the link to verify your account.
-              </p>
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <p className="text-sm text-yellow-800">
-                  💡 Don't forget to check your spam folder!
+          {status === "no-token" && (
+            <div className="space-y-4">
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  We’ve sent a verification email to your registered email address. 
+                  Click the link in the email to verify your account and start using GuideMeLK.
                 </p>
               </div>
+              <Button asChild className="w-full">
+                <a href="/login">Go to Login</a>
+              </Button>
+              <Button variant="outline" asChild className="w-full">
+                <a href="/register">Register New Account</a>
+              </Button>
             </div>
           )}
 
-          {/* Success States */}
-          {(status === 'verified' || status === 'already') && (
-            <div>
-              <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
-              <h1 className="text-2xl font-bold text-gray-800 mb-2">
-                {status === 'verified' ? 'Email Verified!' : 'Already Verified'}
-              </h1>
-              <p className="text-gray-600 mb-4">
-                {status === 'verified' 
-                  ? 'Your email has been successfully verified.' 
-                  : 'Your email was already verified.'}
-              </p>
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <p className="text-green-800 font-medium">
-                  Redirecting to dashboard in {countdown} second{countdown !== 1 ? 's' : ''}...
-                </p>
-              </div>
+          {status === "error" && (
+            <div className="space-y-2">
+              <Button asChild className="w-full">
+                <a href="/register">Try Registering Again</a>
+              </Button>
+              <Button variant="outline" asChild className="w-full">
+                <a href="/login">Go to Login</a>
+              </Button>
             </div>
           )}
-
-          {/* Error State */}
-          {status === 'error' && (
-            <div>
-              <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <h1 className="text-2xl font-bold text-gray-800 mb-2">Verification Failed</h1>
-              <p className="text-gray-600 mb-6">
-                This verification link is invalid or has expired. Please try registering again.
-              </p>
-              <button
-                onClick={() => router.push('/register')}
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Back to Registration
-              </button>
-            </div>
-          )}
-
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

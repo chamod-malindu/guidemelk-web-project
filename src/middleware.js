@@ -17,6 +17,12 @@ const PUBLIC_PATHS = [
   '/api/auth/logout'
 ];
 
+const PROTECTED_PATHS = [
+  '/tourist',
+  '/guide',
+  '/admin'
+];
+
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
   
@@ -40,19 +46,28 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
-  // ✅ Check NextAuth session first (for Google users)
-  const session = await auth();
-  if (session) {
+  // REPLACE THE REST WITH THIS:
+  // ✅ Check if this is a protected path
+  const isProtectedPath = PROTECTED_PATHS.some(path => pathname.startsWith(path));
+  
+  if (isProtectedPath) {
+    // ✅ Check NextAuth session first (for Google users)
+    const session = await auth();
+    if (session) {
+      return NextResponse.next();
+    }
+
+    // ✅ For protected routes, check if token exists
+    const token = request.cookies.get('token')?.value;
+    if (!token) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+
+    // Let the pages handle the actual token verification
     return NextResponse.next();
   }
 
-  // ✅ For protected routes, just check if token exists
-  const token = request.cookies.get('token')?.value;
-  if (!token) {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-
-  // Let the dashboard pages handle the actual token verification
+  // ✅ For all other paths, allow access
   return NextResponse.next();
 }
 

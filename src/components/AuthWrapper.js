@@ -1,55 +1,73 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { getUserFromToken } from '@/lib/auth';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export default function AuthWrapper({ children, requiredRole }) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState(null);
+/**
+ * AuthWrapper protects a page and optionally checks for a specific role.
+ * It uses the backend /api/auth/profile endpoint to verify the session.
+ */
+export default function AuthWrapper({ requiredRole, children }) {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
-    const checkAuth = async () => {
+    let isMounted = true;
+
+    async function checkAuth() {
       try {
-        // Check if user data exists in localStorage
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          const userData = JSON.parse(storedUser);
-          
-          // Check if user has the required role
-          if (requiredRole && userData.role !== requiredRole) {
-            router.push('/login');
-            return;
-          }
-          
-          setUser(userData);
-          setIsLoading(false);
-          return;
+        // ✅ Always verify session from the server using the token cookie
+        const res = await fetch("/api/auth/profile", { credentials: "include" });
+
+        if (!res.ok) throw new Error("Failed to verify session");
+
+        const data = await res.json();
+        if (!data?.user) throw new Error("Invalid user data");
+
+        // ✅ Check role if required
+        if (requiredRole && data.user.role !== requiredRole) {
+          throw new Error("User role does not match required role");
         }
 
-        // If no stored user, redirect to login
-        router.push('/login');
+        // ✅ Update localStorage with fresh profile info
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        if (isMounted) {
+          setAuthenticated(true);
+        }
       } catch (error) {
-        console.error('Auth check failed:', error);
-        router.push('/login');
+        console.error("AuthWrapper:", error.message);
+        localStorage.removeItem("user");
+        if (isMounted) {
+          setAuthenticated(false);
+          router.replace("/login");
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-    };
+    }
 
     checkAuth();
-  }, [router, requiredRole]);
 
-  if (isLoading) {
+    return () => {
+      isMounted = false;
+    };
+  }, [requiredRole, router]);
+
+  // ✅ While verifying session, show loading spinner
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+      <div className="flex justify-center items-center min-h-screen">
+        <p>Loading...</p>
       </div>
     );
   }
 
-  if (!user) {
-    return null; // Will redirect to login
-  }
+  // ✅ Redirect is already triggered inside useEffect
+  if (!authenticated) return null;
 
   return <>{children}</>;
 }
