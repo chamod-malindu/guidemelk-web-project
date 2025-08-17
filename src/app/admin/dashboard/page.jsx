@@ -465,9 +465,6 @@ export default function AdminDashboard() {
                     <option value="paypal">PayPal</option>
                   </select>
                 </div>
-                <button className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
-                  Export Data
-                </button>
               </div>
         
               {/* Transactions Table */}
@@ -777,8 +774,8 @@ export default function AdminDashboard() {
               Manage all platform users including tourists and guides. You can block, unblock, activate, and deactivate users.
             </p>
 
-            {activeTab === "transactions" && "Transaction History"}
-            {activeTab === "disputes" && "Support & Disputes"}
+            {activeSection === "transactions" && "Transaction History"}
+            {activeSection === "disputes" && "Support & Disputes"}
 
             {/* Search and Add User Section */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
