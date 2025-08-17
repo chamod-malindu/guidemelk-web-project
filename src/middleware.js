@@ -26,17 +26,17 @@ const PROTECTED_PATHS = [
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
   
-  // ✅ Public access paths
+  // Public access paths
   if (PUBLIC_PATHS.includes(pathname)) {
     return NextResponse.next();
   }
 
-  // ✅ Allow NextAuth API routes
+  // Allow NextAuth API routes
   if (pathname.startsWith('/api/auth')) {
     return NextResponse.next();
   }
 
-  // ✅ Allow static assets
+  // Allow static assets
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon.ico') ||
@@ -46,18 +46,17 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
-  // REPLACE THE REST WITH THIS:
-  // ✅ Check if this is a protected path
+  // Check if this is a protected path
   const isProtectedPath = PROTECTED_PATHS.some(path => pathname.startsWith(path));
   
   if (isProtectedPath) {
-    // ✅ Check NextAuth session first (for Google users)
+    // Check NextAuth session first (for Google users)
     const session = await auth();
     if (session) {
       return NextResponse.next();
     }
 
-    // ✅ For protected routes, check if token exists
+    // For protected routes, check if token exists
     const token = request.cookies.get('token')?.value;
     if (!token) {
       return NextResponse.redirect(new URL('/login', request.url));
@@ -67,7 +66,7 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
-  // ✅ For all other paths, allow access
+  // For all other paths, allow access
   return NextResponse.next();
 }
 

@@ -17,9 +17,8 @@ export async function GET(request) {
   try {
     // Decode and verify the token from the verification link
     const { userId } = verifyToken(token);
-    
-    await dbConnect();
 
+    await dbConnect();
     const user = await User.findById(userId);
 
     if (!user) {
@@ -29,10 +28,10 @@ export async function GET(request) {
       );
     }
 
-    // If already verified, issue fresh token and set cookie
     if (user.isEmailVerified) {
+      // User already verified: issue new token and respond with success JSON
       const newToken = createToken(user);
-      const response = NextResponse.redirect(new URL('/after-email-verification?role=' + user.role, request.url));
+      const response = NextResponse.json({ success: true, role: user.role }, { status: 200 });
       response.cookies.set('token', newToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -56,8 +55,8 @@ export async function GET(request) {
     // Create JWT token for authenticated session
     const newToken = createToken(updatedUser);
 
-    // Redirect with token cookie set to after-email-verification page
-    const response = NextResponse.redirect(new URL('/after-email-verification?role=' + updatedUser.role, request.url));
+    // Return JSON success and set token cookie
+    const response = NextResponse.json({ success: true, role: updatedUser.role }, { status: 200 });
     response.cookies.set('token', newToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -67,7 +66,6 @@ export async function GET(request) {
     });
 
     return response;
-
   } catch (error) {
     console.error('Verification error:', error);
     return NextResponse.json(

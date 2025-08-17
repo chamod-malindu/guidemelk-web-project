@@ -1,114 +1,329 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import axios from "axios"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Star, MapPin, Calendar, MessageCircle, Search, Clock, CheckCircle, XCircle } from "lucide-react"
-import Link from "next/link"
-import { Navbar } from "@/components/navbar"
-import { useRouter } from "next/navigation"
-import AuthWrapper from "@/components/AuthWrapper"
-
+import { useEffect, useRef, useState } from "react";
+import axios from "axios";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Star, MapPin, Calendar, MessageCircle, Search, Clock, CheckCircle, XCircle, Bell, Sun, Moon } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import AuthWrapper from "@/components/AuthWrapper";
+import { io } from "socket.io-client";
+import PaymentModal from '@/components/PaymentModal'; 
 
 export default function TouristDashboard() {
-  const [activeTab, setActiveTab] = useState("bookings") // Tracks selected tab
-  const [user, setUser] = useState(null) // Holds current logged-in user profile
+  const [activeTab, setActiveTab] = useState("bookings")
+  const [user, setUser] = useState(null)
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    country: ""
+    firstName: "", lastName: "", email: "", phone: "", country: ""
   })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [loggingOut, setLoggingOut] = useState(false);
   const router = useRouter()
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState("");
   const fileInputRef = useRef();
   const [photoPreview, setPhotoPreview] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
+  const [bookings, setBookings] = useState([]);
+  const [loadingBookings, setLoadingBookings] = useState(false);
+  const [bookingError, setBookingError] = useState("");
+  const notificationSocketRef = useRef(null);
+
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentBooking, setPaymentBooking] = useState(null);
+  const [paymentType, setPaymentType] = useState(''); // 'advance' or 'remaining'
 
 
-  // Dummy bookings data
-  const [bookings] = useState([
-    {
-      id: 1,
-      guide: { name: "Kasun Perera", location: "Kandy", image: "/placeholder.svg" },
-      date: "2024-08-10",
-      status: "confirmed",
-      price: 80,
-      groupSize: 2
-    },
-    {
-      id: 2,
-      guide: { name: "Nimali Silva", location: "Galle", image: "/placeholder.svg" },
-      date: "2024-08-12",
-      status: "pending",
-      price: 90,
-      groupSize: 1
+  const handleEditToggle = async () => {
+    if (isEditing) {
+      try {
+        let profileImageUrl = user.profileImage;
+  
+        if (selectedFile) {
+          const formDataUpload = new FormData();
+          formDataUpload.append("file", selectedFile);
+  
+          const uploadRes = await fetch('/api/tourist/profileImage', {
+            method: 'POST',
+            body: formDataUpload,
+          });
+          const uploadData = await uploadRes.json();
+          if (!uploadRes.ok) throw new Error(uploadData.error || "Image upload failed");
+          profileImageUrl = uploadData.imageUrl;
+        }
+  
+        const updateRes = await axios.put('/api/auth/profile', {
+          ...formData,
+          profileImage: profileImageUrl,
+        });
+  
+        if (updateRes.data.success) {
+          setUser(updateRes.data.user);
+          setPhotoPreview("");
+          setSelectedFile(null);
+          alert("Profile updated successfully!");
+        } else {
+          alert("Failed to update profile.");
+        }
+      } catch (error) {
+        console.error("Update failed:", error);
+        alert(error.message || "Error updating profile.");
+      }
     }
-  ])
+  
+    setIsEditing(!isEditing);
+  };
+  
 
-  // Dummy messages data
-  const [messages] = useState([
+  const messages = [
     {
       id: 1,
-      guide: { name: "Kasun Perera", image: "/placeholder.svg" },
-      lastMessage: "Excited to meet you!",
+      guide: { name: "John Doe", image: "/placeholder.svg" },
+      lastMessage: "Thank you for booking with me!",
       time: "2 hours ago",
       unread: true
     }
-  ])
+  ]
 
-  // Dummy reviews data
-  const [reviews] = useState([
-    {
-      id: 1,
-      guide: { name: "Rohan Fernando", image: "/placeholder.svg" },
-      rating: 5,
-      comment: "Very friendly and knowledgeable!",
-      date: "2024-07-20"
+  const fetchBookings = async () => {
+    if (!user) return;
+    setLoadingBookings(true);
+    setBookingError("");
+    try {
+      const touristId = user._id || user.id;
+      const res = await fetch(`/api/bookings/tourist/${touristId}`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch bookings");
+      const data = await res.json();
+      setBookings(data.bookings || []);
+    } catch (err) {
+      console.error("Error fetching bookings:", err);
+      setBookingError(err.message);
+    } finally {
+      setLoadingBookings(false);
     }
-  ])
+  };
 
-  // Get logged-in user's profile from /api/auth/profile
+  // State for review modal
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewBooking, setReviewBooking] = useState(null);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviews, setReviews] = useState([]);
+
+
+  const openReviewModal = (booking) => {
+    setReviewBooking(booking);
+    setReviewRating(0);
+    setReviewComment("");
+    setShowReviewModal(true);
+  };
+
+  const submitReview = async () => {
+    try {
+      if (!reviewRating) {
+        alert("Please select a rating");
+        return;
+      }
+
+      const res = await fetch("/api/reviews/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          bookingId: reviewBooking._id,
+          guideId: reviewBooking.guide._id,
+          touristId: user._id || user.id,
+          rating: reviewRating,
+          comment: reviewComment
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      alert("✅ Review submitted successfully!");
+
+      // Optional real-time notify guide
+      if (notificationSocketRef.current?.connected) {
+        notificationSocketRef.current.emit("new-review", {
+          guideId: reviewBooking.guide._id,
+          review: data.review
+        });
+      }
+
+      // Refresh bookings so "Leave Review" disappears
+      await fetchBookings();
+      await fetchMyReviews();
+      setShowReviewModal(false);
+    } catch (err) {
+      alert(`❌ Failed to submit review: ${err.message}`);
+    }
+  };
+
+
+  // 🔔 Persistent notification socket
+  useEffect(() => {
+    if (!user?._id && !user?.id) return;
+    const userId = user._id || user.id;
+
+    notificationSocketRef.current = io("http://localhost:3000", {
+      path: "/api/socket",
+      transports: ["websocket", "polling"],
+    });
+
+    notificationSocketRef.current.on("connect", () => {
+      notificationSocketRef.current.emit("join-user-room", userId);
+      console.log(`✅ Connected to notifications for user ${userId}`);
+    });
+
+    notificationSocketRef.current.on("booking-notification", (notification) => {
+      console.log("🔔 Received notification:", notification);
+      setNotifications(prev => [notification, ...prev].slice(0, 10));
+      setUnreadCount(prev => prev + 1);
+
+      if (Notification.permission === "granted") {
+        new Notification("GuideMeLK - New Update", {
+          body: notification.message,
+          icon: "/favicon.ico"
+        });
+      }
+
+      fetchBookings();
+    });
+
+    notificationSocketRef.current.on("disconnect", () => {
+      console.log("❌ Notification socket disconnected");
+    });
+
+    return () => {
+      if (notificationSocketRef.current) {
+        notificationSocketRef.current.disconnect();
+        notificationSocketRef.current = null;
+      }
+    };
+  }, [user?._id, user?.id]);
+
+  useEffect(() => {
+    if (!notificationSocketRef.current) return;
+  
+    notificationSocketRef.current.on("new-review", (payload) => {
+      if (payload.review.tourist === (user?._id || user?.id)) {
+        fetchMyReviews();
+      }
+    });
+  
+    return () => {
+      if (notificationSocketRef.current) {
+        notificationSocketRef.current.off("new-review");
+      }
+    };
+  }, [user?._id, user?.id]);
+  
+  
+
+  useEffect(() => {
+    fetchMyReviews();
+  }, [user?._id, user?.id]);
+  
+
+  // Ask notification permission
+  useEffect(() => {
+    if (Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // Initial bookings
+  const userId = user?._id || user?.id;
+  useEffect(() => {
+    if (!user?._id && !user?.id) return;  
+    fetchBookings();
+  }, [userId]);  
+
+
+  // Cancel booking with socket emit
+  const handleCancelBooking = async (bookingId) => {
+    if (!confirm("Are you sure you want to cancel this booking? This action cannot be undone.")) return;
+    try {
+      const response = await fetch(`/api/bookings/${bookingId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'cancel' }),
+        credentials: 'include'
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to cancel booking');
+
+      setBookings(prevBookings =>
+        prevBookings.map(b => b._id === bookingId ? { ...b, status: 'cancelled' } : b)
+      );
+
+      alert(`✅ ${data.message}`);
+
+      // Emit to guide
+      if (notificationSocketRef.current?.connected) {
+        notificationSocketRef.current.emit("booking-status-update", {
+          bookingId,
+          status: "cancelled",
+          guideId: data.booking.guide?._id || data.booking.guide,
+          touristId: user._id || user.id
+        });
+      }
+
+      fetchBookings();
+
+    } catch (error) {
+      console.error('Cancel booking error:', error);
+      alert(`❌ Error: ${error.message}`);
+    }
+  };
+
+  const fetchMyReviews = async () => {
+    try {
+      const id = user?._id || user?.id;
+      if (!id) return;
+      const res = await fetch(`/api//tourist/${id}`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch reviews");
+      const data = await res.json();
+      setReviews(data.reviews || []);
+    } catch (err) {
+      console.error("Error fetching reviews:", err);
+    }
+  };
+
+  // Profile fetch
   useEffect(() => {
     const fetchUser = async () => {
-      setLoading(true)
+      setLoading(true);
       setError("");
       try {
         const res = await axios.get("/api/auth/profile");
         setUser(res.data.user);
         setFormData(res.data.user);
         setLoading(false);
-
       } catch (err) {
         setLoading(false);
-        console.error("Failed to load user:", err)
-
+        console.error("Failed to load user:", err);
         if (err.response && err.response.status === 401) {
           setError("Your session has expired. Redirecting to login...");
-          setTimeout(() => {
-            router.replace("/login");
-          }, 2000); // Delay lets user read message
+          setTimeout(() => { router.replace("/login"); }, 2000);
         } else {
           setError("Unable to load your dashboard. Please try again later.");
         }
-        
       }
-    }
-
-    fetchUser()
-  }, [router])
+    };
+    fetchUser();
+  }, [router]);
 
   useEffect(() => {
     if (user) {
@@ -121,20 +336,17 @@ export default function TouristDashboard() {
       });
     }
   }, [user]);
-  
 
-  // Status color for each booking
   const getStatusColor = (status) => {
     switch (status) {
-      case "confirmed": return "bg-green-100 text-green-800"
-      case "pending": return "bg-yellow-100 text-yellow-800"
-      case "completed": return "bg-blue-100 text-blue-800"
-      case "cancelled": return "bg-red-100 text-red-800"
-      default: return "bg-gray-100 text-gray-800"
+      case "confirmed": return "bg-green-100 text-green-800";
+      case "pending": return "bg-yellow-100 text-yellow-800";
+      case "completed": return "bg-blue-100 text-blue-800";
+      case "cancelled": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   }
 
-  // Icon based on booking status
   const getStatusIcon = (status) => {
     switch (status) {
       case "confirmed": return <CheckCircle className="h-4 w-4" />
@@ -145,60 +357,18 @@ export default function TouristDashboard() {
     }
   }
 
-  // Render nothing until user is fetched
   if (loading) return <div className="p-10 text-center">Loading dashboard...</div>
   if (error) return <div className="p-10 text-center text-red-600">{error}</div>
   if (!user) return null
-
-  const handleEditToggle = async () => {
-    if (isEditing) {
-      // Save Changes to backend
-      try {
-        let profileImageUrl = user.profileImage;
-
-        if (selectedFile) {
-          const formData = new FormData();
-          formData.append("file", selectedFile);
-  
-          const res = await fetch('/api/tourist/profileImage', {
-            method: 'POST',
-            body: formData,
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || "Image upload failed");
-          profileImageUrl = data.imageUrl;
-        }
-        const response = await axios.put('/api/auth/profile', {
-          ...formData,
-          profileImage: profileImageUrl,
-        });
-  
-        if (response.data.success) {
-          setUser(response.data.user);
-          setPhotoPreview("");
-          setSelectedFile(null);
-          alert("Profile updated successfully!");
-        } else {
-          alert("Failed to update profile.");
-        }
-      } catch (err) {
-        console.error("Update failed:", err);
-        alert(err.message || "Error updating profile.");
-      }
-    }
-  
-    setIsEditing(!isEditing)
-  }
 
   const handleLogout = async () => {
     if (loggingOut) return; 
     setLoggingOut(true);
     try {
       await axios.post("/api/auth/logout");
-      // Clear user data immediately for fast UI feedback
       setUser(null);
       alert("Logged out successfully.");
-      router.replace("/login"); // Redirect cleanly to login
+      router.replace("/login");
     } catch (error) {
       console.error("Logout failed:", error);
       alert("Logout failed. Please try again.");
@@ -206,45 +376,194 @@ export default function TouristDashboard() {
       setLoggingOut(false);
     }
   };
-  
+
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     setSelectedFile(file || null);
     setPhotoPreview(file ? URL.createObjectURL(file) : "");
   };
+
+  const NotificationDropdown = () => (
+    <div className="relative">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => {
+          const willOpen = !showNotifications;
+          setShowNotifications(willOpen);
+
+          // If opening the dropdown, clear the count
+          if (willOpen && unreadCount > 0) {
+            setUnreadCount(0);
+          }
+        }}
+        className="relative"
+      >
+        <Bell className="h-5 w-5" />
+        {unreadCount > 0 && (
+          <Badge 
+            variant="destructive" 
+            className="absolute -top-1 -right-1 h-5 w-5 text-xs flex items-center justify-center"
+          >
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </Badge>
+        )}
+      </Button>
+      {showNotifications && (
+        <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+          <div className="p-3 border-b border-gray-200 flex justify-between items-center">
+            <h3 className="font-semibold text-gray-900">Notifications</h3>
+            <Button variant="ghost" size="sm" onClick={() => { setUnreadCount(0); setNotifications([]); setShowNotifications(false); }}>
+              Clear All
+            </Button>
+          </div>
+          <div className="max-h-96 overflow-y-auto">
+            {notifications.length === 0 ? (
+              <div className="p-6 text-center text-gray-500">
+                <Bell className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                <p>No notifications</p>
+              </div>
+            ) : (
+              notifications.map((n, i) => (
+                <div key={i} className="p-3 border-b border-gray-100 hover:bg-gray-50">
+                  <p className="text-sm text-gray-800">{n.message}</p>
+                  <p className="text-xs text-gray-500 mt-1">{new Date(n.timestamp).toLocaleString()}</p>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
   
-  const handlePhotoUpload = async () => {
-    const file = fileInputRef.current.files[0];
-    if (!file) return;
-    setUploading(true);
-    setUploadError("");
-  
-    const formData = new FormData();
-    formData.append("file", file);
-  
-    try {
-      const res = await fetch('/api/tourist/profileImage', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Upload failed");
-      setUser({ ...user, profileImage: data.imageUrl }); // update local profile
-      setPhotoPreview("");
-    } catch (err) {
-      setUploadError(err.message);
-    } finally {
-      setUploading(false);
-    }
+  // Open payment modal
+  const openPaymentModal = (booking, type) => {
+    setPaymentBooking(booking);
+    setPaymentType(type);
+    setShowPaymentModal(true);
   };
+
+  // Handle payment success
+  const handlePaymentSuccess = async (data) => {
+    // Send real-time notification to guide
+    if (notificationSocketRef.current?.connected) {
+      notificationSocketRef.current.emit("booking-status-update", {
+        bookingId: paymentBooking._id,
+        status: paymentType === 'advance' ? 'advance-paid' : 'remaining-paid',
+        guideId: paymentBooking.guide._id,
+        touristId: user._id || user.id
+      });
+    }
+
+    // Refresh bookings
+    await fetchBookings();
+    
+    // Close modal
+    setShowPaymentModal(false);
+    setPaymentBooking(null);
+    setPaymentType('');
+  };
+  
 
   return (
     <AuthWrapper requiredRole="tourist">
     <div className="min-h-screen bg-gray-50">
-      {/* Top Navigation Bar */}
-      <Navbar user={user} />
+      {/* Nav Bar */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <div className="flex items-center">
+              <Link href="/" className="text-xl font-bold text-blue-600">
+                GuideMeLK
+              </Link>
+            </div>
+            
+            {/* Centered Navigation Menu */}
+            <nav className="/tourist md:flex space-x-6 absolute left-1/2 transform -translate-x-1/2">
+              <Link href="/" className="text-gray-700 hover:text-blue-600 transition-colors duration-300">
+                Home
+              </Link>
+              <Link href="/findGuide" className="text-gray-700 hover:text-blue-600 transition-colors duration-300">
+                Find a Guide
+              </Link>
+              <Link href="/about" className="text-gray-700 hover:text-blue-600 transition-colors duration-300">
+                About Us
+              </Link>
+            </nav>
+            
+            {/* Right side - Dark Mode Toggle, Notifications and User Profile */}
+            <div className="flex items-center space-x-3">
+              {/* Dark Mode Toggle */}
+              <button
+                onClick={() => {
+                  const isDark = document.documentElement.classList.contains('dark');
+                  if (isDark) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                  } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                  }
+                }}
+                className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Toggle dark mode"
+              >
+                <Sun className="h-5 w-5 hidden dark:block" />
+                <Moon className="h-5 w-5 block dark:hidden" />
+              </button>
+
+              {/* Notification Dropdown */}
+              <NotificationDropdown />
+              
+              {/* User Profile Section */}
+              <div className="flex items-center space-x-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user.profileImage || "/placeholder.svg"} />
+                  <AvatarFallback>
+                    {user.firstName?.[0]?.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm font-medium">{user.firstName}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="container mx-auto px-4 py-8">
+        {showReviewModal && reviewBooking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-4">Leave a Review for {reviewBooking.guide?.firstName}</h3>
+            
+            {/* Rating stars */}
+            <div className="flex gap-1 mb-4">
+              {[1,2,3,4,5].map((star) => (
+                <Star
+                  key={star}
+                  className={`h-6 w-6 cursor-pointer ${star <= reviewRating ? "text-yellow-400" : "text-gray-300"}`}
+                  onClick={() => setReviewRating(star)}
+                />
+              ))}
+            </div>
+      
+            {/* Comment */}
+            <textarea
+              value={reviewComment}
+              onChange={(e) => setReviewComment(e.target.value)}
+              placeholder="Write your feedback..."
+              className="w-full border rounded p-2 mb-4"
+            />
+      
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowReviewModal(false)}>Cancel</Button>
+              <Button onClick={submitReview}>Submit Review</Button>
+            </div>
+          </div>
+        </div>
+      )}
         {/* Greeting Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {user.firstName}!</h1>
@@ -252,17 +571,31 @@ export default function TouristDashboard() {
         </div>
 
         {/* Tab Section */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(val) => {
+          setActiveTab(val);
+
+          // Reset unread count when going to bookings tab
+          if (val === "bookings" && unreadCount > 0) {
+            setUnreadCount(0);
+          }
+        }} className="w-full">
           <TabsList className="grid grid-cols-4 w-full mb-6">
-            <TabsTrigger value="bookings">My Bookings</TabsTrigger>
+            <TabsTrigger value="bookings" className="relative">
+              My Bookings
+              {unreadCount > 0 && (
+                <Badge variant="destructive" className="ml-2 h-5 text-xs">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Badge>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="messages">Messages</TabsTrigger>
             <TabsTrigger value="reviews">My Reviews</TabsTrigger>
             <TabsTrigger value="profile">Profile</TabsTrigger>
           </TabsList>
 
-          {/* Bookings Tab */}
-          <TabsContent value="bookings">
-            <div className="grid gap-4">
+
+            {/* Bookings Tab */}
+            <TabsContent value="bookings" className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-semibold">My Bookings</h2>
                 <Button asChild>
@@ -273,26 +606,108 @@ export default function TouristDashboard() {
                 </Button>
               </div>
 
-              {bookings.map((booking) => (
-                <Card key={booking.id}>
+              {/* Loading State */}
+              {loadingBookings && (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading your bookings...</p>
+                </div>
+              )}
+
+              {/* Error State */}
+              {bookingError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                  <p className="text-red-600">❌ {bookingError}</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-2"
+                    onClick={fetchBookings}
+                  >
+                    Try Again
+                  </Button>
+                </div>
+              )}
+
+              {/* No Bookings State */}
+              {!loadingBookings && !bookingError && bookings.length === 0 && (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">🌴</div>
+                  <h3 className="text-xl font-semibold text-gray-700 mb-2">No Bookings Yet</h3>
+                  <p className="text-gray-500 mb-4">
+                    Start exploring Sri Lanka by booking your first tour with a local guide!
+                  </p>
+                  <Button asChild>
+                    <Link href="/search">
+                      <Search className="mr-2 h-4 w-4" />
+                      Find a Guide
+                    </Link>
+                  </Button>
+                </div>
+              )}
+
+              {/* Bookings List */}
+              {!loadingBookings && !bookingError && bookings.map((booking) => (
+                <Card key={booking._id}>
                   <CardContent className="p-6">
                     <div className="flex justify-between">
                       <div className="flex gap-4">
                         <Avatar>
-                          <AvatarImage src={booking.guide.image} alt={booking.guide.name} />
-                          <AvatarFallback>{booking.guide.name[0]}</AvatarFallback>
+                          <AvatarImage src={booking.guide?.profileImage || "/placeholder.svg"} alt={`${booking.guide?.firstName} ${booking.guide?.lastName}`} />
+                          <AvatarFallback>
+                            {booking.guide?.firstName?.[0]}{booking.guide?.lastName?.[0]}
+                          </AvatarFallback>
                         </Avatar>
                         <div>
-                          <h3 className="text-lg font-semibold">{booking.guide.name}</h3>
+                          <h3 className="text-lg font-semibold">
+                            {booking.guide?.firstName} {booking.guide?.lastName}
+                          </h3>
                           <div className="text-gray-600 flex items-center gap-2">
                             <MapPin className="h-4 w-4" />
-                            <span>{booking.guide.location}</span>
+                            <span>{booking.guide?.location || "Location not specified"}</span>
                           </div>
                           <div className="text-gray-600 flex items-center gap-2">
                             <Calendar className="h-4 w-4" />
-                            <span>{booking.date}</span>
-                            • {booking.groupSize} {booking.groupSize === 1 ? "person" : "people"}
+                            <span>{new Date(booking.date).toLocaleDateString()}</span>
+                            • 
+                            <span>
+                              {booking.duration === 21 ? "3 weeks" : 
+                              booking.duration === 30 ? "1 month" : 
+                              booking.duration === 60 ? "2 months" : 
+                              booking.duration === 90 ? "3 months" : 
+                              `${booking.duration} ${booking.duration === 1 ? "day" : "days"}`}
+                            </span>
+                            • 
+                            <span>{booking.groupSize} {booking.groupSize === 1 ? "person" : "people"}</span>
                           </div>
+                          
+                          {/* Destinations */}
+                          <div className="mt-2">
+                            <p className="text-sm font-medium text-gray-600">Destinations:</p>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {booking.destinations?.map((destination, index) => (
+                                <Badge key={index} variant="secondary" className="text-xs">
+                                  {destination}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Special Requests */}
+                          {booking.specialRequests && (
+                            <div className="mt-2">
+                              <p className="text-sm font-medium text-gray-600">Special Requests:</p>
+                              <p className="text-sm text-gray-700">{booking.specialRequests}</p>
+                            </div>
+                          )}
+
+                          {/* Decline Reason */}
+                          {booking.status === 'declined' && booking.declineReason && (
+                            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded">
+                              <p className="text-sm font-medium text-red-600">Declined:</p>
+                              <p className="text-sm text-red-700">{booking.declineReason}</p>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="text-right">
@@ -300,33 +715,121 @@ export default function TouristDashboard() {
                           {getStatusIcon(booking.status)}
                           <span className="ml-1 capitalize">{booking.status}</span>
                         </Badge>
-                        <div className="text-blue-600 font-bold text-xl mt-2">${booking.price}</div>
+                        <div className="text-blue-600 font-bold text-xl mt-2">${booking.totalCost}</div>
+
+                        {/* Payment status info */}
+                        <div className="text-xs text-gray-500 mt-1">
+                          {booking.paymentStatus === "partial" && booking.advanceAmount
+                            ? `Advance paid: $${booking.advanceAmount}`
+                            : booking.paymentStatus === "processed"
+                            ? `Fully paid`
+                            : `Not paid yet`}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Booked on {new Date(booking.createdAt).toLocaleDateString()}
+                        </div>
                       </div>
                     </div>
+                    
                     <div className="flex gap-2 mt-4">
-                      <Button variant="outline" size="sm">
+                      {/* Message Guide Button */}
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={async () => {
+                          try {
+                            const currentUser = JSON.parse(localStorage.getItem("user"));
+                            if (!currentUser?.id) {
+                              router.push("/login");
+                              return;
+                            }
+                            
+                            const resChat = await fetch(
+                              `/api/chat/conversations?user1=${currentUser.id}&user2=${booking.guide._id}`
+                            );
+                            if (!resChat.ok) throw new Error("Failed to create or fetch chat");
+                            
+                            const chat = await resChat.json();
+                            router.push(`/chat?chatId=${chat._id}`);
+                          } catch (err) {
+                            console.error("Failed to start chat:", err);
+                            alert("Could not open chat. Please try again.");
+                          }
+                        }}
+                      >
                         <MessageCircle className="mr-1 h-4 w-4" />
                         Message Guide
                       </Button>
-                      {booking.status === "completed" && (
-                        <Button size="sm">
+
+                      {/* Leave Review Button */}
+                      {booking.status === "completed" &&
+                      booking.paymentStatus === "processed" &&
+                      !booking.reviewed && (
+                        <Button
+                          size="sm"
+                          onClick={() => openReviewModal(booking)}
+                        >
                           <Star className="mr-1 h-4 w-4" />
                           Leave Review
                         </Button>
                       )}
+
+                      {/* Pay Advance Button */}
+                      {booking.status === "confirmed" && booking.paymentStatus === "pending" && (
+                        <Button
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                          onClick={() => openPaymentModal(booking, 'advance')}
+                        >
+                          Pay Advance
+                        </Button>
+                      )}
+
+
+                      {/* Pay Remaining Button */}
+                      {booking.status === "completed" && booking.paymentStatus === "partial" && (
+                        <Button
+                          size="sm"
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                          onClick={() => openPaymentModal(booking, 'remaining')}
+                        >
+                          Pay Remaining
+                        </Button>
+                      )}
+         
+                      {/* Cancel Booking Button */}
+                      {['pending', 'confirmed'].includes(booking.status) && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="text-red-600 border-red-300 hover:bg-red-50"
+                          onClick={() => handleCancelBooking(booking._id)}
+                        >
+                          Cancel Booking
+                        </Button>
+                      )}
+
+                      {/* View Details Button */}
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          alert(`Booking Details:\nID: ${booking._id}\nStatus: ${booking.status}\nTotal: ${booking.totalCost}`);
+                        }}
+                      >
+                        View Details
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
               ))}
-            </div>
-          </TabsContent>
+            </TabsContent>
 
-          {/* Messages Tab */}
-          <TabsContent value="messages">
-            <div className="grid gap-4">
+            {/* Messages Tab */}
+            <TabsContent value="messages" className="space-y-4">
               <h2 className="text-2xl font-semibold">Messages</h2>
               {messages.map((msg) => (
-                <Card key={msg.id} className="hover:shadow-md cursor-pointer">
+                <Card key={msg.id} className="hover:shadow-md">
                   <CardContent className="p-4 flex items-center gap-4">
                     <Avatar>
                       <AvatarImage src={msg.guide.image} alt={msg.guide.name} />
@@ -338,56 +841,76 @@ export default function TouristDashboard() {
                         <span className="text-sm text-gray-600">{msg.time}</span>
                       </div>
                       <p className="text-gray-700">{msg.lastMessage}</p>
+                      
+                      <Button
+                        size="sm"
+                        className="mt-2"
+                        onClick={() => {
+                          const currentUser = JSON.parse(localStorage.getItem("user"));
+                          if (!currentUser) {
+                            router.push("/login");
+                            return;
+                          }
+                          router.push("/chat");
+                        }}
+                      >
+                        <MessageCircle className="mr-1 h-4 w-4" />
+                        Go to Chat
+                      </Button>
                     </div>
                     {msg.unread && <div className="w-3 h-3 bg-blue-600 rounded-full" />}
                   </CardContent>
                 </Card>
               ))}
-            </div>
-          </TabsContent>
+            </TabsContent>
 
-          {/* Reviews Tab */}
-          <TabsContent value="reviews">
-            <div className="grid gap-4">
-              <h2 className="text-2xl font-semibold">My Reviews</h2>
-              {reviews.map((review) => (
-                <Card key={review.id}>
-                  <CardContent className="p-6 flex gap-4">
-                    <Avatar>
-                      <AvatarImage src={review.guide.image} alt={review.guide.name} />
-                      <AvatarFallback>{review.guide.name[0]}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex justify-between mb-2">
-                        <h3 className="font-semibold">{review.guide.name}</h3>
-                        <span className="text-sm text-gray-600">{review.date}</span>
-                      </div>
-                      <div className="flex gap-1 mb-2">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-4 w-4 ${i < review.rating ? "text-yellow-400" : "text-gray-300"}`}
-                          />
-                        ))}
-                      </div>
-                      <p>{review.comment}</p>
+            {/* Reviews Tab */}
+            <TabsContent value="reviews" className="space-y-4">
+            <h2 className="text-2xl font-semibold">My Reviews</h2>
+            {reviews.map((review) => (
+              <Card key={review._id}>
+                <CardContent className="p-6 flex gap-4">
+                  <Avatar>
+                    <AvatarImage 
+                      src={review.guide?.profileImage || "/placeholder.svg"} 
+                      alt={`${review.guide?.firstName || ""} ${review.guide?.lastName || ""}`} 
+                    />
+                    <AvatarFallback>
+                      {(review.guide?.firstName?.[0] || "") + (review.guide?.lastName?.[0] || "")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="flex justify-between mb-2">
+                      <h3 className="font-semibold">
+                        {review.guide?.firstName} {review.guide?.lastName}
+                      </h3>
+                      <span className="text-sm text-gray-600">
+                        {new Date(review.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    <div className="flex gap-1 mb-2">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-4 w-4 ${i < review.rating ? "text-yellow-400" : "text-gray-300"}`}
+                        />
+                      ))}
+                    </div>
+                    <p>{review.comment}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </TabsContent>
 
-          {/* Profile Tab */}
-          <TabsContent value="profile">
-            <div className="grid gap-6">
+            {/* Profile Tab */}
+            <TabsContent value="profile" className="space-y-6">
               <h2 className="text-2xl font-semibold">Profile Settings</h2>
               <Card>
                 <CardHeader>
                   <CardTitle>Personal Information</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-
                   <div className="flex items-center mb-4 gap-4">
                     <Avatar className="w-24 h-24">
                       <AvatarImage src={photoPreview || user.profileImage || "/placeholder.svg"} />
@@ -401,10 +924,9 @@ export default function TouristDashboard() {
                       accept="image/*"
                       className="block"
                       onChange={handlePhotoChange}
-                      disabled={!isEditing} // Only editable when editing
+                      disabled={!isEditing}
                     />
                   </div>
-
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -450,33 +972,40 @@ export default function TouristDashboard() {
                       value={formData.country}
                       onChange={(e) => setFormData({ ...formData, country: e.target.value })} 
                       disabled={!isEditing}
-                     />
+                    />
                   </div>
                 </CardContent>
               </Card>
               <div className="mt-2">
-              <Button
-                size="sm"
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-                onClick={handleEditToggle}
-              >
-                {isEditing ? "Save Changes" : "Update Profile"}
-              </Button>
+                <Button
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={handleEditToggle}
+                >
+                  {isEditing ? "Save Changes" : "Update Profile"}
+                </Button>
 
-              <Button
-                size="sm"
-                className="bg-red-600 hover:bg-red-700 text-white m-1"
-                onClick={handleLogout}
-                disabled={loggingOut} // Disable while logout in progress
-              >
-                {loggingOut ? "Logging out..." : "Log Out"}
-              </Button>
-
+                <Button
+                  size="sm"
+                  className="bg-red-600 hover:bg-red-700 text-white m-1"
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                >
+                  {loggingOut ? "Logging out..." : "Log Out"}
+                </Button>
               </div>
-            </div>
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+          </Tabs>
       </div>
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        booking={paymentBooking}
+        paymentType={paymentType}
+        onSuccess={handlePaymentSuccess}
+        touristId={user?._id || user?.id}
+      />
     </div>
     </AuthWrapper>
   )
