@@ -1,27 +1,40 @@
-// src/models/Review.js
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
-const reviewSchema = new mongoose.Schema({
-  guideId: { 
+const ReviewSchema = new mongoose.Schema({
+  booking: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "Booking", 
+    required: true,
+    unique: true 
+  },
+  guide: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: "User", 
     required: true 
   },
-  touristId: { 
+  tourist: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: "User", 
     required: true 
   },
-  rating: { type: Number, 
-    required: true 
+  rating: { 
+    type: Number, 
+    required: true,
+    min: 1,
+    max: 5
   },
-  review: { 
-    type: String 
+  comment: { 
+    type: String, 
+    default: "" 
   },
   createdAt: { 
     type: Date, 
     default: Date.now 
   }
+}, { 
+  toJSON: { virtuals: true }, 
+  toObject: { virtuals: true } 
 });
 
-export default mongoose.models.Review || mongoose.model("Review", reviewSchema);
+
+module.exports = mongoose.models.Review || mongoose.model("Review", ReviewSchema);
