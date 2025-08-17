@@ -1,7 +1,8 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Sun, Moon, LayoutDashboard, BarChart, LineChart, Users, User, LogOut, Search, UserCheck, UserX, Shield, ShieldOff } from 'lucide-react';
+import { Sun, Moon, LayoutDashboard, BarChart, LineChart, Users, User, LogOut, Search, UserCheck, UserX, Shield, ShieldOff, HelpCircle } from 'lucide-react';
 
 export default function AdminDashboard() {
   // State variables for theme, navigation, logout status, tab selection, and search
@@ -10,6 +11,22 @@ export default function AdminDashboard() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [userTab, setUserTab] = useState('tourists');
   const [searchTerm, setSearchTerm] = useState('');
+
+  const [stats, setStats] = useState({
+    totalUsers: 1250,
+    activeGuides: 45,
+    totalBookings: 892,
+    thisMonthRevenue: 25640,
+    loading: false,
+    error: ''
+  });
+
+  const [activity, setActivity] = useState([
+    { date: '2024-03-15T10:30:00Z', message: 'New guide registration: Jane Smith' },
+    { date: '2024-03-15T09:15:00Z', message: 'Payment processed: $450 for booking BK-001' },
+    { date: '2024-03-14T16:45:00Z', message: 'Dispute resolved: DSP-2024-003' },
+    { date: '2024-03-14T14:20:00Z', message: 'New tourist registration: Mike Chen' }
+  ]);
 
   // Dummy data for tourists
   const [tourists, setTourists] = useState([
@@ -27,6 +44,164 @@ export default function AdminDashboard() {
     { id: 3, name: 'Lisa Wong', email: 'lisa@example.com', status: 'inactive', isBlocked: true, joinDate: '2024-02-15', rating: 4.2, totalBookings: 18 },
     { id: 4, name: 'Robert Taylor', email: 'robert@example.com', status: 'active', isBlocked: false, joinDate: '2024-03-01', rating: 4.9, totalBookings: 67 },
     { id: 5, name: 'Maria Garcia', email: 'maria@example.com', status: 'inactive', isBlocked: false, joinDate: '2024-02-28', rating: 4.4, totalBookings: 23 },
+  ]);
+
+  // Dummy transaction data
+  const [transactions, setTransactions] = useState([
+    {
+      id: 1,
+      transactionId: 'TXN-2024-001',
+      tourist: { name: 'John Doe', email: 'john@example.com', id: 1 },
+      guide: { name: 'Jane Smith', email: 'jane@example.com', id: 1 },
+      booking: { id: 'BK-001', date: '2024-03-15', destinations: ['Kandy', 'Sigiriya'] },
+      amount: 450.00,
+      commission: 45.00,
+      netToGuide: 405.00,
+      paymentMethod: 'card',
+      status: 'completed',
+      date: '2024-03-15T10:30:00Z',
+      currency: 'USD'
+    },
+    {
+      id: 2,
+      transactionId: 'TXN-2024-002',
+      tourist: { name: 'Sarah Johnson', email: 'sarah@example.com', id: 2 },
+      guide: { name: 'Alex Rodriguez', email: 'alex@example.com', id: 2 },
+      booking: { id: 'BK-002', date: '2024-03-20', destinations: ['Galle', 'Unawatuna'] },
+      amount: 300.00,
+      commission: 30.00,
+      netToGuide: 270.00,
+      paymentMethod: 'bank',
+      status: 'pending',
+      date: '2024-03-20T14:15:00Z',
+      currency: 'USD'
+    },
+    {
+      id: 3,
+      transactionId: 'TXN-2024-003',
+      tourist: { name: 'Mike Chen', email: 'mike@example.com', id: 3 },
+      guide: { name: 'Lisa Wong', email: 'lisa@example.com', id: 3 },
+      booking: { id: 'BK-003', date: '2024-03-18', destinations: ['Ella', 'Nuwara Eliya'] },
+      amount: 520.00,
+      commission: 52.00,
+      netToGuide: 468.00,
+      paymentMethod: 'paypal',
+      status: 'failed',
+      date: '2024-03-18T09:45:00Z',
+      currency: 'USD'
+    },
+    {
+      id: 4,
+      transactionId: 'TXN-2024-004',
+      tourist: { name: 'Emma Wilson', email: 'emma@example.com', id: 4 },
+      guide: { name: 'Robert Taylor', email: 'robert@example.com', id: 4 },
+      booking: { id: 'BK-004', date: '2024-03-25', destinations: ['Anuradhapura', 'Polonnaruwa'] },
+      amount: 380.00,
+      commission: 38.00,
+      netToGuide: 342.00,
+      paymentMethod: 'card',
+      status: 'completed',
+      date: '2024-03-25T16:20:00Z',
+      currency: 'USD'
+    },
+    {
+      id: 5,
+      transactionId: 'TXN-2024-005',
+      tourist: { name: 'David Brown', email: 'david@example.com', id: 5 },
+      guide: { name: 'Maria Garcia', email: 'maria@example.com', id: 5 },
+      booking: { id: 'BK-005', date: '2024-03-22', destinations: ['Colombo', 'Negombo'] },
+      amount: 250.00,
+      commission: 25.00,
+      netToGuide: 225.00,
+      paymentMethod: 'bank',
+      status: 'completed',
+      date: '2024-03-22T11:30:00Z',
+      currency: 'USD'
+    }
+  ]);
+
+  // Dummy disputes data
+  const [disputes, setDisputes] = useState([
+    {
+      id: 1,
+      disputeId: 'DSP-2024-001',
+      guide: { name: 'Jane Smith', email: 'jane@example.com', id: 1, rating: 4.8 },
+      tourist: { name: 'John Doe', email: 'john@example.com', id: 1 },
+      booking: { id: 'BK-001', date: '2024-03-15', amount: 450 },
+      type: 'Payment Issue',
+      title: 'Payment not received for completed booking',
+      description: 'I completed the 3-day tour to Kandy and Sigiriya on March 15th, but I have not received the payment yet. The tourist confirmed the tour was completed successfully.',
+      status: 'open',
+      priority: 'high',
+      createdAt: '2024-03-18T10:30:00Z',
+      lastUpdated: '2024-03-18T10:30:00Z',
+      adminNotes: '',
+      attachments: ['receipt-001.pdf', 'tour-completion-photo.jpg']
+    },
+    {
+      id: 2,
+      disputeId: 'DSP-2024-002',
+      guide: { name: 'Alex Rodriguez', email: 'alex@example.com', id: 2, rating: 4.6 },
+      tourist: { name: 'Sarah Johnson', email: 'sarah@example.com', id: 2 },
+      booking: { id: 'BK-002', date: '2024-03-20', amount: 300 },
+      type: 'Tourist Behavior',
+      title: 'Tourist was disrespectful and demanding',
+      description: 'The tourist was extremely rude throughout the tour, made unreasonable demands, and left a false negative review. This has affected my rating unfairly.',
+      status: 'in-review',
+      priority: 'medium',
+      createdAt: '2024-03-21T14:15:00Z',
+      lastUpdated: '2024-03-22T09:30:00Z',
+      adminNotes: 'Reviewing chat logs and tourist feedback. Will investigate further.',
+      attachments: ['chat-screenshots.pdf']
+    },
+    {
+      id: 3,
+      disputeId: 'DSP-2024-003',
+      guide: { name: 'Lisa Wong', email: 'lisa@example.com', id: 3, rating: 4.2 },
+      tourist: { name: 'Mike Chen', email: 'mike@example.com', id: 3 },
+      booking: { id: 'BK-003', date: '2024-03-18', amount: 520 },
+      type: 'Booking Cancellation',
+      title: 'Tourist cancelled last minute without valid reason',
+      description: 'Tourist cancelled the booking 2 hours before the tour start time without any valid reason. According to the cancellation policy, I should receive partial payment.',
+      status: 'resolved',
+      priority: 'low',
+      createdAt: '2024-03-18T07:45:00Z',
+      lastUpdated: '2024-03-19T16:20:00Z',
+      adminNotes: 'Resolved - Partial payment (50%) released to guide as per cancellation policy.',
+      attachments: ['cancellation-policy.pdf']
+    },
+    {
+      id: 4,
+      disputeId: 'DSP-2024-004',
+      guide: { name: 'Robert Taylor', email: 'robert@example.com', id: 4, rating: 4.9 },
+      tourist: { name: 'Emma Wilson', email: 'emma@example.com', id: 4 },
+      booking: { id: 'BK-004', date: '2024-03-25', amount: 380 },
+      type: 'Platform Issue',
+      title: 'Commission rate calculated incorrectly',
+      description: 'The platform charged 15% commission instead of the agreed 10% rate for guides with rating above 4.5. This has happened multiple times.',
+      status: 'open',
+      priority: 'high',
+      createdAt: '2024-03-26T11:20:00Z',
+      lastUpdated: '2024-03-26T11:20:00Z',
+      adminNotes: '',
+      attachments: ['commission-calculation.xlsx']
+    },
+    {
+      id: 5,
+      disputeId: 'DSP-2024-005',
+      guide: { name: 'Maria Garcia', email: 'maria@example.com', id: 5, rating: 4.4 },
+      tourist: { name: 'David Brown', email: 'david@example.com', id: 5 },
+      booking: { id: 'BK-005', date: '2024-03-22', amount: 250 },
+      type: 'Other',
+      title: 'Inappropriate review content',
+      description: 'Tourist left a review with inappropriate personal comments that are not related to the tour service. The review should be removed.',
+      status: 'in-review',
+      priority: 'low',
+      createdAt: '2024-03-23T13:45:00Z',
+      lastUpdated: '2024-03-24T10:15:00Z',
+      adminNotes: 'Content moderation team reviewing the review for policy violations.',
+      attachments: []
+    }
   ]);
 
   // Load saved theme from localStorage on first render
@@ -56,7 +231,6 @@ export default function AdminDashboard() {
     });
   };
 
-
   // Handles logout with simulated delay
   const handleLogout = async () => {
     if (loggingOut) return;
@@ -69,7 +243,8 @@ export default function AdminDashboard() {
       alert('Logged out successfully');
     }, 1000);
   };
-// Handles logout with simulated delay
+
+  // Handles user actions (block, unblock, activate, deactivate)
   const handleUserAction = (userId, action, userType) => {
     const updateUsers = userType === 'tourist' ? setTourists : setGuides;
     const users = userType === 'tourist' ? tourists : guides;
@@ -93,8 +268,7 @@ export default function AdminDashboard() {
     }));
   };
 
-    // Search filter for tourists and guides
-
+  // Search filter for tourists and guides
   const filteredTourists = tourists.filter(tourist =>
     tourist.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     tourist.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -105,7 +279,6 @@ export default function AdminDashboard() {
     guide.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // User table UI generator for tourists/guides
   const renderUserTable = (users, userType) => (
     <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
       <div className={`grid gap-4 font-semibold text-gray-700 dark:text-gray-300 mb-3 ${
@@ -192,8 +365,6 @@ export default function AdminDashboard() {
     </div>
   );
 
-    // Dynamically render content for selected section
-
   const renderContent = () => {
     switch (activeSection) {
       case 'overview':
@@ -206,32 +377,397 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
               <div className="bg-indigo-100 dark:bg-indigo-900 p-4 rounded-lg shadow-sm">
                 <p className="text-sm text-indigo-700 dark:text-indigo-300">Total Users</p>
-                <p className="text-3xl font-bold text-indigo-800 dark:text-indigo-100">1,245</p>
+                <p className="text-3xl font-bold text-indigo-800 dark:text-indigo-100">
+                  {stats.loading ? '...' : stats.totalUsers}
+                </p>
               </div>
               <div className="bg-green-100 dark:bg-green-900 p-4 rounded-lg shadow-sm">
                 <p className="text-sm text-green-700 dark:text-green-300">Active Guides</p>
-                <p className="text-3xl font-bold text-green-800 dark:text-green-100">87</p>
+                <p className="text-3xl font-bold text-green-800 dark:text-green-100">
+                  {stats.loading ? '...' : stats.activeGuides}
+                </p>
               </div>
               <div className="bg-yellow-100 dark:bg-yellow-900 p-4 rounded-lg shadow-sm">
                 <p className="text-sm text-yellow-700 dark:text-yellow-300">Total Bookings</p>
-                <p className="text-3xl font-bold text-yellow-800 dark:text-yellow-100">456</p>
+                <p className="text-3xl font-bold text-yellow-800 dark:text-yellow-100">
+                  {stats.loading ? '...' : stats.totalBookings}
+                </p>
               </div>
               <div className="bg-red-100 dark:bg-red-900 p-4 rounded-lg shadow-sm">
                 <p className="text-sm text-red-700 dark:text-red-300">Revenue (This Month)</p>
-                <p className="text-3xl font-bold text-red-800 dark:text-red-100">LKR 2.5M</p>
+                <p className="text-3xl font-bold text-red-800 dark:text-red-100">
+                  {stats.loading ? '...' : `$ ${stats.thisMonthRevenue.toLocaleString()}`}
+                </p>
               </div>
             </div>
             <div className="mt-8">
               <h4 className="text-xl font-semibold mb-3 text-gray-800 dark:text-gray-100">Recent System Activity</h4>
               <ul className="space-y-2 text-gray-700 dark:text-gray-300">
-                <li>- New guide registered: John Smith</li>
-                <li>- Payment processed for booking #12345</li>
-                <li>- User reported issue resolved</li>
-                <li>- System backup completed successfully</li>
+                {activity.length === 0 && <li>No recent activity.</li>}
+                {activity.map((item, idx) => (
+                  <li key={idx}>
+                    {item.date && <span className="text-xs text-gray-400 mr-2">{new Date(item.date).toLocaleString()} -</span>}
+                    {item.message}
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
         );
+
+        case 'transactions':
+          return (
+            <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+              <h3 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Transaction History</h3>
+              <p className="text-gray-700 dark:text-gray-300 mb-6">
+                Monitor all financial transactions between tourists and guides on the platform.
+              </p>
+        
+              {/* Transaction Statistics */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div className="bg-blue-100 dark:bg-blue-900 p-4 rounded-lg shadow-sm">
+                  <p className="text-sm text-blue-700 dark:text-blue-300">Total Transactions</p>
+                  <p className="text-3xl font-bold text-blue-800 dark:text-blue-100">{transactions.length}</p>
+                </div>
+                <div className="bg-green-100 dark:bg-green-900 p-4 rounded-lg shadow-sm">
+                  <p className="text-sm text-green-700 dark:text-green-300">Total Volume</p>
+                  <p className="text-3xl font-bold text-green-800 dark:text-green-100">
+                    ${transactions.reduce((sum, t) => sum + t.amount, 0).toLocaleString()}
+                  </p>
+                </div>
+                <div className="bg-purple-100 dark:bg-purple-900 p-4 rounded-lg shadow-sm">
+                  <p className="text-sm text-purple-700 dark:text-purple-300">Platform Revenue</p>
+                  <p className="text-3xl font-bold text-purple-800 dark:text-purple-100">
+                    ${transactions.reduce((sum, t) => sum + t.commission, 0).toLocaleString()}
+                  </p>
+                </div>
+                <div className="bg-orange-100 dark:bg-orange-900 p-4 rounded-lg shadow-sm">
+                  <p className="text-sm text-orange-700 dark:text-orange-300">Success Rate</p>
+                  <p className="text-3xl font-bold text-orange-800 dark:text-orange-100">
+                    {Math.round((transactions.filter(t => t.status === 'completed').length / transactions.length) * 100)}%
+                  </p>
+                </div>
+              </div>
+        
+              {/* Filter and Search */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <div className="flex gap-4">
+                  <select className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                    <option value="">All Status</option>
+                    <option value="completed">Completed</option>
+                    <option value="pending">Pending</option>
+                    <option value="failed">Failed</option>
+                  </select>
+                  <select className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                    <option value="">All Methods</option>
+                    <option value="card">Card</option>
+                    <option value="bank">Bank</option>
+                    <option value="paypal">PayPal</option>
+                  </select>
+                </div>
+                <button className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
+                  Export Data
+                </button>
+              </div>
+        
+              {/* Transactions Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full table-auto">
+                  <thead>
+                    <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Transaction</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tourist</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Guide</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Amount</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Commission</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {transactions.map((transaction) => (
+                      <tr key={transaction.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {transaction.transactionId}
+                          </div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            {transaction.paymentMethod.toUpperCase()}
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {transaction.tourist.name}
+                          </div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            {transaction.tourist.email}
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {transaction.guide.name}
+                          </div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            {transaction.guide.email}
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <div className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                            ${transaction.amount}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            Net: ${transaction.netToGuide}
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-red-600 dark:text-red-400">
+                            ${transaction.commission}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            {((transaction.commission / transaction.amount) * 100).toFixed(1)}%
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            transaction.status === 'completed' 
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                              : transaction.status === 'pending'
+                              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                              : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                          }`}>
+                            {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                          {new Date(transaction.date).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                          <button className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 mr-3">
+                            View Details
+                          </button>
+                          <button className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300">
+                            Export
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          );
+
+          case 'disputes':
+            return (
+              <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                <h3 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Support & Disputes</h3>
+                <p className="text-gray-700 dark:text-gray-300 mb-6">
+                  Manage guide disputes and support requests from the platform.
+                </p>
+          
+                {/* Dispute Statistics */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                  <div className="bg-red-100 dark:bg-red-900 p-4 rounded-lg shadow-sm">
+                    <p className="text-sm text-red-700 dark:text-red-300">Open Disputes</p>
+                    <p className="text-3xl font-bold text-red-800 dark:text-red-100">
+                      {disputes.filter(d => d.status === 'open').length}
+                    </p>
+                  </div>
+                  <div className="bg-yellow-100 dark:bg-yellow-900 p-4 rounded-lg shadow-sm">
+                    <p className="text-sm text-yellow-700 dark:text-yellow-300">In Review</p>
+                    <p className="text-3xl font-bold text-yellow-800 dark:text-yellow-100">
+                      {disputes.filter(d => d.status === 'in-review').length}
+                    </p>
+                  </div>
+                  <div className="bg-green-100 dark:bg-green-900 p-4 rounded-lg shadow-sm">
+                    <p className="text-sm text-green-700 dark:text-green-300">Resolved</p>
+                    <p className="text-3xl font-bold text-green-800 dark:text-green-100">
+                      {disputes.filter(d => d.status === 'resolved').length}
+                    </p>
+                  </div>
+                  <div className="bg-purple-100 dark:bg-purple-900 p-4 rounded-lg shadow-sm">
+                    <p className="text-sm text-purple-700 dark:text-purple-300">Avg. Resolution Time</p>
+                    <p className="text-3xl font-bold text-purple-800 dark:text-purple-100">2.4d</p>
+                  </div>
+                </div>
+          
+                {/* Filter Tabs */}
+                <div className="mb-6">
+                  <div className="border-b border-gray-200 dark:border-gray-600">
+                    <nav className="-mb-px flex space-x-8">
+                      {['all', 'open', 'in-review', 'resolved'].map((status) => (
+                        <button
+                          key={status}
+                          className={`py-2 px-1 border-b-2 font-medium text-sm capitalize ${
+                            'all' === status
+                              ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                          }`}
+                        >
+                          {status} ({status === 'all' ? disputes.length : disputes.filter(d => d.status === status).length})
+                        </button>
+                      ))}
+                    </nav>
+                  </div>
+                </div>
+          
+                {/* Disputes List */}
+                <div className="space-y-6">
+                  {disputes.map((dispute) => (
+                    <div key={dispute.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 shadow-sm">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                              {dispute.title}
+                            </h4>
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              dispute.status === 'resolved' 
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                : dispute.status === 'in-review'
+                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                                : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                            }`}>
+                              {dispute.status.replace('-', ' ').toUpperCase()}
+                            </span>
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              dispute.priority === 'high' 
+                                ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                                : dispute.priority === 'medium'
+                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                                : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
+                            }`}>
+                              {dispute.priority.toUpperCase()} PRIORITY
+                            </span>
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                            <strong>Dispute ID:</strong> {dispute.disputeId} | <strong>Type:</strong> {dispute.type}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                            <strong>Created:</strong> {new Date(dispute.createdAt).toLocaleDateString()} | 
+                            <strong> Last Updated:</strong> {new Date(dispute.lastUpdated).toLocaleDateString()}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            Booking: {dispute.booking.id}
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            ${dispute.booking.amount}
+                          </div>
+                        </div>
+                      </div>
+          
+                      {/* Guide and Tourist Info */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                          <h5 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Guide Information</h5>
+                          <div className="text-sm">
+                            <p><strong>Name:</strong> {dispute.guide.name}</p>
+                            <p><strong>Email:</strong> {dispute.guide.email}</p>
+                            <p><strong>Rating:</strong> ⭐ {dispute.guide.rating}</p>
+                          </div>
+                        </div>
+                        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg">
+                          <h5 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Tourist Information</h5>
+                          <div className="text-sm">
+                            <p><strong>Name:</strong> {dispute.tourist.name}</p>
+                            <p><strong>Email:</strong> {dispute.tourist.email}</p>
+                            <p><strong>Booking Date:</strong> {new Date(dispute.booking.date).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                      </div>
+          
+                      {/* Description */}
+                      <div className="mb-4">
+                        <h5 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Description</h5>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 p-3 rounded">
+                          {dispute.description}
+                        </p>
+                      </div>
+          
+                      {/* Admin Notes */}
+                      {dispute.adminNotes && (
+                        <div className="mb-4">
+                          <h5 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Admin Notes</h5>
+                          <p className="text-sm text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900 p-3 rounded">
+                            {dispute.adminNotes}
+                          </p>
+                        </div>
+                      )}
+          
+                      {/* Attachments */}
+                      {dispute.attachments.length > 0 && (
+                        <div className="mb-4">
+                          <h5 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Attachments</h5>
+                          <div className="flex flex-wrap gap-2">
+                            {dispute.attachments.map((attachment, index) => (
+                              <span key={index} className="inline-flex items-center px-3 py-1 text-xs bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-full">
+                                📎 {attachment}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+          
+                      {/* Action Buttons */}
+                      <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-600">
+                        <div className="flex gap-3">
+                          {dispute.status === 'open' && (
+                            <>
+                              <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm">
+                                Assign to Review
+                              </button>
+                              <button className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm">
+                                Reject Dispute
+                              </button>
+                            </>
+                          )}
+                          {dispute.status === 'in-review' && (
+                            <>
+                              <button className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm">
+                                Resolve Dispute
+                              </button>
+                              <button className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors text-sm">
+                                Request More Info
+                              </button>
+                            </>
+                          )}
+                          {dispute.status === 'resolved' && (
+                            <button className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors text-sm">
+                              Reopen Dispute
+                            </button>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          <button className="px-3 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors text-sm">
+                            Contact Guide
+                          </button>
+                          <button className="px-3 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors text-sm">
+                            View Booking
+                          </button>
+                          <button className="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors text-sm">
+                            Add Note
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+          
+                {/* Empty State */}
+                {disputes.length === 0 && (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">🛡️</div>
+                    <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">No Disputes Found</h3>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      All disputes have been resolved or no disputes have been submitted yet.
+                    </p>
+                  </div>
+                )}
+              </div>
+            );    
 
       case 'users':
         return (
@@ -240,6 +776,9 @@ export default function AdminDashboard() {
             <p className="text-gray-700 dark:text-gray-300 mb-6">
               Manage all platform users including tourists and guides. You can block, unblock, activate, and deactivate users.
             </p>
+
+            {activeTab === "transactions" && "Transaction History"}
+            {activeTab === "disputes" && "Support & Disputes"}
 
             {/* Search and Add User Section */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -495,6 +1034,18 @@ export default function AdminDashboard() {
             <LayoutDashboard className="mr-3 h-5 w-5" />
             Overview
           </button>
+
+          <button
+            onClick={() => setActiveSection('transactions')}
+            className={`w-full flex items-center px-6 py-3 text-left transition-colors ${
+              activeSection === 'transactions'
+                ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 border-r-4 border-indigo-500'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            <BarChart className="mr-3 h-5 w-5" />
+            Transaction History
+          </button>
           
           <button
             onClick={() => setActiveSection('users')}
@@ -517,6 +1068,18 @@ export default function AdminDashboard() {
           >
             <LineChart className="mr-3 h-5 w-5" />
             Analytics
+          </button>
+
+          <button
+            onClick={() => setActiveSection('disputes')}
+            className={`w-full flex items-center px-6 py-3 text-left transition-colors ${
+              activeSection === 'disputes'
+                ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 border-r-4 border-indigo-500'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            <HelpCircle className="mr-3 h-5 w-5" />
+            Support & Disputes
           </button>
           
           <button
