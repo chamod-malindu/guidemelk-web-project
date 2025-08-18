@@ -13,20 +13,65 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const [stats, setStats] = useState({
-    totalUsers: 1250,
-    activeGuides: 45,
-    totalBookings: 892,
-    thisMonthRevenue: 25640,
-    loading: false,
+    totalUsers: 0,
+    activeGuides: 0,
+    totalBookings: 0,
+    thisMonthRevenue: 0,
+    loading: true,
     error: ''
   });
 
-  const [activity, setActivity] = useState([
-    { date: '2024-03-15T10:30:00Z', message: 'New guide registration: Jane Smith' },
-    { date: '2024-03-15T09:15:00Z', message: 'Payment processed: $450 for booking BK-001' },
-    { date: '2024-03-14T16:45:00Z', message: 'Dispute resolved: DSP-2024-003' },
-    { date: '2024-03-14T14:20:00Z', message: 'New tourist registration: Mike Chen' }
-  ]);
+  const [activity, setActivity] = useState([]); // Recent activity log, loaded on mount
+
+  // Fetch dashboard stats from backend API on initial render
+  useEffect(() => {
+    async function fetchStats() {
+      setStats(s => ({ ...s, loading: true, error: '' }));
+      try {
+        const [
+          userRes,
+          guideRes,
+          bookingsRes,
+          revenueRes
+        ] = await Promise.all([
+          fetch('/api/user/count'),                              // Total users
+          fetch('/api/user/count?role=guide&active=true'),       // Active guides
+          fetch('/api/bookings/count'),                          // Total bookings
+          fetch('/api/payments/sum?status=completed&period=thisMonth') // Revenue
+        ]);
+        setStats({
+          totalUsers: (await userRes.json()).total || 0,
+          activeGuides: (await guideRes.json()).total || 0,
+          totalBookings: (await bookingsRes.json()).total || 0,
+          thisMonthRevenue: (await revenueRes.json()).amount || 0,
+          loading: false,
+          error: ''
+        });
+      } catch (err) {
+        setStats(s => ({ ...s, loading: false, error: 'Failed to load dashboard stats.' }));
+      }
+    }
+    fetchStats();
+  }, []);
+
+  // Fetch recent system activity log from backend API on initial render
+  useEffect(() => {
+    async function fetchActivity() {
+      try {
+        const res = await fetch('/api/admin/activity');
+        if (res.ok) {
+          setActivity(await res.json());
+        } else {
+          setActivity([{ message: "Unable to load recent system activity." }]);
+        }
+      } catch {
+        setActivity([{ message: "Unable to load recent system activity." }]);
+      }
+    }
+    fetchActivity();
+  }, []);
+
+  
 
   // Dummy data for tourists
   const [tourists, setTourists] = useState([
