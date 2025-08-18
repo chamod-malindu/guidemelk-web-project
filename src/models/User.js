@@ -56,6 +56,11 @@ const userSchema = new mongoose.Schema({
   specialties: [String],
   pricePerDay: Number,
   bio: String,
+  status: { 
+    type: String, 
+    enum: ['active', 'inactive'], 
+    default: 'active' 
+  },  
   country: String,
   isBlocked : {
     type: Boolean,

@@ -27,6 +27,12 @@ export default function AdminDashboard() {
   const [loadingTransactions, setLoadingTransactions] = useState(true); 
   const [transactionError, setTransactionError] = useState('');
 
+  const [tourists, setTourists] = useState([]);
+  const [guides, setGuides] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [usersError, setUsersError] = useState('');
+
+
 
   // Fetch dashboard stats from backend API on initial render
   useEffect(() => {
@@ -99,28 +105,26 @@ export default function AdminDashboard() {
       fetchTransactions();
     }
   }, [activeSection]);
+
+  useEffect(() => {
+    if (activeSection === 'users') {
+      setLoadingUsers(true);
+      setUsersError('');
+      Promise.all([
+        fetch('/api/user?role=tourist').then(r => r.json()),
+        fetch('/api/user?role=guide').then(r => r.json()),
+      ])
+        .then(([touristData, guideData]) => {
+          if (touristData.success) setTourists(touristData.users);
+          else setUsersError('Failed to load tourists');
+          if (guideData.success) setGuides(guideData.users);
+          else setUsersError('Failed to load guides');
+        })
+        .catch(() => setUsersError('Failed to fetch users'))
+        .finally(() => setLoadingUsers(false));
+    }
+  }, [activeSection]);
   
-
-  
-
-  // Dummy data for tourists
-  const [tourists, setTourists] = useState([
-    { id: 1, name: 'John Doe', email: 'john@example.com', status: 'active', isBlocked: false, joinDate: '2024-01-15' },
-    { id: 2, name: 'Sarah Johnson', email: 'sarah@example.com', status: 'active', isBlocked: false, joinDate: '2024-02-20' },
-    { id: 3, name: 'Mike Chen', email: 'mike@example.com', status: 'inactive', isBlocked: true, joinDate: '2024-01-30' },
-    { id: 4, name: 'Emma Wilson', email: 'emma@example.com', status: 'active', isBlocked: false, joinDate: '2024-03-05' },
-    { id: 5, name: 'David Brown', email: 'david@example.com', status: 'inactive', isBlocked: false, joinDate: '2024-02-10' },
-  ]);
-
-  // Dummy data for guides
-  const [guides, setGuides] = useState([
-    { id: 1, name: 'Jane Smith', email: 'jane@example.com', status: 'active', isBlocked: false, joinDate: '2024-01-10', rating: 4.8, totalBookings: 45 },
-    { id: 2, name: 'Alex Rodriguez', email: 'alex@example.com', status: 'active', isBlocked: false, joinDate: '2024-01-25', rating: 4.6, totalBookings: 32 },
-    { id: 3, name: 'Lisa Wong', email: 'lisa@example.com', status: 'inactive', isBlocked: true, joinDate: '2024-02-15', rating: 4.2, totalBookings: 18 },
-    { id: 4, name: 'Robert Taylor', email: 'robert@example.com', status: 'active', isBlocked: false, joinDate: '2024-03-01', rating: 4.9, totalBookings: 67 },
-    { id: 5, name: 'Maria Garcia', email: 'maria@example.com', status: 'inactive', isBlocked: false, joinDate: '2024-02-28', rating: 4.4, totalBookings: 23 },
-  ]);
-
   
   // Dummy disputes data
   const [disputes, setDisputes] = useState([
@@ -247,39 +251,53 @@ export default function AdminDashboard() {
   };
 
   // Handles user actions (block, unblock, activate, deactivate)
-  const handleUserAction = (userId, action, userType) => {
-    const updateUsers = userType === 'tourist' ? setTourists : setGuides;
-    const users = userType === 'tourist' ? tourists : guides;
-
-    updateUsers(users.map(user => {
-      if (user.id === userId) {
-        switch (action) {
-          case 'block':
-            return { ...user, isBlocked: true, status: 'inactive' };
-          case 'unblock':
-            return { ...user, isBlocked: false };
-          case 'activate':
-            return { ...user, status: 'active' };
-          case 'deactivate':
-            return { ...user, status: 'inactive' };
-          default:
-            return user;
-        }
+  const handleUserAction = async (userId, action, userType) => {
+    setLoadingUsers(true);
+    setUsersError('');
+    try {
+      const res = await fetch(`/api/user/${userId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
+      const data = await res.json();
+  
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Action failed');
       }
-      return user;
-    }));
+  
+      // Refresh user lists after action success
+      if (userType === 'tourist') {
+        const usersRes = await fetch('/api/user?role=tourist').then(r => r.json());
+        if (usersRes.success) setTourists(usersRes.users);
+      } else {
+        const usersRes = await fetch('/api/user?role=guide').then(r => r.json());
+        if (usersRes.success) setGuides(usersRes.users);
+      }
+    } catch (error) {
+      setUsersError(error.message);
+    } finally {
+      setLoadingUsers(false);
+    }
   };
+  
 
   // Search filter for tourists and guides
   const filteredTourists = tourists.filter(tourist =>
-    tourist.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tourist.email.toLowerCase().includes(searchTerm.toLowerCase())
+    (
+      ((tourist.firstName || '') + ' ' + (tourist.lastName || '')).toLowerCase().includes(searchTerm.toLowerCase())
+    ) ||
+    (tourist.email || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
 
   const filteredGuides = guides.filter(guide =>
-    guide.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    guide.email.toLowerCase().includes(searchTerm.toLowerCase())
+    (
+      ((guide.firstName || '') + ' ' + (guide.lastName || '')).toLowerCase().includes(searchTerm.toLowerCase())
+    ) ||
+    (guide.email || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
 
   const renderUserTable = (users, userType) => (
     <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
@@ -302,64 +320,66 @@ export default function AdminDashboard() {
               user.isBlocked ? 'bg-red-50 dark:bg-red-900/20' : 'bg-white dark:bg-gray-800'
             } ${userType === 'guide' ? 'grid-cols-7' : 'grid-cols-6'}`}
           >
-            <span className="font-medium">{user.name}</span>
-            <span className="text-sm">{user.email}</span>
+            <span className="font-medium">
+              {`${user.firstName || ''} ${user.lastName || ''}`.trim()}
+            </span>
+            <span className="text-sm">{user.email || ''}</span>
             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
               user.status === 'active' 
                 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
                 : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
-            }`}>
-              {user.status === 'active' ? 'Active' : 'Inactive'}
-            </span>
+            }`}>{user.status === 'active' ? 'Active' : 'Inactive'}</span>
             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
               user.isBlocked 
                 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' 
                 : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-            }`}>
-              {user.isBlocked ? 'Blocked' : 'Active'}
-            </span>
+            }`}>{user.isBlocked ? 'Blocked' : 'Active'}</span>
+
             {userType === 'guide' && (
               <span className="text-sm">
                 ⭐ {user.rating} ({user.totalBookings})
               </span>
             )}
-            <span className="text-sm">{user.joinDate}</span>
+            <span className="text-sm">
+              {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : ''}
+            </span>
             <div className="flex space-x-1">
-              {user.isBlocked ? (
-                <button
-                  onClick={() => handleUserAction(user.id, 'unblock', userType)}
-                  className="p-1 text-green-600 hover:text-green-800 hover:bg-green-100 dark:hover:bg-green-900 rounded transition-colors"
-                  title="Unblock User"
-                >
-                  <UserCheck className="h-4 w-4" />
-                </button>
-              ) : (
-                <button
-                  onClick={() => handleUserAction(user.id, 'block', userType)}
-                  className="p-1 text-red-600 hover:text-red-800 hover:bg-red-100 dark:hover:bg-red-900 rounded transition-colors"
-                  title="Block User"
-                >
-                  <UserX className="h-4 w-4" />
-                </button>
-              )}
-              
-              {user.status === 'active' ? (
-                <button
-                  onClick={() => handleUserAction(user.id, 'deactivate', userType)}
-                  className="p-1 text-orange-600 hover:text-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900 rounded transition-colors"
-                  title="Deactivate User"
-                >
-                  <ShieldOff className="h-4 w-4" />
-                </button>
-              ) : (
-                <button
-                  onClick={() => handleUserAction(user.id, 'activate', userType)}
-                  className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors"
-                  title="Activate User"
-                >
-                  <Shield className="h-4 w-4" />
-                </button>
-              )}
+            {user.isBlocked ? (
+              <button
+                onClick={() => handleUserAction(user._id, 'unblock', userType)}
+                className="p-1 text-green-600 hover:text-green-800 hover:bg-green-100 dark:hover:bg-green-900 rounded transition-colors"
+                title="Unblock User"
+              >
+                <UserCheck className="h-4 w-4" />
+              </button>
+            ) : (
+              <button
+                onClick={() => handleUserAction(user._id, 'block', userType)}
+                className="p-1 text-red-600 hover:text-red-800 hover:bg-red-100 dark:hover:bg-red-900 rounded transition-colors"
+                title="Block User"
+              >
+                <UserX className="h-4 w-4" />
+              </button>
+            )}
+
+            {user.status === 'active' ? (
+              <button
+                onClick={() => handleUserAction(user._id, 'deactivate', userType)}
+                className="p-1 text-orange-600 hover:text-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900 rounded transition-colors"
+                title="Deactivate User"
+              >
+                <ShieldOff className="h-4 w-4" />
+              </button>
+            ) : (
+              <button
+                onClick={() => handleUserAction(user._id, 'activate', userType)}
+                className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors"
+                title="Activate User"
+              >
+                <Shield className="h-4 w-4" />
+              </button>
+            )}
+
             </div>
           </div>
         ))}
