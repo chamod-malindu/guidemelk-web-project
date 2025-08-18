@@ -23,6 +23,11 @@ export default function AdminDashboard() {
 
   const [activity, setActivity] = useState([]); // Recent activity log, loaded on mount
 
+  const [transactions, setTransactions] = useState([]); // Start empty, fetched from API
+  const [loadingTransactions, setLoadingTransactions] = useState(true); 
+  const [transactionError, setTransactionError] = useState('');
+
+
   // Fetch dashboard stats from backend API on initial render
   useEffect(() => {
     async function fetchStats() {
@@ -71,6 +76,31 @@ export default function AdminDashboard() {
     fetchActivity();
   }, []);
 
+  useEffect(() => {
+    if (activeSection === 'transactions') {
+      async function fetchTransactions() {
+        setLoadingTransactions(true);
+        setTransactionError('');
+        try {
+          const res = await fetch('/api/payments');
+          if (!res.ok) throw new Error('Failed to fetch transactions');
+          const data = await res.json();
+          if (data.success) {
+            setTransactions(data.payments);
+          } else {
+            setTransactionError(data.error || 'Unknown error');
+          }
+        } catch (error) {
+          setTransactionError(error.message);
+        } finally {
+          setLoadingTransactions(false);
+        }
+      }
+      fetchTransactions();
+    }
+  }, [activeSection]);
+  
+
   
 
   // Dummy data for tourists
@@ -91,80 +121,7 @@ export default function AdminDashboard() {
     { id: 5, name: 'Maria Garcia', email: 'maria@example.com', status: 'inactive', isBlocked: false, joinDate: '2024-02-28', rating: 4.4, totalBookings: 23 },
   ]);
 
-  // Dummy transaction data
-  const [transactions, setTransactions] = useState([
-    {
-      id: 1,
-      transactionId: 'TXN-2024-001',
-      tourist: { name: 'John Doe', email: 'john@example.com', id: 1 },
-      guide: { name: 'Jane Smith', email: 'jane@example.com', id: 1 },
-      booking: { id: 'BK-001', date: '2024-03-15', destinations: ['Kandy', 'Sigiriya'] },
-      amount: 450.00,
-      commission: 45.00,
-      netToGuide: 405.00,
-      paymentMethod: 'card',
-      status: 'completed',
-      date: '2024-03-15T10:30:00Z',
-      currency: 'USD'
-    },
-    {
-      id: 2,
-      transactionId: 'TXN-2024-002',
-      tourist: { name: 'Sarah Johnson', email: 'sarah@example.com', id: 2 },
-      guide: { name: 'Alex Rodriguez', email: 'alex@example.com', id: 2 },
-      booking: { id: 'BK-002', date: '2024-03-20', destinations: ['Galle', 'Unawatuna'] },
-      amount: 300.00,
-      commission: 30.00,
-      netToGuide: 270.00,
-      paymentMethod: 'bank',
-      status: 'pending',
-      date: '2024-03-20T14:15:00Z',
-      currency: 'USD'
-    },
-    {
-      id: 3,
-      transactionId: 'TXN-2024-003',
-      tourist: { name: 'Mike Chen', email: 'mike@example.com', id: 3 },
-      guide: { name: 'Lisa Wong', email: 'lisa@example.com', id: 3 },
-      booking: { id: 'BK-003', date: '2024-03-18', destinations: ['Ella', 'Nuwara Eliya'] },
-      amount: 520.00,
-      commission: 52.00,
-      netToGuide: 468.00,
-      paymentMethod: 'paypal',
-      status: 'failed',
-      date: '2024-03-18T09:45:00Z',
-      currency: 'USD'
-    },
-    {
-      id: 4,
-      transactionId: 'TXN-2024-004',
-      tourist: { name: 'Emma Wilson', email: 'emma@example.com', id: 4 },
-      guide: { name: 'Robert Taylor', email: 'robert@example.com', id: 4 },
-      booking: { id: 'BK-004', date: '2024-03-25', destinations: ['Anuradhapura', 'Polonnaruwa'] },
-      amount: 380.00,
-      commission: 38.00,
-      netToGuide: 342.00,
-      paymentMethod: 'card',
-      status: 'completed',
-      date: '2024-03-25T16:20:00Z',
-      currency: 'USD'
-    },
-    {
-      id: 5,
-      transactionId: 'TXN-2024-005',
-      tourist: { name: 'David Brown', email: 'david@example.com', id: 5 },
-      guide: { name: 'Maria Garcia', email: 'maria@example.com', id: 5 },
-      booking: { id: 'BK-005', date: '2024-03-22', destinations: ['Colombo', 'Negombo'] },
-      amount: 250.00,
-      commission: 25.00,
-      netToGuide: 225.00,
-      paymentMethod: 'bank',
-      status: 'completed',
-      date: '2024-03-22T11:30:00Z',
-      currency: 'USD'
-    }
-  ]);
-
+  
   // Dummy disputes data
   const [disputes, setDisputes] = useState([
     {
@@ -463,142 +420,162 @@ export default function AdminDashboard() {
         case 'transactions':
           return (
             <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-              <h3 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Transaction History</h3>
+              <h3 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
+                Transaction History
+              </h3>
               <p className="text-gray-700 dark:text-gray-300 mb-6">
                 Monitor all financial transactions between tourists and guides on the platform.
               </p>
-        
-              {/* Transaction Statistics */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div className="bg-blue-100 dark:bg-blue-900 p-4 rounded-lg shadow-sm">
-                  <p className="text-sm text-blue-700 dark:text-blue-300">Total Transactions</p>
-                  <p className="text-3xl font-bold text-blue-800 dark:text-blue-100">{transactions.length}</p>
-                </div>
-                <div className="bg-green-100 dark:bg-green-900 p-4 rounded-lg shadow-sm">
-                  <p className="text-sm text-green-700 dark:text-green-300">Total Volume</p>
-                  <p className="text-3xl font-bold text-green-800 dark:text-green-100">
-                    ${transactions.reduce((sum, t) => sum + t.amount, 0).toLocaleString()}
-                  </p>
-                </div>
-                <div className="bg-purple-100 dark:bg-purple-900 p-4 rounded-lg shadow-sm">
-                  <p className="text-sm text-purple-700 dark:text-purple-300">Platform Revenue</p>
-                  <p className="text-3xl font-bold text-purple-800 dark:text-purple-100">
-                    ${transactions.reduce((sum, t) => sum + t.commission, 0).toLocaleString()}
-                  </p>
-                </div>
-                <div className="bg-orange-100 dark:bg-orange-900 p-4 rounded-lg shadow-sm">
-                  <p className="text-sm text-orange-700 dark:text-orange-300">Success Rate</p>
-                  <p className="text-3xl font-bold text-orange-800 dark:text-orange-100">
-                    {Math.round((transactions.filter(t => t.status === 'completed').length / transactions.length) * 100)}%
-                  </p>
-                </div>
-              </div>
-        
-              {/* Filter and Search */}
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                <div className="flex gap-4">
-                  <select className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
-                    <option value="">All Status</option>
-                    <option value="completed">Completed</option>
-                    <option value="pending">Pending</option>
-                    <option value="failed">Failed</option>
-                  </select>
-                  <select className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
-                    <option value="">All Methods</option>
-                    <option value="card">Card</option>
-                    <option value="bank">Bank</option>
-                    <option value="paypal">PayPal</option>
-                  </select>
-                </div>
-              </div>
-        
-              {/* Transactions Table */}
-              <div className="overflow-x-auto">
-                <table className="w-full table-auto">
-                  <thead>
-                    <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Transaction</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tourist</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Guide</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Amount</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Commission</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {transactions.map((transaction) => (
-                      <tr key={transaction.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <td className="px-4 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                            {transaction.transactionId}
-                          </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {transaction.paymentMethod.toUpperCase()}
-                          </div>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                            {transaction.tourist.name}
-                          </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {transaction.tourist.email}
-                          </div>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                            {transaction.guide.name}
-                          </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {transaction.guide.email}
-                          </div>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap">
-                          <div className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                            ${transaction.amount}
-                          </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
-                            Net: ${transaction.netToGuide}
-                          </div>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-red-600 dark:text-red-400">
-                            ${transaction.commission}
-                          </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
-                            {((transaction.commission / transaction.amount) * 100).toFixed(1)}%
-                          </div>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            transaction.status === 'completed' 
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                              : transaction.status === 'pending'
-                              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
-                              : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                          }`}>
-                            {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                          {new Date(transaction.date).toLocaleDateString()}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
-                          <button className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 mr-3">
-                            View Details
-                          </button>
-                          <button className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300">
-                            Export
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+
+              {loadingTransactions && (
+                <p>Loading transactions...</p>
+              )}
+
+              {transactionError && (
+                <p className="text-red-600 mb-4">
+                  Error loading transactions: {transactionError}
+                </p>
+              )}
+
+              {!loadingTransactions && !transactionError && transactions.length === 0 && (
+                <p>No transactions found.</p>
+              )}
+
+              {!loadingTransactions && !transactionError && transactions.length > 0 && (
+                <>
+                  {/* Transaction Statistics */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div className="bg-blue-100 dark:bg-blue-900 p-4 rounded-lg shadow-sm">
+                      <p className="text-sm text-blue-700 dark:text-blue-300">Total Transactions</p>
+                      <p className="text-3xl font-bold text-blue-800 dark:text-blue-100">
+                        {transactions.length}
+                      </p>
+                    </div>
+                    <div className="bg-green-100 dark:bg-green-900 p-4 rounded-lg shadow-sm">
+                      <p className="text-sm text-green-700 dark:text-green-300">Total Volume</p>
+                      <p className="text-3xl font-bold text-green-800 dark:text-green-100">
+                        ${transactions.reduce((sum, t) => sum + (t.amount || 0), 0).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="bg-purple-100 dark:bg-purple-900 p-4 rounded-lg shadow-sm">
+                      <p className="text-sm text-purple-700 dark:text-purple-300">Platform Revenue</p>
+                      <p className="text-3xl font-bold text-purple-800 dark:text-purple-100">
+                        ${transactions.reduce((sum, t) => sum + (t.commission || 0), 0).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="bg-orange-100 dark:bg-orange-900 p-4 rounded-lg shadow-sm">
+                      <p className="text-sm text-orange-700 dark:text-orange-300">Success Rate</p>
+                      <p className="text-3xl font-bold text-orange-800 dark:text-orange-100">
+                        {transactions.length > 0
+                          ? Math.round(
+                              (transactions.filter(t => t.status === 'completed').length / transactions.length) * 100
+                            )
+                          : 0}
+                        %
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Filter and Search */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <div className="flex gap-4">
+                      <select className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-black dark:text-white">
+                        <option value="">All Status</option>
+                        <option value="completed">Completed</option>
+                        <option value="pending">Pending</option>
+                        <option value="failed">Failed</option>
+                      </select>
+                      <select className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-black dark:text-white">
+                        <option value="">All Methods</option>
+                        <option value="card">Card</option>
+                        <option value="bank">Bank</option>
+                        <option value="paypal">PayPal</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Transactions Table */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full table-auto">
+                      <thead>
+                        <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Transaction ID</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tourist</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Guide</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Amount</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Commission</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        {transactions.map(transaction => (
+                          <tr key={transaction._id || transaction.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <td className="px-3 py-3 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                {(transaction.transactionId || transaction._id)?.substring(0, 10)}...
+                              </div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">
+                                {transaction.paymentMethod?.toUpperCase() || '-'}
+                              </div>
+                            </td>
+                            <td className="px-3 py-3 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                {transaction.tourist
+                                  ? `${transaction.tourist.firstName || ''} ${transaction.tourist.lastName || ''}`.trim() || transaction.tourist.email?.split('@')[0]
+                                  : '-'}
+                              </div>
+                            </td>
+                            <td className="px-3 py-3 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                {transaction.guide
+                                  ? `${transaction.guide.firstName || ''} ${transaction.guide.lastName || ''}`.trim() || transaction.guide.email?.split('@')[0]
+                                  : '-'}
+                              </div>
+                            </td>
+                            <td className="px-3 py-3 whitespace-nowrap">
+                              <div className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                                ${transaction.amount?.toFixed(2) || 0}
+                              </div>
+                            </td>
+                            <td className="px-3 py-3 whitespace-nowrap">
+                              <div className="text-sm font-medium text-red-600 dark:text-red-400">
+                                ${transaction.commission?.toFixed(2) || 0}
+                              </div>
+                            </td>
+                            <td className="px-3 py-3 whitespace-nowrap">
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                transaction.status === 'completed'
+                                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                  : transaction.status === 'pending'
+                                  ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                                  : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                              }`}>
+                                {transaction.status
+                                  ? transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)
+                                  : '-'}
+                              </span>
+                            </td>
+                            <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                              {transaction.date ? new Date(transaction.date).toLocaleDateString() : '-'}
+                            </td>
+                            <td className="px-3 py-3 whitespace-nowrap text-sm font-medium">
+                              <button className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
+                                View
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
             </div>
           );
+
+
 
           case 'disputes':
             return (

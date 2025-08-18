@@ -16,3 +16,18 @@ export async function POST(req) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+
+export async function GET() {
+  await dbConnect();
+  try {
+    const payments = await Payment.find()
+      .sort({ date: -1 })
+      .populate("tourist", "firstName lastName email") // Adjust fields as needed
+      .populate("guide", "firstName lastName email")
+      .lean();
+
+    return NextResponse.json({ success: true, payments }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
