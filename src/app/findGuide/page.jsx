@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Search, Filter, Star, MapPin, Languages, Users, Calendar, DollarSign, ImageIcon } from "lucide-react";
 import Image from "next/image";
+import TouristNavbar from '@/components/TouristNavbar';
 
 // Sri Lankan districts data (from your registration form)
 const sriLankanDistricts = [
@@ -176,6 +177,10 @@ export default function FindGuidePage() {
   const [travelDate, setTravelDate] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
+  const [user, setUser] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
   useEffect(() => {
     async function fetchGuides() {
       try {
@@ -227,6 +232,22 @@ export default function FindGuidePage() {
     
     fetchGuides();
   }, []);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch('/api/auth/profile', { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data.user);
+        }
+      } catch (err) {
+        console.log('User not logged in');
+      }
+    };
+    fetchUser();
+  }, []);
+  
 
   // Filter function
   const filteredGuides = guides.filter((guide) => {
@@ -304,7 +325,15 @@ export default function FindGuidePage() {
     );
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-8">
+    <div className="min-h-screen bg-gray-50">
+      <TouristNavbar 
+        user={user}
+        notifications={notifications}
+        setNotifications={setNotifications}
+        unreadCount={unreadCount}
+        setUnreadCount={setUnreadCount}
+      />  
+    <div className="pt-8"> {/* Add pt-8 to account for navbar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -546,5 +575,6 @@ export default function FindGuidePage() {
         )}
       </div>
     </div>
+  </div>  
   );
 }
