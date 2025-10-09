@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth'; // NextAuth
-import { verifyToken } from '@/lib/auth'; // Your existing custom auth
 
 const PUBLIC_PATHS = [
   '/', 
@@ -8,81 +7,72 @@ const PUBLIC_PATHS = [
   '/register',
   '/verify-email',
   '/verify-reminder',
-  '/auth/after-google', // Add this line
+  '/auth/after-google',
   '/api/auth/login',
   '/api/auth/register',
   '/api/auth/verify',
-  '/api/auth/resend-verification'
+  '/api/auth/resend-verification',
+  '/forgot-password',
+  '/reset-password',
+  '/api/auth/logout'
+];
+
+const PROTECTED_PATHS = [
+  '/tourist',
+  '/guide',
+  '/admin'
 ];
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
   
-  // ✅ Public access paths
+  // Public access paths
   if (PUBLIC_PATHS.includes(pathname)) {
     return NextResponse.next();
   }
 
-  // ✅ Allow NextAuth API routes
+  // Allow NextAuth API routes
   if (pathname.startsWith('/api/auth')) {
     return NextResponse.next();
   }
 
-  // ✅ Allow static assets
+  // Allow static assets
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon.ico') ||
-    pathname.startsWith('/images')
+    pathname.startsWith('/images') ||
+    pathname.startsWith('/icons')
   ) {
     return NextResponse.next();
   }
 
-  // ✅ Check NextAuth session first (for Google users)
-  const session = await auth();
-  if (session) {
+  // Check if this is a protected path
+  const isProtectedPath = PROTECTED_PATHS.some(path => pathname.startsWith(path));
+  
+  if (isProtectedPath) {
+    // Check NextAuth session first (for Google users)
+    const session = await auth();
+    if (session) {
+      return NextResponse.next();
+    }
+
+    // For protected routes, check if token exists
+    const token = request.cookies.get('token')?.value;
+    if (!token) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+
+    // Let the pages handle the actual token verification
     return NextResponse.next();
   }
 
-  // ✅ Check custom JWT token (for email users)
-  const token = request.cookies.get('token')?.value;
-  if (!token) {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-
-  try {
-    const decoded = verifyToken(token);
-    
-    // ✅ Unverified users go to verify-reminder
-    if (!decoded.emailVerified && pathname !== '/verify-reminder') {
-      return NextResponse.redirect(new URL('/verify-reminder', request.url));
-    }
-
-    // ✅ Role-based route protection
-    if (pathname.startsWith('/admin-dashboard') && decoded.role !== 'admin') {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-
-    if (
-      (pathname.startsWith('/tourist-dashboard') ||
-       pathname === '/tourist-home') &&
-      decoded.role !== 'tourist'
-    ) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-
-    if (pathname.startsWith('/guide-dashboard') && decoded.role !== 'guide') {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-
-    return NextResponse.next();
-  } catch (error) {
-    console.error('Middleware token error:', error);
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
+  // For all other paths, allow access
+  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
+    '/((?!_next|favicon.ico|images|icons|api/auth).*)',
+    '/api/auth/(.*)'
+  ]
 };

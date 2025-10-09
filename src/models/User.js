@@ -25,6 +25,11 @@ const userSchema = new mongoose.Schema({
   password : {
      type: String
   },
+  phone: {
+    type: String,
+    required: true,
+    trim: true
+  },
   role : {
     type: String,
     enum: ['guide', 'tourist', 'admin'],
@@ -51,6 +56,11 @@ const userSchema = new mongoose.Schema({
   specialties: [String],
   pricePerDay: Number,
   bio: String,
+  status: { 
+    type: String, 
+    enum: ['active', 'inactive'], 
+    default: 'active' 
+  },  
   country: String,
   isBlocked : {
     type: Boolean,

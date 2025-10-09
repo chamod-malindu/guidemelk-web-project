@@ -1,18 +1,23 @@
 "use client";
+
 import { signIn } from "next-auth/react";
 import { FcGoogle } from "react-icons/fc";
 import { Button } from "@/components/ui/button";
 
-export default function GoogleAuthButton({ userRole, disabled }) {
+export default function GoogleAuthButton({ userRole = "tourist", disabled }) {
+  const handleGoogleSignIn = () => {
+    // 🔹 Pass role in query string ONLY for new sign-ups
+    // Backend will fall back to DB role for existing users
+    signIn("google", {
+      callbackUrl: `/api/auth/google-callback?role=${encodeURIComponent(userRole)}`
+    });
+  };
+
   return (
     <Button
       variant="outline"
       className="w-full h-12 bg-white"
-      onClick={() =>
-        signIn("google", {
-          callbackUrl: `/auth/after-google?role=${userRole}`,
-        })
-      }
+      onClick={handleGoogleSignIn}
       disabled={disabled}
       type="button"
     >
