@@ -27,6 +27,7 @@ export async function testEmailConnection() {
   }
 }
 
+// Send verification email
 export async function sendVerificationEmail(email, token) {
   console.log('📧 Attempting to send verification email to:', email);
   
@@ -94,5 +95,66 @@ export async function sendVerificationEmail(email, token) {
       responseCode: error.responseCode
     });
     throw new Error(`Failed to send verification email: ${error.message}`);
+  }
+}
+
+// send OTP email
+export async function sendOTPEmail(email, otp) {
+  console.log('📧 Attempting to send OTP email to:', email);
+  
+  const isReady = await testEmailConnection();
+  if (!isReady) {
+    throw new Error('Email service is not configured correctly');
+  }
+
+  const emailTemplate = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #333; margin-bottom: 10px;">Password Reset Request</h1>
+        <p style="color: #666; font-size: 16px;">You requested to reset your password for GuideMeLK</p>
+      </div>
+      
+      <div style="background-color: #f8f9fa; padding: 30px; border-radius: 8px; text-align: center;">
+        <p style="color: #333; margin-bottom: 15px;">Your One-Time Password (OTP) is:</p>
+        
+        <div style="background-color: #007bff; color: white; padding: 20px; font-size: 32px; font-weight: bold; letter-spacing: 8px; border-radius: 8px; display: inline-block; margin: 10px 0;">
+          ${otp}
+        </div>
+        
+        <p style="color: #666; margin-top: 20px; font-size: 14px;">
+          This OTP will expire in <strong>10 minutes</strong>
+        </p>
+      </div>
+      
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+        <p style="color: #888; font-size: 14px; line-height: 1.5;">
+          <strong>Security Notice:</strong><br>
+          • Do not share this OTP with anyone<br>
+          • If you didn't request this password reset, please ignore this email<br>
+          • Your password will remain unchanged if you don't use this OTP
+        </p>
+        
+        <p style="color: #888; font-size: 12px; margin-top: 20px;">
+          This is an automated email from GuideMeLK. Please do not reply to this email.
+        </p>
+      </div>
+    </div>
+  `;
+
+  try {
+    console.log('📤 Sending OTP email...');
+    
+    const info = await transporter.sendMail({
+      from: `"GuideMeLK" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Password Reset OTP - GuideMeLK',
+      html: emailTemplate,
+    });
+    
+    console.log('✅ OTP email sent successfully:', info.messageId);
+    
+  } catch (error) {
+    console.error('❌ OTP email sending failed:', error);
+    throw new Error(`Failed to send OTP email: ${error.message}`);
   }
 }
