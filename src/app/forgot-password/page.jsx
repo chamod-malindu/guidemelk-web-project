@@ -51,7 +51,7 @@ export default function ForgotPasswordPage() {
       if (response.ok) {
         setSuccess("OTP has been sent to your email address")
         setTimeout(() => {
-          router.push(`/reset-password?email=${encodeURIComponent(email.trim())}`)
+          router.push(`/reset-password?email=${encodeURIComponent(email.trim())}&time=${Date.now()}`)
         }, 2000)
       } else {
         setError(data.error || "Failed to send OTP. Please try again.")
