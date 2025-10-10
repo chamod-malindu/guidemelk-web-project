@@ -25,6 +25,8 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [email, setEmail] = useState("")
+  const [resendTimer, setResendTimer] = useState(60)
+  const [canResend, setCanResend] = useState(false)
   
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -37,6 +39,27 @@ export default function ResetPasswordPage() {
       setEmail(emailParam)
     }
   }, [searchParams, router])
+
+  // Countdown timer effect
+  useEffect(() => {
+    let interval = null
+    
+    if (resendTimer > 0 && !canResend) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => {
+          if (prev <= 1) {
+            setCanResend(true)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [resendTimer, canResend])
 
   // Step 1: Verify OTP
   const handleVerifyOTP = async (e) => {
@@ -167,6 +190,9 @@ export default function ResetPasswordPage() {
         // Reset to step 1 and clear OTP
         setStep(1)
         setOtp("")
+        // Reset timer
+        setResendTimer(60)
+        setCanResend(false)
       } else {
         setError(data.error || "Failed to resend OTP")
       }
@@ -275,10 +301,13 @@ export default function ResetPasswordPage() {
                   <button
                     type="button"
                     onClick={handleResendOTP}
-                    disabled={isLoading}
-                    className="text-sm text-blue-600 hover:underline disabled:opacity-50"
+                    disabled={isLoading || !canResend}
+                    className="text-sm text-blue-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
                   >
-                    Didn't receive OTP? Resend
+                    {canResend 
+                      ? "Didn't receive OTP? Resend" 
+                      : `Resend OTP in ${resendTimer}s`
+                    }
                   </button>
                 </div>
 
