@@ -5,24 +5,26 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Mail, User, MapPin } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from 'next/navigation';
 import { Navbar } from "@/components/navbar"
 import GoogleAuthButton from "@/components/GoogleAuthButton"
 
 export default function RegisterClient() {
-    const [selectedUserType, setSelectedUserType] = useState("")
+    const [selectedUserType, setSelectedUserType] = useState("");
+    const router = useRouter();
 
   const handleEmailSignup = () => {
     if (selectedUserType) {
-      window.location.href = `/register/form?type=${selectedUserType}`
+      router.push(`/register/form?type=${selectedUserType}`);
     }
   }
 
   const handleGoogleSignup = () => {
     if (selectedUserType) {
       // Handle Google OAuth signup
-      console.log(`Google signup for ${selectedUserType}`)
+      console.log(`Google signup for ${selectedUserType}`);
       // Redirect to Google OAuth with user type parameter
-      window.location.href = `/auth/google?type=${selectedUserType}`
+      router.push(`/auth/google?type=${selectedUserType}`);
     }
   }
 

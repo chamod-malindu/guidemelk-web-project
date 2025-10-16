@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Eye, EyeOff, ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
+import toast from "react-hot-toast"
 
 // Sri Lankan districts data
 const sriLankanDistricts = [
@@ -44,32 +45,32 @@ const tourSpecialties = [
 ]
 
 export default function RegisterFormClient() {
-  const searchParams = useSearchParams()
-  const userType = searchParams.get("type") || "tourist"
+  const searchParams = useSearchParams();
+  const userType = searchParams.get("type") || "tourist";
 
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [acceptTerms, setAcceptTerms] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [errors, setErrors] = useState({})
-  const { data: session, status } = useSession()
-  const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
   useEffect(() => {
-    console.log("Auth status:", status)
-    console.log("Session user:", session?.user)
+    console.log("Auth status:", status);
+    console.log("Session user:", session?.user);
     
     // Redirect to appropriate dashboard if already signed in
     if (status === "authenticated" && session?.user?.usertype) {
       const role = session.user.usertype
       if (role === 'tourist') {
-        router.push('/tourist')
+        router.push('/tourist');
       } else if (role === 'guide') {
-        router.push('/guide/dashboard')
+        router.push('/guide/dashboard');
       } else if (role === 'admin') {
-        router.push('/admin/dashboard')
+        router.push('/admin/dashboard');
       } else {
-        router.push(`/${role}/dashboard`)
+        router.push(`/${role}/dashboard`);
       }
     }
   }, [status, session, router])
@@ -160,7 +161,7 @@ export default function RegisterFormClient() {
   const handleTouristRegister = async () => {
     if (!validateTouristForm()) return
     if (!acceptTerms) {
-      alert("Please accept the terms and conditions")
+      toast.error("Please accept the terms and conditions");
       return
     }
 
@@ -187,18 +188,20 @@ export default function RegisterFormClient() {
       const data = await response.json()
       
       if (data.success) {
-        alert('Registration successful! Please check your email for verification.')
-        window.location.href = "/verify-email"
+        toast.success('Registration successful! Please check your email for verification.', { duration: 3000 });
+        setTimeout(() => {
+          router.push('/verify-email');
+        }, 3000);
       } else {
         if (data.error) {
-          alert(data.error)
+          toast.error(data.error)
         } else {
-          alert('Registration failed. Please try again.')
+          toast.error('Registration failed. Please try again.')
         }
       }
     } catch (error) {
       console.error('Registration failed:', error)
-      alert('Registration failed. Please try again.')
+      toast.error('Registration failed. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -207,7 +210,7 @@ export default function RegisterFormClient() {
   const handleGuideRegister = async () => {
     if (!validateGuideForm()) return
     if (!acceptTerms) {
-      alert("Please accept the terms and conditions")
+      toast.error("Please accept the terms and conditions")
       return
     }
 
@@ -239,27 +242,29 @@ export default function RegisterFormClient() {
       const data = await response.json()
       
       if (data.success) {
-        alert('Registration successful! Please check your email for verification.')
-        window.location.href = "/verify-email"
+        toast.success('Registration successful! Please check your email for verification.', { duration: 3000 });
+        setTimeout(() => {
+          router.push('/verify-email');
+        }, 3000);
       } else {
         if (data.error) {
-          alert(data.error)
+          toast.error(data.error);
         } else {
-          alert('Registration failed. Please try again.')
+          toast.error('Registration failed. Please try again.');
         }
       }
     } catch (error) {
-      console.error('Registration failed:', error)
-      alert('Registration failed. Please try again.')
+      console.error('Registration failed:', error);
+      toast.error('Registration failed. Please try again.');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
   // Redirect if no user type is specified
   useEffect(() => {
     if (!userType || (userType !== "tourist" && userType !== "guide")) {
-      window.location.href = "/register"
+     router.push("/register")
     }
   }, [userType])
 
