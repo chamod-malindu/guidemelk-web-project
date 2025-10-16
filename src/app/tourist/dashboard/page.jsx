@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import AuthWrapper from "@/components/AuthWrapper";
 import { io } from "socket.io-client";
 import PaymentModal from '@/components/PaymentModal'; 
+import toast from "react-hot-toast";
 
 export default function TouristDashboard() {
   const [activeTab, setActiveTab] = useState("bookings")
@@ -42,6 +43,13 @@ export default function TouristDashboard() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentBooking, setPaymentBooking] = useState(null);
   const [paymentType, setPaymentType] = useState(''); // 'advance' or 'remaining'
+
+  // State for review modal
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewBooking, setReviewBooking] = useState(null);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviews, setReviews] = useState([]);
 
 
   const handleEditToggle = async () => {
@@ -71,13 +79,13 @@ export default function TouristDashboard() {
           setUser(updateRes.data.user);
           setPhotoPreview("");
           setSelectedFile(null);
-          alert("Profile updated successfully!");
+          toast.success("Profile updated successfully!");
         } else {
-          alert("Failed to update profile.");
+          toast.error("Failed to update profile.");
         }
       } catch (error) {
         console.error("Update failed:", error);
-        alert(error.message || "Error updating profile.");
+        toast.error(error.message || "Error updating profile.");
       }
     }
   
@@ -113,14 +121,6 @@ export default function TouristDashboard() {
     }
   };
 
-  // State for review modal
-  const [showReviewModal, setShowReviewModal] = useState(false);
-  const [reviewBooking, setReviewBooking] = useState(null);
-  const [reviewRating, setReviewRating] = useState(0);
-  const [reviewComment, setReviewComment] = useState("");
-  const [reviews, setReviews] = useState([]);
-
-
   const openReviewModal = (booking) => {
     setReviewBooking(booking);
     setReviewRating(0);
@@ -131,7 +131,7 @@ export default function TouristDashboard() {
   const submitReview = async () => {
     try {
       if (!reviewRating) {
-        alert("Please select a rating");
+        toast.error("Please select a rating");
         return;
       }
 
@@ -151,7 +151,7 @@ export default function TouristDashboard() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      alert("✅ Review submitted successfully!");
+      toast.success("Review submitted successfully!");
 
       // Optional real-time notify guide
       if (notificationSocketRef.current?.connected) {
@@ -166,12 +166,12 @@ export default function TouristDashboard() {
       await fetchMyReviews();
       setShowReviewModal(false);
     } catch (err) {
-      alert(`❌ Failed to submit review: ${err.message}`);
+      toast.error(`Failed to submit review: ${err.message}`);
     }
   };
 
 
-  // 🔔 Persistent notification socket
+  // Persistent notification socket
   useEffect(() => {
     if (!user?._id && !user?.id) return;
     const userId = user._id || user.id;
@@ -268,7 +268,7 @@ export default function TouristDashboard() {
         prevBookings.map(b => b._id === bookingId ? { ...b, status: 'cancelled' } : b)
       );
 
-      alert(`✅ ${data.message}`);
+      toast.success(`${data.message}`);
 
       // Emit to guide
       if (notificationSocketRef.current?.connected) {
@@ -284,7 +284,7 @@ export default function TouristDashboard() {
 
     } catch (error) {
       console.error('Cancel booking error:', error);
-      alert(`❌ Error: ${error.message}`);
+      toast.error(`Error: ${error.message}`);
     }
   };
 
@@ -367,11 +367,14 @@ export default function TouristDashboard() {
     try {
       await axios.post("/api/auth/logout");
       setUser(null);
-      alert("Logged out successfully.");
-      router.replace("/login");
+      toast.success("Logged out successfully.", {duration: 2000});
+      setTimeout(() => {
+        router.replace("/login");
+      }, 2000);
+      
     } catch (error) {
       console.error("Logout failed:", error);
-      alert("Logout failed. Please try again.");
+      toast.error("Logout failed. Please try again.");
     } finally {
       setLoggingOut(false);
     }
@@ -753,7 +756,7 @@ export default function TouristDashboard() {
                             router.push(`/chat?chatId=${chat._id}`);
                           } catch (err) {
                             console.error("Failed to start chat:", err);
-                            alert("Could not open chat. Please try again.");
+                            toast.error("Could not open chat. Please try again.");
                           }
                         }}
                       >
@@ -814,7 +817,16 @@ export default function TouristDashboard() {
                         variant="ghost" 
                         size="sm"
                         onClick={() => {
-                          alert(`Booking Details:\nID: ${booking._id}\nStatus: ${booking.status}\nTotal: ${booking.totalCost}`);
+                          toast.custom(
+                            <div style={{whiteSpace: 'pre-line', padding: '10px'}}>
+                              Booking Details:
+                                {`\nID: ${booking._id}\nStatus: ${booking.status}\nTotal: ${booking.totalCost}`}
+                              </div>,
+                              {
+                                duration: 5000,
+                                position: 'top-right',
+                              }     
+                          );
                         }}
                       >
                         View Details
