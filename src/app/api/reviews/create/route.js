@@ -1,7 +1,6 @@
 import dbConnect from "@/lib/mongodb.js";
 import Review from "@/models/Review.js";
 import Booking from "@/models/Booking.js";
-import User from "@/models/User.js";
 
 export async function POST(req) {
   await dbConnect();
