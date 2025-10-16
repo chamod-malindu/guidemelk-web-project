@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Search, Star, MapPin, Languages, Users, Heart, Eye, Calendar, Info, Sun, Moon} from "lucide-react";
+import { Search, Star, MapPin, Languages, Users, Heart, Eye, Calendar, Info} from "lucide-react";
 import Link from "next/link";
 import TouristNavbar from '@/components/TouristNavbar';
 
@@ -44,17 +44,7 @@ export default function TouristHomePage() {
     };
     fetchUser();
   }, []);
-  
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    if (!isDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  };
+
 
   const guides = [
     {
