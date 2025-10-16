@@ -818,7 +818,7 @@ export default function TouristDashboard() {
                         size="sm"
                         onClick={() => {
                           toast.custom(
-                            <div style={{whiteSpace: 'pre-line', padding: '10px'}}>
+                            <div className="whitespace-pre-line p-3 rounded-lg max-w-sm shadow-lg bg-white">
                               Booking Details:
                                 {`\nID: ${booking._id}\nStatus: ${booking.status}\nTotal: ${booking.totalCost}`}
                               </div>,

@@ -3,24 +3,13 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
-import {
-  Star,
-  MapPin,
-  Languages,
-  Users,
-  Calendar,
-  MessageCircle,
-  Award,
-  Clock,
-  ChevronDown,
-  X,
-} from "lucide-react";
+import {Star, MapPin, Languages, Users, Calendar, MessageCircle, Award, Clock, ChevronDown,X,} from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import AuthWrapper from "@/components/AuthWrapper";
 import { getCurrentUser } from "@/utils/getCurrentUser";
-import { io } from "socket.io-client";
 import { useRef } from "react";
+import toast from "react-hot-toast";
 
 
 // Destination list
@@ -83,18 +72,20 @@ function GuideProfile() {
   
     // Validate form data
     if (selectedDestinations.length === 0) {
-      alert("Please select at least one destination");
+      toast.error("Please select at least one destination");
       return;
     }
     if (!selectedDate) {
-      alert("Please select a date for your tour");
+      toast.error("Please select a date for your tour");
       return;
     }
   
     const currentUser = await getCurrentUser("tourist");
     if (!currentUser?.id) {
-      alert("Please log in to book a tour");
-      router.push("/login");
+      toast.error("Please log in to book a tour", {duration: 2000});
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000)
       return;
     }
   
@@ -129,16 +120,28 @@ function GuideProfile() {
         duration === 90 ? "3 months" :
         `${duration} ${duration === 1 ? "day" : "days"}`;
   
-      alert(
-        `🎉 Booking request sent successfully!\n\nDetails:\n- Guide: ${guide.firstName} ${guide.lastName}\n- Date: ${selectedDate}\n- Duration: ${durationText}\n- Group Size: ${groupSize}\n- Destinations: ${selectedDestinations.join(', ')}\n- Total Cost: ${bookingData.totalCost}\n\nThe guide will respond within 24 hours. You can check the status in your dashboard.`
-      );
+      toast.custom(
+        <div className="whitespace-pre-line p-3 rounded-lg max-w-sm bg-white shadow-lg">
+        {`✅ Booking request sent successfully!
+
+        Details:
+        - Guide: ${guide.firstName} ${guide.lastName}
+        - Date: ${selectedDate}
+        - Duration: ${durationText}
+        - Group Size: ${groupSize}
+        - Destinations: ${selectedDestinations.join(', ')}
+        - Total Cost: ${bookingData.totalCost}
+
+        The guide will respond within 24 hours. You can check the status in your dashboard.`}
+          </div>
+        );
   
       // Redirect to tourist dashboard to see the booking
       router.push('/tourist/dashboard?tab=bookings');
       
     } catch (error) {
       console.error('Booking error:', error);
-      alert(`❌ Booking failed: ${error.message}`);
+      toast.error(`Booking failed: ${error.message}`);
     }
   };
   
@@ -163,7 +166,7 @@ function GuideProfile() {
       router.push(`/chat?chatId=${chat._id}`);
     } catch (err) {
       console.error("Failed to start chat:", err);
-      alert("Could not open chat. Please try again.");
+      toast.error("Could not open chat. Please try again.");
     } finally {
       setCreatingChat(false);
     }
