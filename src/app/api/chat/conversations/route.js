@@ -7,7 +7,7 @@ export async function GET(req) {
   const user1 = searchParams.get("user1");
   const user2 = searchParams.get("user2");
 
-  // ✅ Prevent invalid IDs from reaching Mongoose
+  // Prevent invalid IDs from reaching Mongoose
   if (!user1 || !user2 || user1 === "undefined" || user2 === "undefined") {
     return new Response(
       JSON.stringify({ error: "Missing or invalid user IDs" }),

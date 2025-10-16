@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 export default function GoogleAuthButton({ userRole = "tourist", disabled }) {
   const handleGoogleSignIn = () => {
-    // 🔹 Pass role in query string ONLY for new sign-ups
+    // Pass role in query string ONLY for new sign-ups
     // Backend will fall back to DB role for existing users
     signIn("google", {
       callbackUrl: `/api/auth/google-callback?role=${encodeURIComponent(userRole)}`

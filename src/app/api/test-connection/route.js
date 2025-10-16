@@ -3,7 +3,7 @@ import { testConnection } from '@/lib/mongodb';
 
 export async function GET() {
   try {
-    console.log('🧪 Testing database connection...');
+    console.log('Testing database connection...');
     const result = await testConnection();
     
     if (result.success) {
@@ -14,7 +14,7 @@ export async function GET() {
         details: result
       });
     } else {
-      console.log('❌ Connection test failed');
+      console.log('Connection test failed');
       return NextResponse.json({
         success: false,
         message: 'Database connection failed',
@@ -22,7 +22,7 @@ export async function GET() {
       }, { status: 500 });
     }
   } catch (error) {
-    console.error('💥 Connection test error:', error);
+    console.error('Connection test error:', error);
     return NextResponse.json({
       success: false,
       message: 'Connection test failed',

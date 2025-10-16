@@ -6,7 +6,7 @@ export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const userId = searchParams.get("userId");
 
-  // ✅ Prevent CastError by validating input early
+  // Prevent CastError by validating input early
   if (!userId || userId === "undefined" || userId === "null") {
     return new Response(
       JSON.stringify({ error: "Missing or invalid userId" }),

@@ -6,7 +6,7 @@ export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const chatId = searchParams.get("chatId");
 
-  // ✅ Prevent CastError
+  // Prevent CastError
   if (!chatId || chatId === "undefined" || chatId === "null") {
     return new Response(
       JSON.stringify({ error: "Missing or invalid chatId" }),

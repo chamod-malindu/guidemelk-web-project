@@ -42,6 +42,7 @@ import {
 import { useRouter } from "next/navigation";
 import { io } from "socket.io-client"; 
 import ProfileManagementSection from "@/components/guide/ProfileManagementSection";
+import toast from "react-hot-toast";
 
 export default function GuideDashboard() {
   const router = useRouter();
@@ -420,7 +421,7 @@ export default function GuideDashboard() {
         prev.map(b => b._id === bookingId ? { ...b, ...data.booking } : b)
       );
 
-      alert(`✅ ${data.message}`);
+      toast.success(`${data.message}`);
 
       if (notificationSocketRef.current?.connected) {
         notificationSocketRef.current.emit("booking-status-update", {
@@ -434,7 +435,7 @@ export default function GuideDashboard() {
       await fetchBookings();
     } catch (error) {
       console.error('Booking action error:', error);
-      alert(`❌ Error: ${error.message}`);
+      toast.error(`Error: ${error.message}`);
     }
   };
 
@@ -1261,7 +1262,7 @@ const stats = {
                       <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
                       <p className="text-red-600 font-medium mb-2">Error Loading Payments</p>
                       <p className="text-red-500 text-sm mb-4">{paymentError}</p>
-                      <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                      <Button variant="outline" size="sm" onClick={() => router.push(router.asPath)}>
                         Try Again
                       </Button>
                     </div>

@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Navbar } from "@/components/navbar";
 import { Send, Search, ArrowLeft, Wifi, WifiOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link"
@@ -57,7 +55,6 @@ export default function ChatPage() {
       setConnecting(true);
 
       try {
-        // Optional: hit /api/socket to wake backend
         await fetch("/api/socket");
         await new Promise((resolve) => setTimeout(resolve, 500));
 

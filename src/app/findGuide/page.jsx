@@ -315,7 +315,7 @@ export default function FindGuidePage() {
           <p className="text-xl mb-2">Error loading guides</p>
           <p className="text-sm mb-4">{error}</p>
           <button 
-            onClick={() => window.location.reload()} 
+            onClick={() => window.location.reload()} // for full reload , ensures clean state
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
             Try Again
