@@ -54,7 +54,9 @@ export default function RegisterFormClient() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const { data: session, status } = useSession();
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const router = useRouter();
+  
 
   useEffect(() => {
     console.log("Auth status:", status);
@@ -74,6 +76,17 @@ export default function RegisterFormClient() {
       }
     }
   }, [status, session, router])
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark');
+    } else {
+      setIsDarkMode(false);
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
 
   // Tourist form state
   const [touristForm, setTouristForm] = useState({
@@ -269,7 +282,7 @@ export default function RegisterFormClient() {
   }, [userType])
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-8 px-4">
+    <div className={`${isDarkMode ? 'dark' : ''} min-h-screen dark:from-gray-900 dark:to-gray-800 bg-gradient-to-b from-blue-50 to-white py-8 px-4`}>
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -284,10 +297,10 @@ export default function RegisterFormClient() {
               </Button>
             </Link>
             <div className="text-center">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2 dark:text-white">
                 {userType === "tourist" ? "Join as Tourist" : "Join as Guide"}
               </h1>
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-300">
                 {userType === "tourist"
                   ? "Start discovering amazing local guides across Sri Lanka"
                   : "Join our community of local guides and start earning"}
@@ -429,7 +442,7 @@ export default function RegisterFormClient() {
               </div>
 
               <Button 
-                className="w-full" 
+                className="w-full dark:text-gray-700 dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer" 
                 onClick={handleTouristRegister} 
                 disabled={!acceptTerms || isLoading}
               >
@@ -701,7 +714,7 @@ export default function RegisterFormClient() {
               </div>
 
               <Button 
-                className="w-full" 
+                className="w-full dark:text-gray-700 dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer" 
                 onClick={handleGuideRegister} 
                 disabled={!acceptTerms || isLoading}
               >
