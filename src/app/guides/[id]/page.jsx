@@ -10,6 +10,7 @@ import AuthWrapper from "@/components/AuthWrapper";
 import { getCurrentUser } from "@/utils/getCurrentUser";
 import { useRef } from "react";
 import toast from "react-hot-toast";
+import TouristNavbar from '@/components/TouristNavbar';
 
 
 // Destination list
@@ -40,6 +41,11 @@ function GuideProfile() {
   const [duration, setDuration] = useState(1);
   const [destinationDropdownOpen, setDestinationDropdownOpen] = useState(false);
 
+  const [user, setUser] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
   // Fetch guide data on mount and when id changes
   useEffect(() => {
     if (!id) return;
@@ -64,6 +70,34 @@ function GuideProfile() {
 
     fetchGuide();
   }, [id]);
+
+  // fetch current user
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch('/api/auth/profile', { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data.user);
+        }
+      } catch (err) {
+        console.log('User not logged in');
+      }
+    };
+    fetchUser();
+  }, []);
+
+  // Dark mode setup
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark');
+    } else {
+      setIsDarkMode(false);
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
 
   // Handlers
   const handleBooking = async (e) => {
@@ -223,19 +257,29 @@ function GuideProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      <div className={`${isDarkMode ? 'dark' : ''} min-h-screen bg-gradient-to-br dark:bg-gray-900`}>
+        <TouristNavbar 
+          user={user}
+          notifications={notifications}
+          setNotifications={setNotifications}
+          unreadCount={unreadCount}
+          setUnreadCount={setUnreadCount}
+        />
+      <div>
+      {/* Enhanced Cover Section */}
+      <div className="relative h-64 md:h-80 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600">
       {/* Enhanced Cover Section */}
       <div className="relative h-64 md:h-80 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600">
         <div className="absolute inset-0 bg-black bg-opacity-20"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-10">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 z-20">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Enhanced Profile Header */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
               <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
                 <div className="relative">
                 <Image
@@ -254,7 +298,7 @@ function GuideProfile() {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-2">
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
                       {guide.firstName} {guide.lastName}
                     </h1>
                   </div>
@@ -281,16 +325,16 @@ function GuideProfile() {
                   </div>
                   <div className="flex items-center text-gray-600 mb-3">
                     <MapPin className="h-4 w-4 mr-2 text-blue-500" />
-                    <span className="font-medium">{guide.location || "Location not specified"}</span>
+                    <span className="font-medium dark:text-gray-300">{guide.location || "Location not specified"}</span>
                   </div>
                   <div className="flex flex-wrap items-center gap-4 text-sm">
-                    <div className="flex items-center bg-gray-50 px-3 py-1 rounded-lg">
+                    <div className="flex items-center bg-gray-50 px-3 py-1 rounded-lg dark:bg-black">
                       <Users className="h-4 w-4 mr-2 text-blue-500" />
-                      <span className="font-medium">{guide.experience || 0} years experience</span>
+                      <span className="font-medium dark:text-gray-300">{guide.experience || 0} years experience</span>
                     </div>
-                    <div className="flex items-center bg-gray-50 px-3 py-1 rounded-lg">
+                    <div className="flex items-center bg-gray-50 px-3 py-1 rounded-lg dark:bg-black">
                       <Languages className="h-4 w-4 mr-2 text-green-500" />
-                      <span className="font-medium">
+                      <span className="font-medium dark:text-gray-300">
                         {guide.languages && guide.languages.length > 0 
                           ? guide.languages.join(", ") 
                           : "Languages not specified"}
@@ -309,24 +353,24 @@ function GuideProfile() {
             </div>
 
             {/* Enhanced About Section */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
                 <div className="w-1 h-6 bg-blue-600 rounded mr-3"></div>
                 About Me
               </h2>
               {guide.bio ? (
-                <p className="text-gray-700 leading-relaxed">{guide.bio}</p>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{guide.bio}</p>
               ) : (
                 <div className="text-center py-8 text-gray-500">
                   <div className="text-4xl mb-2">📝</div>
-                  <p>This guide hasn't added a bio yet.</p>
+                  <p className="dark:text-gray-400">This guide hasn't added a bio yet.</p>
                 </div>
               )}
             </div>
 
             {/* Enhanced Specialties */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
                 <div className="w-1 h-6 bg-purple-600 rounded mr-3"></div>
                 Specialties
               </h2>
@@ -335,7 +379,7 @@ function GuideProfile() {
                   {guide.specialties.map((specialty, index) => (
                     <span
                       key={index}
-                      className="bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium border border-blue-200"
+                      className="bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 text-blue-800 dark:text-blue-200 px-4 py-2 rounded-full text-sm font-medium border border-blue-200 dark:border-blue-700"
                     >
                       {specialty}
                     </span>
@@ -350,8 +394,8 @@ function GuideProfile() {
             </div>
 
             {/* Photo Gallery */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
                 <div className="w-1 h-6 bg-green-600 rounded mr-3"></div>
                 Photo Gallery
               </h2>
@@ -385,9 +429,9 @@ function GuideProfile() {
             </div>
 
             {/* Reviews */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <div className="bg-white rounded-xl shadow-lg p-6 border dark:bg-gray-800 border-gray-100 dark:border-gray-700">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
                   <div className="w-1 h-6 bg-yellow-500 rounded mr-3"></div>
                   Reviews
                 </h2>
@@ -458,8 +502,8 @@ function GuideProfile() {
 
           {/* Enhanced Booking Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-lg p-6 sticky top-8 border border-gray-100">
-              <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">
+            <div className="bg-white rounded-xl dark:border-gray-700 dark:bg-gray-800 shadow-lg p-6 sticky top-8 border border-gray-100">
+              <h3 className="text-xl font-semibold dark:text-white text-gray-900 mb-6 text-center">
                 Book Your Adventure
               </h3>
 
@@ -467,7 +511,7 @@ function GuideProfile() {
                 <div>
                   <label
                     htmlFor="date"
-                    className="block text-sm font-medium text-gray-700 mb-2"
+                    className="block text-sm dark:border-gray-100 font-medium text-gray-700 mb-2 dark:text-blue-100"
                   >
                     Select Date
                   </label>
@@ -477,7 +521,7 @@ function GuideProfile() {
                       type="date"
                       id="date"
                       required
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       value={selectedDate}
                       onChange={(e) => setSelectedDate(e.target.value)}
                       min={new Date().toISOString().split("T")[0]}
@@ -489,7 +533,7 @@ function GuideProfile() {
                 <div>
                   <label
                     htmlFor="duration"
-                    className="block text-sm font-medium text-gray-700 mb-2"
+                    className="block text-sm font-medium dark:border-gray-100 text-gray-700 mb-2 dark:text-blue-100"
                   >
                     Duration
                   </label>
@@ -497,7 +541,7 @@ function GuideProfile() {
                     <Clock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <select
                       id="duration"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       value={duration}
                       onChange={(e) => setDuration(Number.parseInt(e.target.value))}
                     >
@@ -518,18 +562,18 @@ function GuideProfile() {
 
                 {/* Destinations Dropdown */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm dark:border-gray-100 font-medium text-gray-700 dark:text-blue-100 mb-2">
                     Destinations
                   </label>
                   <div className="relative">
                     <button
                       type="button"
                       onClick={() => setDestinationDropdownOpen(!destinationDropdownOpen)}
-                      className="w-full flex items-center justify-between pl-4 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
+                      className="w-full flex items-center justify-between pl-4 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white dark:bg-gray-700"
                     >
                       <div className="flex items-center">
-                        <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="text-gray-500">
+                        <MapPin className="h-4 w-4 text-gray-400 mr-2 dark:text-blue-100" />
+                        <span className="text-gray-500 dark:text-blue-100">
                           {selectedDestinations.length === 0 
                             ? "Select destinations..." 
                             : `${selectedDestinations.length} selected`
@@ -569,7 +613,7 @@ function GuideProfile() {
                       {selectedDestinations.map((destination) => (
                         <span
                           key={destination}
-                          className="inline-flex items-center bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
+                          className="inline-flex items-center bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded-full"
                         >
                           {destination}
                           <button
@@ -588,7 +632,7 @@ function GuideProfile() {
                 <div>
                   <label
                     htmlFor="groupSize"
-                    className="block text-sm font-medium text-gray-700 mb-2"
+                    className="block text-sm dark:border-gray-100 font-medium text-gray-700 dark:text-blue-100 mb-2"
                   >
                     Group Size
                   </label>
@@ -596,7 +640,7 @@ function GuideProfile() {
                     <Users className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <select
                       id="groupSize"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       value={groupSize}
                       onChange={(e) => setGroupSize(Number.parseInt(e.target.value))}
                     >
@@ -612,14 +656,14 @@ function GuideProfile() {
                 <div>
                   <label
                     htmlFor="requests"
-                    className="block text-sm font-medium text-gray-700 mb-2"
+                    className="block text-sm dark:border-gray-100 font-medium text-gray-700 dark:text-blue-100 mb-2"
                   >
                     Special Requests (Optional)
                   </label>
                   <textarea
                     id="requests"
                     rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none dark:bg-gray-700 dark:border-gray-100 focus:text-blue-100"
                     placeholder="Any special requirements or preferences..."
                     value={specialRequests}
                     onChange={(e) => setSpecialRequests(e.target.value)}
@@ -628,12 +672,12 @@ function GuideProfile() {
 
                 <div className="border-t border-gray-200 pt-4 space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Base price:</span>
-                    <span className="font-medium text-gray-900">${guide.pricePerDay || 0}/day</span>
+                    <span className="text-gray-600 dark:text-blue-100">Base price:</span>
+                    <span className="font-medium text-gray-900 dark:text-white">${guide.pricePerDay || 0}/day</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Duration:</span>
-                    <span className="font-medium text-gray-900">
+                    <span className="text-gray-600 dark:border-gray-100 dark:text-blue-100">Duration:</span>
+                    <span className="font-medium text-gray-900 dark:text-blue-100">
                       {duration === 21 ? "3 weeks" : 
                        duration === 30 ? "1 month" : 
                        duration === 60 ? "2 months" : 
@@ -642,13 +686,13 @@ function GuideProfile() {
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Group size:</span>
-                    <span className="font-medium text-gray-900">
+                    <span className="text-gray-600 dark:border-gray-100 dark:text-blue-100">Group size:</span>
+                    <span className="font-medium text-gray-900 dark:text-blue-100">
                       {groupSize} {groupSize === 1 ? "person" : "people"}
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-lg font-semibold border-t border-gray-200 pt-3">
-                    <span className="text-gray-900">Total:</span>
+                    <span className="text-gray-900 dark:border-gray-100 dark:text-blue-100">Total:</span>
                     <span className="text-green-600">${(guide.pricePerDay || 0) * groupSize * duration}</span>
                   </div>
                 </div>
@@ -685,6 +729,8 @@ function GuideProfile() {
         </div>
       </div>
     </div>
+  </div>
+  </div>
   );
 }
 
