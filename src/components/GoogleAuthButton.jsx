@@ -16,7 +16,7 @@ export default function GoogleAuthButton({ userRole = "tourist", disabled }) {
   return (
     <Button
       variant="outline"
-      className="w-full h-12 bg-white"
+      className="w-full h-12 bg-white dark:text-black"
       onClick={handleGoogleSignIn}
       disabled={disabled}
       type="button"
