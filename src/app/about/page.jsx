@@ -41,8 +41,8 @@ export default function About() {
         {/* Navigation Links (hidden on small screens) */}
         <nav className="hidden md:flex space-x-6">
           <a href="/" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">Home</a>
-          <a href="/find-guide" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">Find a Guide</a>
-          <a href="/become-guide" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">Become a Guide</a>
+          <a href="/register" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">Find a Guide</a>
+          <a href="/register/form?type=guide" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">Become a Guide</a>
           <a href="/about" className="text-indigo-600 dark:text-indigo-400 font-semibold">About Us</a> {/* Highlight current page */}
         </nav>
         {/* Dark Mode Toggle and Login/Sign Up Button */}
