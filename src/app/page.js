@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { Sun, Moon, MapPin, BookOpen, ShieldCheck, CalendarDays } from 'lucide-react';
+import { MapPin, BookOpen, ShieldCheck, CalendarDays } from 'lucide-react';
 import Link from 'next/link';
+import HomeNavbar from '@/components/HomeNavbar.jsx';
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -30,25 +31,8 @@ export default function Home() {
 
   return (
     <div className={`${isDarkMode ? 'dark' : ''} min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-50 font-inter`}>
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm py-4 px-6 md:px-12 flex justify-between items-center rounded-b-xl">
-        <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">Guidemelk</div>
-        <nav className="hidden md:flex space-x-6">
-          <Link href="/" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">Home</Link>
-          <Link href="/login" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">Find a Guide</Link>
-          <Link href="/register" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">Become a Guide</Link>
-          <Link href="/about" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">About Us</Link>
-        </nav>
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={toggleDarkMode}
-            className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            aria-label="Toggle dark mode"
-          >
-            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
-          <Link href="/login" className="px-5 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-all duration-300 ease-in-out transform hover:scale-105 shadow-md">Sign in</Link>
-        </div>
-      </header>
+
+      <HomeNavbar isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
 
       <main>
         <section
