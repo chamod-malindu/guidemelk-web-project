@@ -22,7 +22,7 @@ export async function GET() {
   try {
     const payments = await Payment.find()
       .sort({ date: -1 })
-      .populate("tourist", "firstName lastName email") // Adjust fields as needed
+      .populate("tourist", "firstName lastName email")
       .populate("guide", "firstName lastName email")
       .lean();
 

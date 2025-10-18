@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { Sun, Moon, MapPin, BookOpen, ShieldCheck, CalendarDays } from 'lucide-react';
+import { MapPin, BookOpen, ShieldCheck, CalendarDays } from 'lucide-react';
 import Link from 'next/link';
+import HomeNavbar from '@/components/HomeNavbar.jsx';
 
 export default function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -30,40 +31,22 @@ export default function Home() {
 
   return (
     <div className={`${isDarkMode ? 'dark' : ''} min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-50 font-inter`}>
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm py-4 px-6 md:px-12 flex justify-between items-center rounded-b-xl">
-        <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">Guidemelk</div>
-        <nav className="hidden md:flex space-x-6">
-          <Link href="/" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">Home</Link>
-          <Link href="/login" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">Find a Guide</Link>
-          <Link href="/register" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">Become a Guide</Link>
-          <Link href="/about" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">About Us</Link>
-        </nav>
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={toggleDarkMode}
-            className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            aria-label="Toggle dark mode"
-          >
-            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
-          <Link href="/login" className="px-5 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-all duration-300 ease-in-out transform hover:scale-105 shadow-md">Login</Link>
-        </div>
-      </header>
+
+      <HomeNavbar isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
 
       <main>
         <section
-          className="relative h-[70vh] flex items-center justify-center text-center overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-800 dark:to-purple-900 shadow-lg rounded-b-3xl mx-4 mt-4 bg-cover bg-center"
-          style={{ backgroundImage: `url('/img/girl.jpg')` }}
+          className="bg-hero-bg relative h-[70vh] flex items-center justify-center text-center overflow-hidden from-indigo-500 to-purple-600 dark:from-indigo-800 dark:to-purple-900 shadow-lg rounded-b-3xl mx-4 mt-4 bg-cover bg-left"
         >
           <div className="relative z-10 p-6 max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-6xl font-extrabold text-white leading-tight mb-4 animate-fade-in-up">
               Explore Sri Lanka with Local Experts
             </h1>
-            <p className="text-xl text-indigo-100 mb-8 animate-fade-in-up animation-delay-300">
+            <p className="text-xl text-white font-semibold mb-8 animate-fade-in-up animation-delay-300 mt-[48px]">
               Connect with passionate local guides for authentic and unforgettable experiences.
             </p>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6 animate-fade-in-up animation-delay-600">
-              <Link href="/login?type=tourist" className="px-8 py-3 bg-white text-indigo-600 font-semibold rounded-full shadow-lg hover:bg-gray-100 transition-all duration-300 ease-in-out transform hover:scale-105">
+              <Link href="/login?type=tourist" className="px-8 py-3 bg-white text-indigo-600 font-semibold rounded-full shadow-lg hover:bg-gray-100 transition-all duration-300 ease-in-out transform hover:scale-105 flex justify-center items-center">
                 Find Your Guide
               </Link>
               <Link href="/login?type=guide" className="px-8 py-3 border-2 border-white text-white font-semibold rounded-full shadow-lg hover:bg-white hover:text-indigo-600 transition-all duration-300 ease-in-out transform hover:scale-105">
@@ -176,9 +159,6 @@ export default function Home() {
                 <Link href="https://kandyesalaperahera.com/" className="px-4 py-2 border border-indigo-600 text-indigo-600 dark:text-indigo-400 rounded-full hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-400 dark:hover:text-gray-900 transition-colors duration-300 text-sm">
                   Learn More
                 </Link>
-                <Link href="/login?type=tourist&event=kandy-perahera" className="px-4 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors duration-300 text-sm">
-                  Find Guides &rarr;
-                </Link>
               </div>
             </div>
 
@@ -197,9 +177,6 @@ export default function Home() {
                 <Link href="https://rmkd.lk/kataragama-esala-festival/" className="px-4 py-2 border border-indigo-600 text-indigo-600 dark:text-indigo-400 rounded-full hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-400 dark:hover:text-gray-900 transition-colors duration-300 text-sm">
                   Learn More
                 </Link>
-                <Link href="/login?type=tourist&event=kataragama-festival" className="px-4 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors duration-300 text-sm">
-                  Find Guides &rarr;
-                </Link>
               </div>
             </div>
 
@@ -217,9 +194,6 @@ export default function Home() {
               <div className="flex justify-center space-x-2 mt-4">
                 <Link href="https://www.lovesrilanka.org/all-about-the-gathering/" className="px-4 py-2 border border-indigo-600 text-indigo-600 dark:text-indigo-400 rounded-full hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-400 dark:hover:text-gray-900 transition-colors duration-300 text-sm">
                   Learn More
-                </Link>
-                <Link href="/login?type=tourist&event=elephant-gathering" className="px-4 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors duration-300 text-sm">
-                  Find Guides &rarr;
                 </Link>
               </div>
             </div>

@@ -16,21 +16,16 @@ export const runtime = 'nodejs'; // Use Node.js runtime (supports file operation
 // GET: Fetch guide's gallery images
 export async function GET(request, context) {
   try {
-    // Connect to MongoDB database
     await dbConnect();
-
-    // Extract guide ID from dynamic route parameters [id]
     const { id } = await context.params;
 
     // Query all images for this guide, sorted by most recent first
     const images = await GuideImage.find({ guide: id }).sort({ uploadedAt: -1 });
-    
-    // Return images as JSON response
     return NextResponse.json({ images });
+
   } catch (error) {
     // Log error for debugging purposes
     console.error("Error fetching gallery:", error);
-    // Return 500 Internal Server Error response
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -38,18 +33,14 @@ export async function GET(request, context) {
 // POST: Upload new image to guide's gallery
 export async function POST(request, context) {
   try {
-    // Connect to MongoDB database
     await dbConnect();
 
-    // Extract guide ID from dynamic route parameters [id]
     const { id } = await context.params;
 
-    // Convert string ID to MongoDB ObjectId format
     let guideObjectId;
     try {
       guideObjectId = new mongoose.Types.ObjectId(id);
     } catch {
-      // Return 400 Bad Request if ID format is invalid
       return NextResponse.json({ error: "Invalid guide ID" }, { status: 400 });
     }
 
@@ -57,7 +48,6 @@ export async function POST(request, context) {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
     if (!token) {
-      // Return 401 Unauthorized if no token found
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -66,14 +56,12 @@ export async function POST(request, context) {
 
     // Authorization: Only allow admins or the guide owner to upload images
     if (decoded.role !== "admin" && decoded.userId !== id) {
-      // Return 403 Forbidden if user lacks permission
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Verify the guide exists in database and has role "guide"
     const guide = await User.findOne({ _id: guideObjectId, role: "guide" });
     if (!guide) {
-      // Return 404 Not Found if guide doesn't exist
       return NextResponse.json({ error: "Guide not found" }, { status: 404 });
     }
 
@@ -128,7 +116,6 @@ export async function POST(request, context) {
       uploadedAt: new Date(),      // Timestamp for sorting/tracking
     });
 
-    // Save to MongoDB database
     await guideImage.save();
 
     // Return success response with image details
@@ -143,7 +130,6 @@ export async function POST(request, context) {
   } catch (error) {
     // Log any unexpected errors for debugging
     console.error("Error in POST /api/guides/[id]/gallery:", error);
-    // Return 500 Internal Server Error for any unhandled exceptions
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

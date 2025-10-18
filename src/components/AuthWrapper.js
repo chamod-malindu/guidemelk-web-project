@@ -17,7 +17,7 @@ export default function AuthWrapper({ requiredRole, children }) {
 
     async function checkAuth() {
       try {
-        // ✅ Always verify session from the server using the token cookie
+        // Always verify session from the server using the token cookie
         const res = await fetch("/api/auth/profile", { credentials: "include" });
 
         if (!res.ok) throw new Error("Failed to verify session");
@@ -25,12 +25,12 @@ export default function AuthWrapper({ requiredRole, children }) {
         const data = await res.json();
         if (!data?.user) throw new Error("Invalid user data");
 
-        // ✅ Check role if required
+        // Check role if required
         if (requiredRole && data.user.role !== requiredRole) {
           throw new Error("User role does not match required role");
         }
 
-        // ✅ Update localStorage with fresh profile info
+        // Update localStorage with fresh profile info
         localStorage.setItem("user", JSON.stringify(data.user));
 
         if (isMounted) {
@@ -57,7 +57,7 @@ export default function AuthWrapper({ requiredRole, children }) {
     };
   }, [requiredRole, router]);
 
-  // ✅ While verifying session, show loading spinner
+  // While verifying session, show loading spinner
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -66,7 +66,7 @@ export default function AuthWrapper({ requiredRole, children }) {
     );
   }
 
-  // ✅ Redirect is already triggered inside useEffect
+  // Redirect is already triggered inside useEffect
   if (!authenticated) return null;
 
   return <>{children}</>;

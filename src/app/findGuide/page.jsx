@@ -300,23 +300,23 @@ export default function FindGuidePage() {
 
   if (loading) 
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading guides...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">Loading guides...</p>
         </div>
       </div>
     );
 
   if (error) 
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center text-red-600 max-w-md mx-auto p-6">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center text-red-600 dark:text-red-400 max-w-md mx-auto p-6">
           <p className="text-xl mb-2">Error loading guides</p>
           <p className="text-sm mb-4">{error}</p>
           <button 
-            onClick={() => window.location.reload()} 
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            onClick={() => window.location.reload()}
+            className="bg-blue-600 dark:bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
           >
             Try Again
           </button>
@@ -325,7 +325,7 @@ export default function FindGuidePage() {
     );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <TouristNavbar 
         user={user}
         notifications={notifications}
@@ -337,21 +337,21 @@ export default function FindGuidePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Find Your Perfect Guide</h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-50 mb-4">Find Your Perfect Guide</h1>
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
             Browse through our verified professional tour guides and find the perfect match for your Sri Lankan adventure
           </p>
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
           {/* Main search bar */}
           <div className="relative mb-4">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search guides, locations, or specialties..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -359,13 +359,13 @@ export default function FindGuidePage() {
 
           {/* Filter toggle button */}
           <div className="flex justify-between items-center mb-4">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
-            >
-              <Filter className="h-4 w-4 mr-2" />
-              {showFilters ? 'Hide Filters' : 'Show Filters'}
-            </button>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="bg-blue-600 dark:bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors flex items-center"
+          >
+            <Filter className="h-4 w-4 mr-2" />
+            {showFilters ? 'Hide Filters' : 'Show Filters'}
+          </button>
             
             {(searchTerm || selectedLocation !== "All Locations" || selectedLanguage !== "All Languages" || 
               selectedSpecialty !== "All Specialties" || selectedPriceRange !== "All Prices") && (
@@ -383,9 +383,9 @@ export default function FindGuidePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 pt-4 border-t">
               {/* Location filter */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
                 <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   value={selectedLocation}
                   onChange={(e) => setSelectedLocation(e.target.value)}
                 >
@@ -399,12 +399,12 @@ export default function FindGuidePage() {
 
               {/* Language filter */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
-                <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  value={selectedLanguage}
-                  onChange={(e) => setSelectedLanguage(e.target.value)}
-                >
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Language</label>
+                  <select
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    value={selectedLanguage}
+                    onChange={(e) => setSelectedLanguage(e.target.value)}
+                  >
                   {worldLanguages.map((language) => (
                     <option key={language} value={language}>
                       {language}
@@ -415,12 +415,12 @@ export default function FindGuidePage() {
 
               {/* Specialty filter */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Specialty</label>
-                <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                  value={selectedSpecialty}
-                  onChange={(e) => setSelectedSpecialty(e.target.value)}
-                >
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Specialty</label>
+                  <select
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    value={selectedSpecialty}
+                    onChange={(e) => setSelectedSpecialty(e.target.value)}
+                  >
                   {tourSpecialties.map((specialty) => (
                     <option key={specialty} value={specialty}>
                       {specialty}
@@ -462,7 +462,7 @@ export default function FindGuidePage() {
 
         {/* Results count */}
         <div className="mb-6 flex justify-between items-center">
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-white">
             Showing {filteredGuides.length} verified guide{filteredGuides.length !== 1 ? "s" : ""}
           </p>
           <div className="flex items-center text-sm text-gray-500">
@@ -494,7 +494,7 @@ export default function FindGuidePage() {
             {filteredGuides.map((guide) => (
               <div
                 key={guide._id}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
               >
                 <div className="relative">
                   <GuideImage
@@ -513,22 +513,22 @@ export default function FindGuidePage() {
 
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-xl font-semibold text-gray-900">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                       {guide.firstName} {guide.lastName}
                     </h3>
                     <div className="flex items-center">
                       <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                      <span className="ml-1 text-sm font-medium">4.8</span>
-                      <span className="ml-1 text-sm text-gray-500">(12)</span>
+                      <span className="ml-1 text-sm font-medium dark:text-gray-200">4.8</span>
+                      <span className="ml-1 text-sm text-gray-500 dark:text-gray-400">(12)</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center text-gray-600 mb-3">
+                  <div className="flex items-center text-gray-600 dark:text-gray-400 mb-3">
                     <MapPin className="h-4 w-4 mr-1" />
                     <span className="text-sm">{guide.location || "Location not specified"}</span>
                   </div>
 
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
                     {guide.bio || "No description available"}
                   </p>
 
@@ -553,12 +553,12 @@ export default function FindGuidePage() {
                   {/* Guide info */}
                   <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
                     <div className="flex items-center">
-                      <Languages className="h-4 w-4 mr-1" />
-                      <span>{guide.languages?.length || 0} languages</span>
+                      <Languages className="h-4 w-4 mr-1 dark:text-white" />
+                      <span className="dark:text-white">{guide.languages?.length || 0} languages</span>
                     </div>
                     <div className="flex items-center">
-                      <Users className="h-4 w-4 mr-1" />
-                      <span>{guide.experience || 0} years</span>
+                      <Users className="h-4 w-4 mr-1c dark:text-white" />
+                      <span className="dark:text-white">{guide.experience || 0} years</span>
                     </div>
                   </div>
 

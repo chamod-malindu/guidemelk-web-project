@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Eye, EyeOff, ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
+import toast from "react-hot-toast"
 
 // Sri Lankan districts data
 const sriLankanDistricts = [
@@ -44,35 +45,48 @@ const tourSpecialties = [
 ]
 
 export default function RegisterFormClient() {
-  const searchParams = useSearchParams()
-  const userType = searchParams.get("type") || "tourist"
+  const searchParams = useSearchParams();
+  const userType = searchParams.get("type") || "tourist";
 
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [acceptTerms, setAcceptTerms] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [errors, setErrors] = useState({})
-  const { data: session, status } = useSession()
-  const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const { data: session, status } = useSession();
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const router = useRouter();
+  
 
   useEffect(() => {
-    console.log("Auth status:", status)
-    console.log("Session user:", session?.user)
+    console.log("Auth status:", status);
+    console.log("Session user:", session?.user);
     
     // Redirect to appropriate dashboard if already signed in
     if (status === "authenticated" && session?.user?.usertype) {
       const role = session.user.usertype
       if (role === 'tourist') {
-        router.push('/tourist')
+        router.push('/tourist');
       } else if (role === 'guide') {
-        router.push('/guide/dashboard')
+        router.push('/guide/dashboard');
       } else if (role === 'admin') {
-        router.push('/admin/dashboard')
+        router.push('/admin/dashboard');
       } else {
-        router.push(`/${role}/dashboard`)
+        router.push(`/${role}/dashboard`);
       }
     }
   }, [status, session, router])
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark');
+    } else {
+      setIsDarkMode(false);
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
 
   // Tourist form state
   const [touristForm, setTouristForm] = useState({
@@ -160,7 +174,7 @@ export default function RegisterFormClient() {
   const handleTouristRegister = async () => {
     if (!validateTouristForm()) return
     if (!acceptTerms) {
-      alert("Please accept the terms and conditions")
+      toast.error("Please accept the terms and conditions");
       return
     }
 
@@ -187,18 +201,20 @@ export default function RegisterFormClient() {
       const data = await response.json()
       
       if (data.success) {
-        alert('Registration successful! Please check your email for verification.')
-        window.location.href = "/verify-email"
+        toast.success('Registration successful! Please check your email for verification.', { duration: 3000 });
+        setTimeout(() => {
+          router.push('/verify-email');
+        }, 3000);
       } else {
         if (data.error) {
-          alert(data.error)
+          toast.error(data.error)
         } else {
-          alert('Registration failed. Please try again.')
+          toast.error('Registration failed. Please try again.')
         }
       }
     } catch (error) {
       console.error('Registration failed:', error)
-      alert('Registration failed. Please try again.')
+      toast.error('Registration failed. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -207,7 +223,7 @@ export default function RegisterFormClient() {
   const handleGuideRegister = async () => {
     if (!validateGuideForm()) return
     if (!acceptTerms) {
-      alert("Please accept the terms and conditions")
+      toast.error("Please accept the terms and conditions")
       return
     }
 
@@ -239,32 +255,34 @@ export default function RegisterFormClient() {
       const data = await response.json()
       
       if (data.success) {
-        alert('Registration successful! Please check your email for verification.')
-        window.location.href = "/verify-email"
+        toast.success('Registration successful! Please check your email for verification.', { duration: 3000 });
+        setTimeout(() => {
+          router.push('/verify-email');
+        }, 3000);
       } else {
         if (data.error) {
-          alert(data.error)
+          toast.error(data.error);
         } else {
-          alert('Registration failed. Please try again.')
+          toast.error('Registration failed. Please try again.');
         }
       }
     } catch (error) {
-      console.error('Registration failed:', error)
-      alert('Registration failed. Please try again.')
+      console.error('Registration failed:', error);
+      toast.error('Registration failed. Please try again.');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
   // Redirect if no user type is specified
   useEffect(() => {
     if (!userType || (userType !== "tourist" && userType !== "guide")) {
-      window.location.href = "/register"
+     router.push("/register")
     }
   }, [userType])
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-8 px-4">
+    <div className={`${isDarkMode ? 'dark' : ''} min-h-screen dark:from-gray-900 dark:to-gray-800 bg-gradient-to-b from-blue-50 to-white py-8 px-4`}>
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -279,10 +297,10 @@ export default function RegisterFormClient() {
               </Button>
             </Link>
             <div className="text-center">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2 dark:text-white">
                 {userType === "tourist" ? "Join as Tourist" : "Join as Guide"}
               </h1>
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-300">
                 {userType === "tourist"
                   ? "Start discovering amazing local guides across Sri Lanka"
                   : "Join our community of local guides and start earning"}
@@ -424,7 +442,7 @@ export default function RegisterFormClient() {
               </div>
 
               <Button 
-                className="w-full" 
+                className="w-full dark:text-gray-700 dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer" 
                 onClick={handleTouristRegister} 
                 disabled={!acceptTerms || isLoading}
               >
@@ -696,7 +714,7 @@ export default function RegisterFormClient() {
               </div>
 
               <Button 
-                className="w-full" 
+                className="w-full dark:text-gray-700 dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer" 
                 onClick={handleGuideRegister} 
                 disabled={!acceptTerms || isLoading}
               >

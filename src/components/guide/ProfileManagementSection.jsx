@@ -5,6 +5,7 @@ import ProfilePhotoCard from "./ProfilePhotoCard";
 import BasicInfoCard from "./BasicInfoCard";
 import ProfessionalDetailsCard from "./ProfessionalDetailsCard";
 import PhotoGalleryCard from "./PhotoGalleryCard";
+import toast from "react-hot-toast";
 
 export default function ProfileManagementSection({ currentUser, setCurrentUser }) {
   const [formValues, setFormValues] = useState({
@@ -43,9 +44,10 @@ export default function ProfileManagementSection({ currentUser, setCurrentUser }
 
       setCurrentUser(data.user);
       localStorage.setItem("user", JSON.stringify(data.user));
-      alert("Profile updated successfully!");
+      toast.success("Profile updated successfully!");
+      
     } catch (err) {
-      alert("Error: " + err.message);
+      toast.error("Error: " + err.message);
     }
   };
 

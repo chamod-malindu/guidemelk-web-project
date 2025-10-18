@@ -94,8 +94,6 @@ import { X, CreditCard, Building, CheckCircle, Loader } from "lucide-react";
         },
       });
   
-      // 2. ***NEW: Save payment record to MongoDB via /api/payments***
-      // You can customize commission/netEarnings logic if needed
       try {
         await fetch("/api/payments", {
           method: "POST",
@@ -115,7 +113,6 @@ import { X, CreditCard, Building, CheckCircle, Loader } from "lucide-react";
           }),
         });
       } catch (payErr) {
-        // Optional: Log, show warning, but do not block main payment flow
         console.error("Payment record creation failed:", payErr);
       }
   

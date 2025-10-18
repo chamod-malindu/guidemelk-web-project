@@ -126,25 +126,25 @@ export default function TouristNavbar() {
         )}
       </Button>
       {showNotifications && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-          <div className="p-3 border-b border-gray-200 flex justify-between items-center">
-            <h3 className="font-semibold text-gray-900">Notifications</h3>
+        <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+          <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Notifications</h3>
             <Button variant="ghost" size="sm" onClick={() => { setUnreadCount(0); setNotifications([]); setShowNotifications(false); }}>
               Clear All
             </Button>
           </div>
           <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="p-6 text-center text-gray-500">
-                <Bell className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+              <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+                <Bell className="h-8 w-8 mx-auto mb-2 text-gray-300 dark:text-gray-600" />
                 <p>No notifications</p>
               </div>
             ) : (
               notifications.map((n, i) => (
-                <div key={i} className="p-3 border-b border-gray-100 hover:bg-gray-50">
-                  <p className="text-sm text-gray-800">{n.message}</p>
-                  <p className="text-xs text-gray-500 mt-1">{new Date(n.timestamp).toLocaleString()}</p>
-                </div>
+                <div key={i} className="p-3 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <p className="text-sm text-gray-800 dark:text-gray-200">{n.message}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{new Date(n.timestamp).toLocaleString()}</p>
+              </div>
               ))
             )}
           </div>
@@ -154,30 +154,30 @@ export default function TouristNavbar() {
   );
 
   return (
-    <div className="bg-white shadow-sm border-b">
+    <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/" className="text-xl font-bold text-blue-600">
-              GuideMeLK
-            </Link>
+          <Link href="/" className="text-xl font-bold text-blue-600 dark:text-blue-400">
+            GuideMeLK
+          </Link>
           </div>
           
           {/* Centered Navigation Menu */}
           <nav className="hidden md:flex space-x-6 absolute left-1/2 transform -translate-x-1/2">
-            <Link href="/tourist" className="text-gray-700 hover:text-blue-600 transition-colors duration-300">
-              Home
-            </Link>
-            <Link href="/findGuide" className="text-gray-700 hover:text-blue-600 transition-colors duration-300">
-              Find a Guide
-            </Link>
-            <Link href="/about" className="text-gray-700 hover:text-blue-600 transition-colors duration-300">
-              About Us
-            </Link>
-            <Link href="/tourist/dashboard" className="text-gray-700 hover:text-blue-600 transition-colors duration-300">
-              Dashboard
-            </Link>
+          <Link href="/tourist" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
+            Home
+          </Link>
+          <Link href="/findGuide" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
+            Find a Guide
+          </Link>
+          <Link href="/about" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
+            About Us
+          </Link>
+          <Link href="/tourist/dashboard" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
+            Dashboard
+          </Link>
           </nav>
           
           {/* Right side - Dark Mode Toggle, Notifications and User Profile */}
@@ -203,10 +203,10 @@ export default function TouristNavbar() {
                     {user.firstName?.[0]?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm font-medium">{user.firstName}</span>
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.firstName}</span>
               </div>
             ) : (
-              <Link href="/login" className="px-5 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-all duration-300 ease-in-out transform hover:scale-105 shadow-md">
+              <Link href="/login" className="px-5 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-full hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all duration-300 ease-in-out transform hover:scale-105 shadow-md">
                 Login / Sign Up
               </Link>
             )}

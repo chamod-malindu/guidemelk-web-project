@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -22,8 +22,20 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [activeTab, setActiveTab] = useState("tourist")
+  const [isDarkMode, setIsDarkMode] = useState(false);
   
   const router = useRouter();
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark');
+    } else {
+      setIsDarkMode(false);
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
 
   const handleLogin = async (userType) => {
     // Reset previous messages
@@ -93,16 +105,18 @@ export default function LoginPage() {
     setSuccess("")
   }
 
+
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center p-4">
+    <div className={`${isDarkMode ? 'dark' : ''} min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4`}>
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="mb-4">
             <Navbar />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-          <p className="text-gray-600">Sign in to your account to continue</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Welcome Back</h1>
+          <p className="text-gray-600 dark:text-gray-300">Sign in to your account to continue</p>
         </div>
 
         {/* Success/Error Messages */}
@@ -135,15 +149,16 @@ export default function LoginPage() {
           <TabsContent value="tourist">
             <Card>
               <CardHeader>
-                <CardTitle>Tourist Login</CardTitle>
-                <CardDescription>Access your bookings and discover new guides</CardDescription>
+                <CardTitle className="dark:text-white">Tourist Login</CardTitle>
+                <CardDescription className="dark:text-gray-300">Access your bookings and discover new guides</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="tourist-email">Email</Label>
+                  <Label htmlFor="tourist-email" className="dark:text-gray-200">Email</Label>
                   <Input
                     id="tourist-email"
                     type="email"
+                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => {
@@ -154,13 +169,14 @@ export default function LoginPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="tourist-password">Password</Label>
+                <Label htmlFor="tourist-password" className="dark:text-gray-200">Password</Label>
                   <div className="relative">
                     <Input
                       id="tourist-password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
                       value={password}
+                      className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                       onChange={(e) => {
                         setPassword(e.target.value)
                         clearMessages()
@@ -201,10 +217,10 @@ export default function LoginPage() {
                 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
+                    <span className="w-full border-t dark:border-gray-600" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-2 text-muted-foreground">Or</span>
+                    <span className="bg-white dark:bg-gray-800 px-2 text-muted-foreground dark:text-gray-400">Or</span>
                   </div>
                 </div>
 
@@ -234,6 +250,7 @@ export default function LoginPage() {
                     type="email"
                     placeholder="Enter your email"
                     value={email}
+                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                     onChange={(e) => {
                       setEmail(e.target.value)
                       clearMessages()
@@ -249,6 +266,7 @@ export default function LoginPage() {
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
                       value={password}
+                      className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                       onChange={(e) => {
                         setPassword(e.target.value)
                         clearMessages()
@@ -289,18 +307,18 @@ export default function LoginPage() {
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
+                    <span className="w-full border-t dark:border-gray-600" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-2 text-muted-foreground">Or</span>
+                    <span className="bg-white dark:bg-gray-800 px-2 text-muted-foreground dark:text-gray-400">Or</span>
                   </div>
                 </div>
 
                 <GoogleAuthButton userRole="guide" disabled={isLoading} />
 
                 <div className="text-center text-sm">
-                  <span className="text-gray-600">Don't have an account? </span>
-                  <Link href="/register" className="text-blue-600 hover:underline">
+                  <span className="text-gray-600 dark:text-gray-300">Don't have an account? </span>
+                  <Link href="/register" className="text-blue-600 dark:text-blue-400 hover:underline">
                     Sign up
                   </Link>
                 </div>
@@ -322,6 +340,7 @@ export default function LoginPage() {
                     type="email"
                     placeholder="Enter admin email"
                     value={email}
+                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                     onChange={(e) => {
                       setEmail(e.target.value)
                       clearMessages()
@@ -337,6 +356,7 @@ export default function LoginPage() {
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter admin password"
                       value={password}
+                      className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
                       onChange={(e) => {
                         setPassword(e.target.value)
                         clearMessages()

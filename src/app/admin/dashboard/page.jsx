@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { Sun, Moon, LayoutDashboard, BarChart, LineChart, Users, User, LogOut, Search, UserCheck, UserX, Shield, ShieldOff, HelpCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function AdminDashboard() {
   // State variables for theme, navigation, logout status, tab selection, and search
@@ -246,7 +247,7 @@ export default function AdminDashboard() {
       localStorage.removeItem('user');
       localStorage.removeItem('theme');
       setLoggingOut(false);
-      alert('Logged out successfully');
+      toast.success('Logged out successfully');
     }, 1000);
   };
 

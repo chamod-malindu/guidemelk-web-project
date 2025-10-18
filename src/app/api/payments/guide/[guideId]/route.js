@@ -8,7 +8,7 @@ export async function GET(req, { params }) {
     const { guideId } = params;
     const payments = await Payment.find({ guide: guideId })
       .sort({ date: -1 })
-      .populate("tourist", "firstName lastName profileImage") // <<< THIS IS THE FIX!
+      .populate("tourist", "firstName lastName profileImage") 
       .lean();
     return NextResponse.json({ success: true, payments }, { status: 200 });
   } catch (error) {

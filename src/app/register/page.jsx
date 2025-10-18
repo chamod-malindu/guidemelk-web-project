@@ -1,6 +1,4 @@
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { getUserFromToken } from "@/lib/auth";
 import RegisterClient from "./RegisterClient";
 
 export default async function RegisterPage() {

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Sun, Moon, Link as LucideLink } from 'lucide-react';
+import { Sun, Moon, Link as LucideLink, Image } from 'lucide-react';
+import HomeNavbar from '@/components/HomeNavbar';
 
 export default function About() {
   // State to manage dark mode
@@ -34,29 +35,9 @@ export default function About() {
   return (
     // Main container with dynamic dark mode class and default font
     <div className={`${isDarkMode ? 'dark' : ''} min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-50 font-inter`}>
+      
       {/* Header Section */}
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm py-4 px-6 md:px-12 flex justify-between items-center rounded-b-xl">
-        {/* Logo/Site Title */}
-        <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">Guidemelk</div>
-        {/* Navigation Links (hidden on small screens) */}
-        <nav className="hidden md:flex space-x-6">
-          <a href="/" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">Home</a>
-          <a href="/find-guide" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">Find a Guide</a>
-          <a href="/become-guide" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">Become a Guide</a>
-          <a href="/about" className="text-indigo-600 dark:text-indigo-400 font-semibold">About Us</a> {/* Highlight current page */}
-        </nav>
-        {/* Dark Mode Toggle and Login/Sign Up Button */}
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={toggleDarkMode}
-            className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            aria-label="Toggle dark mode"
-          >
-            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />} {/* Display Sun or Moon icon based on theme */}
-          </button>
-          <a href="/login" className="px-5 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-all duration-300 ease-in-out transform hover:scale-105 shadow-md">Login / Sign Up</a>
-        </div>
-      </header>
+      <HomeNavbar isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
 
       <main>
         {/* Hero Section - About Us */}
@@ -128,8 +109,8 @@ export default function About() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
             {/* Team Member 1 */}
             <div className="bg-gray-100 dark:bg-gray-800 p-8 rounded-xl shadow-lg text-center transform hover:scale-105 transition-transform duration-300 animate-fade-in animation-delay-200">
-              <img
-                src="https://placehold.co/150x150/E0E7FF/4338CA?text=Chamod"
+            <img
+                src="/team/chamod.jpg"
                 alt="Chamod"
                 className="w-32 h-32 rounded-full mx-auto mb-4 object-cover border-4 border-indigo-500"
               />
@@ -142,7 +123,7 @@ export default function About() {
             {/* Team Member 2 */}
             <div className="bg-gray-100 dark:bg-gray-800 p-8 rounded-xl shadow-lg text-center transform hover:scale-105 transition-transform duration-300 animate-fade-in animation-delay-400">
               <img
-                src="https://placehold.co/150x150/FFE0E7/CA3843?text=Thisara"
+                src="/team/thisara.jpg"
                 alt="Thisara"
                 className="w-32 h-32 rounded-full mx-auto mb-4 object-cover border-4 border-pink-500"
               />
@@ -155,7 +136,7 @@ export default function About() {
             {/* Team Member 3 */}
             <div className="bg-gray-100 dark:bg-gray-800 p-8 rounded-xl shadow-lg text-center transform hover:scale-105 transition-transform duration-300 animate-fade-in animation-delay-600">
               <img
-                src="https://placehold.co/150x150/E0FFEF/38CA43?text=Poojani"
+                src="/team/poojani.jpg"
                 alt="Poojani"
                 className="w-32 h-32 rounded-full mx-auto mb-4 object-cover border-4 border-green-500"
               />
@@ -168,7 +149,7 @@ export default function About() {
             {/* Team Member 4 */}
             <div className="bg-gray-100 dark:bg-gray-800 p-8 rounded-xl shadow-lg text-center transform hover:scale-105 transition-transform duration-300 animate-fade-in animation-delay-800">
               <img
-                src="https://placehold.co/150x150/FFEFD5/FFA500?text=Chamodi"
+                src="/team/aponsu.jpg"
                 alt="Chamodi"
                 className="w-32 h-32 rounded-full mx-auto mb-4 object-cover border-4 border-orange-500"
               />
@@ -181,7 +162,7 @@ export default function About() {
             {/* Team Member 5 */}
             <div className="bg-gray-100 dark:bg-gray-800 p-8 rounded-xl shadow-lg text-center transform hover:scale-105 transition-transform duration-300 animate-fade-in animation-delay-1000">
               <img
-                src="https://placehold.co/150x150/D5FFFF/00CED1?text=Hiruni"
+                src="/team/hiruni.jpg"
                 alt="Hiruni"
                 className="w-32 h-32 rounded-full mx-auto mb-4 object-cover border-4 border-cyan-500"
               />

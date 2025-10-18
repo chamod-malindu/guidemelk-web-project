@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import AuthWrapper from "@/components/AuthWrapper";
 import { io } from "socket.io-client";
 import PaymentModal from '@/components/PaymentModal'; 
+import toast from "react-hot-toast";
 
 export default function TouristDashboard() {
   const [activeTab, setActiveTab] = useState("bookings")
@@ -42,6 +43,13 @@ export default function TouristDashboard() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentBooking, setPaymentBooking] = useState(null);
   const [paymentType, setPaymentType] = useState(''); // 'advance' or 'remaining'
+
+  // State for review modal
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewBooking, setReviewBooking] = useState(null);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviews, setReviews] = useState([]);
 
 
   const handleEditToggle = async () => {
@@ -71,13 +79,13 @@ export default function TouristDashboard() {
           setUser(updateRes.data.user);
           setPhotoPreview("");
           setSelectedFile(null);
-          alert("Profile updated successfully!");
+          toast.success("Profile updated successfully!");
         } else {
-          alert("Failed to update profile.");
+          toast.error("Failed to update profile.");
         }
       } catch (error) {
         console.error("Update failed:", error);
-        alert(error.message || "Error updating profile.");
+        toast.error(error.message || "Error updating profile.");
       }
     }
   
@@ -113,14 +121,6 @@ export default function TouristDashboard() {
     }
   };
 
-  // State for review modal
-  const [showReviewModal, setShowReviewModal] = useState(false);
-  const [reviewBooking, setReviewBooking] = useState(null);
-  const [reviewRating, setReviewRating] = useState(0);
-  const [reviewComment, setReviewComment] = useState("");
-  const [reviews, setReviews] = useState([]);
-
-
   const openReviewModal = (booking) => {
     setReviewBooking(booking);
     setReviewRating(0);
@@ -131,7 +131,7 @@ export default function TouristDashboard() {
   const submitReview = async () => {
     try {
       if (!reviewRating) {
-        alert("Please select a rating");
+        toast.error("Please select a rating");
         return;
       }
 
@@ -151,7 +151,7 @@ export default function TouristDashboard() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      alert("✅ Review submitted successfully!");
+      toast.success("Review submitted successfully!");
 
       // Optional real-time notify guide
       if (notificationSocketRef.current?.connected) {
@@ -166,12 +166,12 @@ export default function TouristDashboard() {
       await fetchMyReviews();
       setShowReviewModal(false);
     } catch (err) {
-      alert(`❌ Failed to submit review: ${err.message}`);
+      toast.error(`Failed to submit review: ${err.message}`);
     }
   };
 
 
-  // 🔔 Persistent notification socket
+  // Persistent notification socket
   useEffect(() => {
     if (!user?._id && !user?.id) return;
     const userId = user._id || user.id;
@@ -268,7 +268,7 @@ export default function TouristDashboard() {
         prevBookings.map(b => b._id === bookingId ? { ...b, status: 'cancelled' } : b)
       );
 
-      alert(`✅ ${data.message}`);
+      toast.success(`${data.message}`);
 
       // Emit to guide
       if (notificationSocketRef.current?.connected) {
@@ -284,7 +284,7 @@ export default function TouristDashboard() {
 
     } catch (error) {
       console.error('Cancel booking error:', error);
-      alert(`❌ Error: ${error.message}`);
+      toast.error(`Error: ${error.message}`);
     }
   };
 
@@ -366,12 +366,26 @@ export default function TouristDashboard() {
     setLoggingOut(true);
     try {
       await axios.post("/api/auth/logout");
+
+      localStorage.removeItem('user');
+    
+      // Dispatch storage event to notify HomeNavbar and other components
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'user',
+        newValue: null,
+        url: window.location.href,
+        storageArea: localStorage
+      }));
+      
       setUser(null);
-      alert("Logged out successfully.");
-      router.replace("/login");
+      toast.success("Logged out successfully.", {duration: 2000});
+      setTimeout(() => {
+        router.replace("/login");
+      }, 2000);
+      
     } catch (error) {
       console.error("Logout failed:", error);
-      alert("Logout failed. Please try again.");
+      toast.error("Logout failed. Please try again.");
     } finally {
       setLoggingOut(false);
     }
@@ -410,24 +424,24 @@ export default function TouristDashboard() {
         )}
       </Button>
       {showNotifications && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-          <div className="p-3 border-b border-gray-200 flex justify-between items-center">
-            <h3 className="font-semibold text-gray-900">Notifications</h3>
+        <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+          <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100">Notifications</h3>
             <Button variant="ghost" size="sm" onClick={() => { setUnreadCount(0); setNotifications([]); setShowNotifications(false); }}>
               Clear All
             </Button>
           </div>
           <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="p-6 text-center text-gray-500">
-                <Bell className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+              <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+                <Bell className="h-8 w-8 mx-auto mb-2 text-gray-300 dark:text-gray-600" />
                 <p>No notifications</p>
               </div>
             ) : (
               notifications.map((n, i) => (
-                <div key={i} className="p-3 border-b border-gray-100 hover:bg-gray-50">
-                  <p className="text-sm text-gray-800">{n.message}</p>
-                  <p className="text-xs text-gray-500 mt-1">{new Date(n.timestamp).toLocaleString()}</p>
+                <div key={i} className="p-3 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <p className="text-sm text-gray-800 dark:text-gray-200">{n.message}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{new Date(n.timestamp).toLocaleString()}</p>
                 </div>
               ))
             )}
@@ -468,29 +482,29 @@ export default function TouristDashboard() {
 
   return (
     <AuthWrapper requiredRole="tourist">
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Nav Bar */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center">
-              <Link href="/" className="text-xl font-bold text-blue-600">
-                GuideMeLK
-              </Link>
+            <Link href="/" className="text-xl font-bold text-blue-600 dark:text-blue-400">
+              GuideMeLK
+            </Link>
             </div>
             
             {/* Centered Navigation Menu */}
             <nav className="/tourist md:flex space-x-6 absolute left-1/2 transform -translate-x-1/2">
-              <Link href="/" className="text-gray-700 hover:text-blue-600 transition-colors duration-300">
-                Home
-              </Link>
-              <Link href="/findGuide" className="text-gray-700 hover:text-blue-600 transition-colors duration-300">
-                Find a Guide
-              </Link>
-              <Link href="/about" className="text-gray-700 hover:text-blue-600 transition-colors duration-300">
-                About Us
-              </Link>
+            <Link href="/" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
+              Home
+            </Link>
+            <Link href="/findGuide" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
+              Find a Guide
+            </Link>
+            <Link href="/about" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
+              About Us
+            </Link>
             </nav>
             
             {/* Right side - Dark Mode Toggle, Notifications and User Profile */}
@@ -525,7 +539,7 @@ export default function TouristDashboard() {
                     {user.firstName?.[0]?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm font-medium">{user.firstName}</span>
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.firstName}</span>
               </div>
             </div>
           </div>
@@ -535,8 +549,8 @@ export default function TouristDashboard() {
       <div className="container mx-auto px-4 py-8">
         {showReviewModal && reviewBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-4">Leave a Review for {reviewBooking.guide?.firstName}</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Leave a Review for {reviewBooking.guide?.firstName}</h3>
             
             {/* Rating stars */}
             <div className="flex gap-1 mb-4">
@@ -554,7 +568,7 @@ export default function TouristDashboard() {
               value={reviewComment}
               onChange={(e) => setReviewComment(e.target.value)}
               placeholder="Write your feedback..."
-              className="w-full border rounded p-2 mb-4"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded p-2 mb-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
             />
       
             <div className="flex justify-end gap-2">
@@ -566,8 +580,8 @@ export default function TouristDashboard() {
       )}
         {/* Greeting Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {user.firstName}!</h1>
-          <p className="text-gray-600">Manage your bookings and explore Sri Lanka.</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Welcome back, {user.firstName}!</h1>
+          <p className="text-gray-600 dark:text-gray-300">Manage your bookings and explore Sri Lanka.</p>
         </div>
 
         {/* Tab Section */}
@@ -597,7 +611,7 @@ export default function TouristDashboard() {
             {/* Bookings Tab */}
             <TabsContent value="bookings" className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-semibold">My Bookings</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">My Bookings</h2>
                 <Button asChild>
                   <Link href="/search">
                     <Search className="mr-2 h-4 w-4" />
@@ -610,14 +624,14 @@ export default function TouristDashboard() {
               {loadingBookings && (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600">Loading your bookings...</p>
+                  <p className="text-gray-600 dark:text-gray-300">Loading your bookings...</p>
                 </div>
               )}
 
               {/* Error State */}
               {bookingError && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-                  <p className="text-red-600">❌ {bookingError}</p>
+                  <p className="text-red-600 dark:text-red-400">❌ {bookingError}</p>
                   <Button 
                     variant="outline" 
                     size="sm" 
@@ -633,8 +647,8 @@ export default function TouristDashboard() {
               {!loadingBookings && !bookingError && bookings.length === 0 && (
                 <div className="text-center py-12">
                   <div className="text-6xl mb-4">🌴</div>
-                  <h3 className="text-xl font-semibold text-gray-700 mb-2">No Bookings Yet</h3>
-                  <p className="text-gray-500 mb-4">
+                  <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">No Bookings Yet</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">
                     Start exploring Sri Lanka by booking your first tour with a local guide!
                   </p>
                   <Button asChild>
@@ -659,10 +673,10 @@ export default function TouristDashboard() {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <h3 className="text-lg font-semibold">
-                            {booking.guide?.firstName} {booking.guide?.lastName}
-                          </h3>
-                          <div className="text-gray-600 flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {booking.guide?.firstName} {booking.guide?.lastName}
+                        </h3>
+                        <div className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
                             <MapPin className="h-4 w-4" />
                             <span>{booking.guide?.location || "Location not specified"}</span>
                           </div>
@@ -683,7 +697,7 @@ export default function TouristDashboard() {
                           
                           {/* Destinations */}
                           <div className="mt-2">
-                            <p className="text-sm font-medium text-gray-600">Destinations:</p>
+                            <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Destinations:</p>
                             <div className="flex flex-wrap gap-1 mt-1">
                               {booking.destinations?.map((destination, index) => (
                                 <Badge key={index} variant="secondary" className="text-xs">
@@ -696,17 +710,17 @@ export default function TouristDashboard() {
                           {/* Special Requests */}
                           {booking.specialRequests && (
                             <div className="mt-2">
-                              <p className="text-sm font-medium text-gray-600">Special Requests:</p>
-                              <p className="text-sm text-gray-700">{booking.specialRequests}</p>
+                              <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Special Requests:</p>
+                              <p className="text-sm text-gray-700 dark:text-gray-200">{booking.specialRequests}</p>
                             </div>
                           )}
 
                           {/* Decline Reason */}
                           {booking.status === 'declined' && booking.declineReason && (
-                            <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded">
-                              <p className="text-sm font-medium text-red-600">Declined:</p>
-                              <p className="text-sm text-red-700">{booking.declineReason}</p>
-                            </div>
+                            <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded">
+                            <p className="text-sm font-medium text-red-600 dark:text-red-400">Declined:</p>
+                            <p className="text-sm text-red-700 dark:text-red-300">{booking.declineReason}</p>
+                          </div>
                           )}
                         </div>
                       </div>
@@ -715,17 +729,16 @@ export default function TouristDashboard() {
                           {getStatusIcon(booking.status)}
                           <span className="ml-1 capitalize">{booking.status}</span>
                         </Badge>
-                        <div className="text-blue-600 font-bold text-xl mt-2">${booking.totalCost}</div>
+                        <div className="text-blue-600 dark:text-blue-400 font-bold text-xl mt-2">${booking.totalCost}</div>
 
-                        {/* Payment status info */}
-                        <div className="text-xs text-gray-500 mt-1">
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                           {booking.paymentStatus === "partial" && booking.advanceAmount
                             ? `Advance paid: $${booking.advanceAmount}`
                             : booking.paymentStatus === "processed"
                             ? `Fully paid`
                             : `Not paid yet`}
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                           Booked on {new Date(booking.createdAt).toLocaleDateString()}
                         </div>
                       </div>
@@ -753,7 +766,7 @@ export default function TouristDashboard() {
                             router.push(`/chat?chatId=${chat._id}`);
                           } catch (err) {
                             console.error("Failed to start chat:", err);
-                            alert("Could not open chat. Please try again.");
+                            toast.error("Could not open chat. Please try again.");
                           }
                         }}
                       >
@@ -814,7 +827,16 @@ export default function TouristDashboard() {
                         variant="ghost" 
                         size="sm"
                         onClick={() => {
-                          alert(`Booking Details:\nID: ${booking._id}\nStatus: ${booking.status}\nTotal: ${booking.totalCost}`);
+                          toast.custom(
+                            <div className="whitespace-pre-line p-3 rounded-lg max-w-sm shadow-lg bg-white dark:bg-gray-900">
+                              Booking Details:
+                                {`\nID: ${booking._id}\nStatus: ${booking.status}\nTotal: ${booking.totalCost}`}
+                              </div>,
+                              {
+                                duration: 5000,
+                                position: 'top-right',
+                              }     
+                          );
                         }}
                       >
                         View Details
@@ -827,7 +849,7 @@ export default function TouristDashboard() {
 
             {/* Messages Tab */}
             <TabsContent value="messages" className="space-y-4">
-              <h2 className="text-2xl font-semibold">Messages</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Messages</h2>
               {messages.map((msg) => (
                 <Card key={msg.id} className="hover:shadow-md">
                   <CardContent className="p-4 flex items-center gap-4">
@@ -837,10 +859,10 @@ export default function TouristDashboard() {
                     </Avatar>
                     <div className="flex-1">
                       <div className="flex justify-between items-center">
-                        <h3 className="font-semibold">{msg.guide.name}</h3>
-                        <span className="text-sm text-gray-600">{msg.time}</span>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{msg.guide.name}</h3>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{msg.time}</span>
                       </div>
-                      <p className="text-gray-700">{msg.lastMessage}</p>
+                      <p className="text-gray-700 dark:text-gray-300">{msg.lastMessage}</p>
                       
                       <Button
                         size="sm"
@@ -866,7 +888,7 @@ export default function TouristDashboard() {
 
             {/* Reviews Tab */}
             <TabsContent value="reviews" className="space-y-4">
-            <h2 className="text-2xl font-semibold">My Reviews</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">My Reviews</h2>
             {reviews.map((review) => (
               <Card key={review._id}>
                 <CardContent className="p-6 flex gap-4">
@@ -881,13 +903,13 @@ export default function TouristDashboard() {
                   </Avatar>
                   <div className="flex-1">
                     <div className="flex justify-between mb-2">
-                      <h3 className="font-semibold">
-                        {review.guide?.firstName} {review.guide?.lastName}
-                      </h3>
-                      <span className="text-sm text-gray-600">
-                        {new Date(review.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                      {review.guide?.firstName} {review.guide?.lastName}
+                    </h3>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      {new Date(review.createdAt).toLocaleDateString()}
+                    </span>
+                                        </div>
                     <div className="flex gap-1 mb-2">
                       {[...Array(5)].map((_, i) => (
                         <Star
@@ -896,7 +918,7 @@ export default function TouristDashboard() {
                         />
                       ))}
                     </div>
-                    <p>{review.comment}</p>
+                    <p className="text-gray-700 dark:text-gray-300">{review.comment}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -905,7 +927,7 @@ export default function TouristDashboard() {
 
             {/* Profile Tab */}
             <TabsContent value="profile" className="space-y-6">
-              <h2 className="text-2xl font-semibold">Profile Settings</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Profile Settings</h2>
               <Card>
                 <CardHeader>
                   <CardTitle>Personal Information</CardTitle>
