@@ -366,6 +366,17 @@ export default function TouristDashboard() {
     setLoggingOut(true);
     try {
       await axios.post("/api/auth/logout");
+
+      localStorage.removeItem('user');
+    
+      // Dispatch storage event to notify HomeNavbar and other components
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'user',
+        newValue: null,
+        url: window.location.href,
+        storageArea: localStorage
+      }));
+      
       setUser(null);
       toast.success("Logged out successfully.", {duration: 2000});
       setTimeout(() => {
