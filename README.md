@@ -9,8 +9,8 @@
 
 ---
 
-![Next.js](https://img.shields.io/badge/Next.js-13+-black?style=flat&logo=next.js)
-![MongoDB](https://img.shields.io/badge/MongoDB-6.0-green?style=flat&logo=mongodb)
+![Next.js](https://img.shields.io/badge/Next.js-15.3.3-black?style=flat&logo=next.js)
+![MongoDB](https://img.shields.io/badge/MongoDB-8.17.1-green?style=flat&logo=mongodb)
 ![Node.js](https://img.shields.io/badge/Node.js-18+-green?style=flat&logo=node.js)
 
 ---
@@ -182,8 +182,6 @@ To continue improving GuidMeLK, we plan to introduce the following features in f
 **GuidMeLK** serves as a bridge between **tourists** and **local guides**, fostering trust, convenience, and sustainable tourism in Sri Lanka.  
 Through its innovative features — from real-time communication to verified profiles — the platform helps tourists enjoy authentic experiences while empowering local guides with new opportunities.  
 
-> ⭐ If you find this project useful or inspiring, please consider starring the repo and following our journey. Thank you!
-
 ---
 
 ## 🖼️ Project Screenshots
@@ -203,10 +201,10 @@ Through its innovative features — from real-time communication to verified pro
   <img src="public/screenshots/pay.png" alt="Payment Options" width="800" />
 </p>
 
-### 💳 Chat Page
+### 💬 Chat Page
 <p align="center">
   <img src="public/screenshots/chat.png" alt="Payment Options" width="800" />
 </p>
 
-> All UI designs and components were created to ensure a responsive, user-friendly experience for both tourists and guides.
+> ⭐ If you find this project useful or inspiring, please consider starring the repo and following our journey. Thank you!
 
