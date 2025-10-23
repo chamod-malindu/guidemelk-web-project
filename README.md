@@ -137,7 +137,7 @@ Meet the development team behind **GuidMeLK** (Group 08 – UWU/ICT/22):
 | **Chamod Malindu**    | Full Stack Developer & Planning            | [@chamod-malindu](https://github.com/chamod-malindu)    | [Chamod Kariyawasam](https://www.linkedin.com/in/chamod-kariyawasam-7724b1311)  |
 | **Poojani Ranasinghe**| Frontend Developer & Designer              | [@PoojaniRanasinghe](https://github.com/PoojaniRanasinghe) | [Poojani Ranasinghe](http://www.linkedin.com/in/poojani-ranasinghe-184770310)  |
 | **Chamodi Aponsu**    | Project Management & Development Support   | [@ChamodiAponsu](https://github.com/ChamodiAponsu)       | [Chamodi Aponsu](https://www.linkedin.com/in/chamodi-aponsu-167410307)  |
-| **Thisara Randima**   | UI/UX Designer                             | —                                            | [Thisara Randima](https://www.linkedin.com/in/thisara-randima-44476735a/)  |
+| **Thisara Randima**   | UI/UX Designer                             | [@Thisara Randima](https://github.com/Thisara82687625)                                          | [Thisara Randima](https://www.linkedin.com/in/thisara-randima-44476735a)                                            | [Thisara Randima](https://www.linkedin.com/in/thisara-randima-44476735a/)  |
 | **Hiruni Pamudika**   | Documentation & Quality Assurance (QA)     | [@hiruni7](https://github.com/hiruni7)   | [Hiruni Pamudika](https://www.linkedin.com/in/hiruni-pramudika-4148a637b)  |
 
 ---  
