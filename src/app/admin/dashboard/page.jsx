@@ -1,11 +1,12 @@
-
-"use client";
+"use client"
 
 import { useState, useEffect } from 'react';
 import { Sun, Moon, LayoutDashboard, BarChart, LineChart, Users, User, LogOut, Search, UserCheck, UserX, Shield, ShieldOff, HelpCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 export default function AdminDashboard() {
+  const router = useRouter();
   // State variables for theme, navigation, logout status, tab selection, and search
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [activeSection, setActiveSection] = useState('overview');
@@ -34,6 +35,12 @@ export default function AdminDashboard() {
   const [usersError, setUsersError] = useState('');
 
 
+  useEffect(() => {
+    if (loggingOut) {
+      router.replace('/login');
+      return;
+    } 
+  }, [loggingOut]);
 
   // Fetch dashboard stats from backend API on initial render
   useEffect(() => {
@@ -240,7 +247,10 @@ export default function AdminDashboard() {
 
   // Handles logout with simulated delay
   const handleLogout = async () => {
-    if (loggingOut) return;
+    if (loggingOut) {
+      navigation.replace('/login');
+      return;
+    } 
     setLoggingOut(true);
     // Simulate logout process
     setTimeout(() => {
