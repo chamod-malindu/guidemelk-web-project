@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Bell, Sun, Moon } from "lucide-react";
+import { Bell, Sun, Moon, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ export default function TouristNavbar() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const notificationSocketRef = useRef(null);
 
   // Fetch user profile
@@ -25,7 +26,6 @@ export default function TouristNavbar() {
         setUser(res.data.user);
       } catch (err) {
         console.error("Failed to load user:", err);
-        // Don't redirect here, let individual pages handle auth
       }
     };
     fetchUser();
@@ -53,6 +53,15 @@ export default function TouristNavbar() {
       localStorage.setItem('theme', 'light');
     }
   };
+
+  // Close menu on resize to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) setIsMenuOpen(false);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Notification socket setup
   useEffect(() => {
@@ -100,6 +109,13 @@ export default function TouristNavbar() {
       Notification.requestPermission();
     }
   }, []);
+
+  const navLinks = [
+    { href: '/tourist', label: 'Home' },
+    { href: '/findGuide', label: 'Find a Guide' },
+    { href: '/about', label: 'About Us' },
+    { href: '/tourist/dashboard', label: 'Dashboard' },
+  ];
 
   const NotificationDropdown = () => (
     <div className="relative">
@@ -159,29 +175,26 @@ export default function TouristNavbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-          <Link href="/" className="text-xl font-bold text-blue-600 dark:text-blue-400">
-            GuideMeLK
-          </Link>
+            <Link href="/" className="text-xl font-bold text-blue-600 dark:text-blue-400">
+              GuideMeLK
+            </Link>
           </div>
           
-          {/* Centered Navigation Menu */}
+          {/* Centered Navigation Menu - Desktop */}
           <nav className="hidden md:flex space-x-6 absolute left-1/2 transform -translate-x-1/2">
-          <Link href="/tourist" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
-            Home
-          </Link>
-          <Link href="/findGuide" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
-            Find a Guide
-          </Link>
-          <Link href="/about" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
-            About Us
-          </Link>
-          <Link href="/tourist/dashboard" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
-            Dashboard
-          </Link>
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300"
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
           
-          {/* Right side - Dark Mode Toggle, Notifications and User Profile */}
-          <div className="flex items-center space-x-3">
+          {/* Right side - Desktop */}
+          <div className="flex items-center space-x-2 sm:space-x-3">
             {/* Dark Mode Toggle */}
             <button
               onClick={toggleDarkMode}
@@ -194,24 +207,74 @@ export default function TouristNavbar() {
             {/* Notification Dropdown - only show if user is logged in */}
             {user && <NotificationDropdown />}
             
-            {/* User Profile Section - only show if user is logged in */}
+            {/* User Profile Section - only show on desktop or if logged in with avatar */}
             {user ? (
-              <div className="flex items-center space-x-2">
+              <div className="hidden sm:flex items-center space-x-2">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={user.profileImage || "/placeholder.svg"} />
                   <AvatarFallback>
                     {user.firstName?.[0]?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.firstName}</span>
+                <span className="hidden lg:inline text-sm font-medium text-gray-900 dark:text-gray-100">{user.firstName}</span>
               </div>
             ) : (
-              <Link href="/login" className="px-5 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-full hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all duration-300 ease-in-out transform hover:scale-105 shadow-md">
+              <Link href="/login" className="hidden sm:inline-block px-4 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-full hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-all duration-300 ease-in-out transform hover:scale-105 shadow-md text-sm">
                 Login / Sign Up
               </Link>
             )}
+
+            {/* Hamburger Button */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="md:hidden p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-300 focus:outline-none"
+              aria-label="Toggle menu"
+            >
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
         </div>
+      </div>
+
+      {/* Mobile Menu */}
+      <div
+        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+          isMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <nav className="flex flex-col px-4 pb-4 space-y-1 border-t border-gray-200 dark:border-gray-700 pt-3">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setIsMenuOpen(false)}
+              className="block py-2.5 px-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium"
+            >
+              {link.label}
+            </Link>
+          ))}
+
+          {/* Mobile user section */}
+          {user ? (
+            <div className="sm:hidden flex items-center space-x-3 px-3 py-2.5 border-t border-gray-200 dark:border-gray-700 mt-2 pt-3">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={user.profileImage || "/placeholder.svg"} />
+                <AvatarFallback>
+                  {user.firstName?.[0]?.toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.firstName}</span>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              onClick={() => setIsMenuOpen(false)}
+              className="sm:hidden block mt-2 py-2.5 px-3 text-center bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 font-medium"
+            >
+              Login / Sign Up
+            </Link>
+          )}
+        </nav>
       </div>
     </div>
   );

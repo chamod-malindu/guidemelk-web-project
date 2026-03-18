@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import ProfilePhotoCard from "./ProfilePhotoCard";
-import BasicInfoCard from "./BasicInfoCard";
-import ProfessionalDetailsCard from "./ProfessionalDetailsCard";
-import PhotoGalleryCard from "./PhotoGalleryCard";
+import ProfilePhotoCard from "../ProfilePhotoCard";
+import BasicInfoCard from "../BasicInfoCard";
+import ProfessionalDetailsCard from "../ProfessionalDetailsCard";
+import PhotoGalleryCard from "../PhotoGalleryCard";
 import toast from "react-hot-toast";
 
 export default function ProfileManagementSection({ currentUser, setCurrentUser }) {

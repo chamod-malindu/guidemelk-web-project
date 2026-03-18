@@ -41,25 +41,25 @@ export default function About() {
 
       <main>
         {/* Hero Section - About Us */}
-        <section className="relative h-[50vh] flex items-center justify-center text-center overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-800 dark:to-purple-900 shadow-lg rounded-b-3xl mx-4 mt-4">
+        <section className="relative h-[40vh] sm:h-[45vh] md:h-[50vh] flex items-center justify-center text-center overflow-hidden bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-800 dark:to-purple-900 shadow-lg rounded-b-3xl mx-2 sm:mx-4 mt-2 sm:mt-4">
           <div className="absolute inset-0 z-0 opacity-20 bg-black/30 dark:bg-black/50">
             <div className="absolute w-64 h-64 bg-white rounded-full mix-blend-overlay animate-blob top-0 left-1/4"></div>
             <div className="absolute w-96 h-96 bg-yellow-300 rounded-full mix-blend-overlay animate-blob animation-delay-2000 bottom-0 right-1/3"></div>
           </div>
           <div className="relative z-10 p-6 max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-6xl font-extrabold text-white leading-tight mb-4 animate-fade-in-up">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-4 animate-fade-in-up">
               About Guidemelk
             </h1>
-            <p className="text-xl text-indigo-100 mb-8 animate-fade-in-up animation-delay-300">
+            <p className="text-base sm:text-lg md:text-xl text-indigo-100 mb-8 animate-fade-in-up animation-delay-300">
               Connecting travelers with authentic local experiences in Sri Lanka.
             </p>
           </div>
         </section>
 
         {/* Our Mission Section */}
-        <section className="py-16 px-6 md:px-12 bg-white dark:bg-gray-900">
+        <section className="py-10 sm:py-16 px-4 sm:px-6 md:px-12 bg-white dark:bg-gray-900">
           <div className="max-w-6xl mx-auto text-center">
-            <h2 className="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-8 animate-fade-in">Our Mission</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-6 sm:mb-8 animate-fade-in">Our Mission</h2>
             <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed max-w-3xl mx-auto animate-fade-in animation-delay-200">
               At Guidemelk, our mission is to empower travelers to discover the true essence of Sri Lanka through the eyes of its local experts. We believe that the most memorable journeys are those guided by genuine connections and authentic insights, fostering cultural exchange and sustainable tourism.
             </p>
@@ -67,9 +67,9 @@ export default function About() {
         </section>
 
         {/* Our Values Section */}
-        <section className="py-16 px-6 md:px-12 bg-gray-50 dark:bg-gray-800">
-          <h2 className="text-4xl font-bold text-center text-gray-800 dark:text-gray-100 mb-12 animate-fade-in">Our Values</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
+        <section className="py-10 sm:py-16 px-4 sm:px-6 md:px-12 bg-gray-50 dark:bg-gray-800">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-800 dark:text-gray-100 mb-8 sm:mb-12 animate-fade-in">Our Values</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-10 max-w-6xl mx-auto">
             {/* Value Card 1: Authenticity */}
             <div className="bg-white dark:bg-gray-900 p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-2 animate-fade-in animation-delay-200">
               <div className="flex justify-center mb-4">
@@ -104,9 +104,9 @@ export default function About() {
         </section>
 
         {/* Our Team Section */}
-        <section className="py-16 px-6 md:px-12 bg-white dark:bg-gray-900">
-          <h2 className="text-4xl font-bold text-center text-gray-800 dark:text-gray-100 mb-12 animate-fade-in">Meet Our Team</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
+        <section className="py-10 sm:py-16 px-4 sm:px-6 md:px-12 bg-white dark:bg-gray-900">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-800 dark:text-gray-100 mb-8 sm:mb-12 animate-fade-in">Meet Our Team</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-10 max-w-6xl mx-auto">
             {/* Team Member 1 */}
             <div className="bg-gray-100 dark:bg-gray-800 p-8 rounded-xl shadow-lg text-center transform hover:scale-105 transition-transform duration-300 animate-fade-in animation-delay-200">
             <img
@@ -176,12 +176,12 @@ export default function About() {
         </section>
 
         {/* Contact Us / Call to Action Section */}
-        <section className="py-16 px-6 md:px-12 bg-indigo-50 dark:bg-gray-800 rounded-t-3xl mx-4 mb-4 shadow-inner">
+        <section className="py-10 sm:py-16 px-4 sm:px-6 md:px-12 bg-indigo-50 dark:bg-gray-800 rounded-t-3xl mx-2 sm:mx-4 mb-2 sm:mb-4 shadow-inner">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl font-bold text-indigo-800 dark:text-indigo-200 mb-6 animate-fade-in">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-indigo-800 dark:text-indigo-200 mb-6 animate-fade-in">
               Have Questions? We're Here to Help!
             </h2>
-            <p className="text-xl text-indigo-700 dark:text-indigo-300 mb-8 animate-fade-in animation-delay-200">
+            <p className="text-base sm:text-lg md:text-xl text-indigo-700 dark:text-indigo-300 mb-8 animate-fade-in animation-delay-200">
               Whether you're a traveler or a guide, feel free to reach out to us.
             </p>
             <a href="/contact" className="px-8 py-3 bg-indigo-600 text-white font-semibold rounded-full shadow-lg hover:bg-indigo-700 transition-all duration-300 ease-in-out transform hover:scale-105">
@@ -192,8 +192,8 @@ export default function About() {
       </main>
 
       {/* Footer Section */}
-      <footer className="bg-gray-800 dark:bg-gray-950 text-gray-300 py-8 px-6 md:px-12 rounded-t-xl">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+      <footer className="bg-gray-800 dark:bg-gray-950 text-gray-300 py-8 px-4 sm:px-6 md:px-12 rounded-t-xl">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
           {/* Footer Column 1: Site Info */}
           <div>
             <h3 className="text-xl font-bold text-white mb-4">Guidemelk</h3>

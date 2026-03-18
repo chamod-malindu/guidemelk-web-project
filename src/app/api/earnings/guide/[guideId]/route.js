@@ -3,7 +3,7 @@ import dbConnect from '@/lib/mongodb';
 import Booking from '@/models/Booking';
 
 export async function GET(req, { params }) {
-  const { guideId } = params;
+  const { guideId } = await params;
   await dbConnect();
 
   try {

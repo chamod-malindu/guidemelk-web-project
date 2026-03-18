@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Search, ArrowLeft, Wifi, WifiOff } from "lucide-react";
+import { Send, Search, ArrowLeft, Wifi, WifiOff, Menu, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link"
 import { io } from "socket.io-client";
@@ -194,22 +194,39 @@ const handleSendMessage = () => {
   // ===== FIND selected chat full data =====
   const selectedChatData = chats.find((c) => c._id === selectedChat);
 
+  const [chatMenuOpen, setChatMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Navbar */}
-      <nav className="flex items-center justify-between py-4 px-6 bg-white shadow rounded-lg">
-      <Link href="/" className="text-2xl font-bold text-blue-600">
-        GuidMeLK
-      </Link>
-      <div className="space-x-4">
-        <Link href="/login" className="text-gray-600 hover:text-blue-600">
-          Login
-        </Link>
-        <Link href="/register" className="text-gray-600 hover:text-blue-600">
-          Register
-        </Link>
-      </div>
-    </nav>
+      <nav className="py-4 px-4 sm:px-6 bg-white shadow rounded-lg">
+        <div className="flex items-center justify-between">
+          <Link href="/" className="text-2xl font-bold text-blue-600">
+            GuidMeLK
+          </Link>
+          <div className="hidden sm:flex space-x-4">
+            <Link href="/login" className="text-gray-600 hover:text-blue-600 transition-colors">
+              Login
+            </Link>
+            <Link href="/register" className="text-gray-600 hover:text-blue-600 transition-colors">
+              Register
+            </Link>
+          </div>
+          <button
+            onClick={() => setChatMenuOpen(!chatMenuOpen)}
+            className="sm:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+            aria-label="Toggle menu"
+          >
+            {chatMenuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
+        <div className={`sm:hidden overflow-hidden transition-all duration-300 ease-in-out ${chatMenuOpen ? 'max-h-40 opacity-100 mt-3' : 'max-h-0 opacity-0'}`}>
+          <div className="flex flex-col space-y-1 border-t border-gray-100 pt-3">
+            <Link href="/login" onClick={() => setChatMenuOpen(false)} className="block py-2 px-3 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors font-medium">Login</Link>
+            <Link href="/register" onClick={() => setChatMenuOpen(false)} className="block py-2 px-3 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors font-medium">Register</Link>
+          </div>
+        </div>
+      </nav>
 
       {/* Connection Status */}
       {currentUser && (
