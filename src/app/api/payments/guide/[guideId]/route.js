@@ -5,7 +5,7 @@ import Payment from "@/models/Payment";
 export async function GET(req, { params }) {
   await dbConnect();
   try {
-    const { guideId } = params;
+    const { guideId } = await params;
     const payments = await Payment.find({ guide: guideId })
       .sort({ date: -1 })
       .populate("tourist", "firstName lastName profileImage") 

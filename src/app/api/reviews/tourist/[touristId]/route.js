@@ -1,8 +1,9 @@
-import dbConnect from "@/lib/mongodb.js";
+import dbConnect from "@/lib/mongodb";
 import Review from "@/models/Review";
 
+
 export async function GET(req, context) {
-  const { touristId } = context.params; 
+  const { touristId } = await context.params; 
   await dbConnect();
 
   try {

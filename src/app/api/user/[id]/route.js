@@ -4,7 +4,7 @@ import User from '@/models/User';
 
 export async function PATCH(request, { params }) {
   await dbConnect();
-  const userId = params.id;
+  const userId = await params.id;
 
   try {
     const body = await request.json();

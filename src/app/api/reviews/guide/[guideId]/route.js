@@ -2,7 +2,7 @@ import dbConnect from "@/lib/mongodb.js";
 import Review from "@/models/Review.js";
 
 export async function GET(req, context) {
-  const { guideId } = context.params; 
+  const { guideId } = await context.params; 
   await dbConnect();
 
   try {

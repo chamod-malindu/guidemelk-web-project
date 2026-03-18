@@ -7,7 +7,7 @@ import { verifyToken } from '@/lib/auth';
 // UPDATE booking status
 export async function PUT(request, { params }) {
   try {
-    const { bookingId } = params;
+    const { bookingId } = await params;
     
     // Get token from cookies
     const cookieStore = await cookies();
@@ -274,7 +274,7 @@ export async function PUT(request, { params }) {
 // GET single booking details
 export async function GET(request, { params }) {
   try {
-    const { bookingId } = params;
+    const { bookingId } = await params;
     
     // Get token from cookies
     const cookieStore = await cookies();
@@ -341,7 +341,7 @@ export async function GET(request, { params }) {
 // DELETE booking (for admin or cancellation)
 export async function DELETE(request, { params }) {
   try {
-    const { bookingId } = params;
+    const { bookingId } = await params;
     
     // Get token from cookies
     const cookieStore = await cookies();
