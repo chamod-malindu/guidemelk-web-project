@@ -19,7 +19,7 @@ export default function ReviewsTab({ reviews }) {
 
       {reviews.map((review) => (
         <Card key={review._id}>
-          <CardContent className="p-6 flex gap-4">
+          <CardContent className="p-4 sm:p-6 flex gap-4">
             <Avatar>
               <AvatarImage
                 src={review.guide?.profileImage || "/placeholder.svg"}

@@ -31,7 +31,7 @@ export default function ProfileTab({
 
         <CardContent className="space-y-4">
           {/* Avatar + File Upload */}
-          <div className="flex items-center mb-4 gap-4">
+          <div className="flex flex-col sm:flex-row items-center mb-4 gap-4">
             <Avatar className="w-24 h-24">
               <AvatarImage
                 src={photoPreview || user.profileImage || "/placeholder.svg"}
@@ -52,7 +52,7 @@ export default function ProfileTab({
           </div>
 
           {/* Name Fields */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="firstName">First Name</Label>
               <Input

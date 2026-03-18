@@ -14,7 +14,7 @@ export default function BookingTab({bookings, loadingBookings, bookingError, fet
 
   return (
     <TabsContent value="bookings" className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
       <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">My Bookings</h2>
         <Button asChild>
           <Link href="/search">
@@ -67,8 +67,8 @@ export default function BookingTab({bookings, loadingBookings, bookingError, fet
       {/* Bookings List */}
       {!loadingBookings && !bookingError && bookings.map((booking) => (
         <Card key={booking._id}>
-          <CardContent className="p-6">
-            <div className="flex justify-between">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
               <div className="flex gap-4">
                 <Avatar>
                   <AvatarImage src={booking.guide?.profileImage || "/placeholder.svg"} alt={`${booking.guide?.firstName} ${booking.guide?.lastName}`} />
@@ -128,7 +128,7 @@ export default function BookingTab({bookings, loadingBookings, bookingError, fet
                   )}
                 </div>
               </div>
-              <div className="text-right">
+              <div className="flex flex-col sm:items-end gap-1 sm:text-right">
                 <Badge className={getStatusColor(booking.status)}>
                   {getStatusIcon(booking.status)}
                   <span className="ml-1 capitalize">{booking.status}</span>
@@ -148,7 +148,7 @@ export default function BookingTab({bookings, loadingBookings, bookingError, fet
               </div>
             </div>
             
-            <div className="flex gap-2 mt-4">
+            <div className="flex flex-wrap gap-2 mt-4">
               {/* Message Guide Button */}
               <Button 
                 variant="outline" 

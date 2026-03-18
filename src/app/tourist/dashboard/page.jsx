@@ -18,6 +18,8 @@ import {
   Bell,
   Sun,
   Moon,
+  Menu,
+  X,
 } from "lucide-react";
 
 import Link from "next/link";
@@ -47,6 +49,7 @@ export default function TouristDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [loggingOut, setLoggingOut] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // ------------------------
   // User / Profile State
@@ -595,9 +598,9 @@ export default function TouristDashboard() {
                 </Link>
               </div>
 
-              {/* Centered Navigation Menu */}
-              <nav className=" /tourist md:flex space-x-6 absolute left-1/2 transform -translate-x-1/2">
-                <Link href="/" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
+              {/* Centered Navigation Menu — Desktop */}
+              <nav className="hidden md:flex space-x-6 absolute left-1/2 transform -translate-x-1/2">
+                <Link href="/tourist" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
                   Home
                 </Link>
                 <Link href="/findGuide" className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
@@ -608,8 +611,8 @@ export default function TouristDashboard() {
                 </Link>
               </nav>
 
-              {/* Right side - Dark Mode Toggle, Notifications and User Profile */}
-              <div className="flex items-center space-x-3">
+              {/* Right side */}
+              <div className="flex items-center space-x-2 sm:space-x-3">
                 {/* Dark Mode Toggle */}
                 <button
                   onClick={() => {
@@ -632,16 +635,52 @@ export default function TouristDashboard() {
                 {/* Notification Dropdown */}
                 <NotificationUI />
 
-                {/* User Profile Section */}
-                <div className="flex items-center space-x-2">
+                {/* User Profile Section — hidden on very small screens */}
+                <div className="hidden sm:flex items-center space-x-2">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user.profileImage || "/placeholder.svg"} />
                     <AvatarFallback>{user.firstName?.[0]?.toUpperCase()}</AvatarFallback>
                   </Avatar>
-                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.firstName}</span>
+                  <span className="hidden lg:inline text-sm font-medium text-gray-900 dark:text-gray-100">{user.firstName}</span>
                 </div>
+
+                {/* Hamburger Button */}
+                <button
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="md:hidden p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-300 focus:outline-none"
+                  aria-label="Toggle menu"
+                >
+                  {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
               </div>
             </div>
+          </div>
+
+          {/* Mobile Menu */}
+          <div
+            className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+              isMobileMenuOpen ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'
+            }`}
+          >
+            <nav className="flex flex-col px-4 pb-4 space-y-1 border-t border-gray-200 dark:border-gray-700 pt-3">
+              <Link href="/tourist" onClick={() => setIsMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium">
+                Home
+              </Link>
+              <Link href="/findGuide" onClick={() => setIsMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium">
+                Find a Guide
+              </Link>
+              <Link href="/about" onClick={() => setIsMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium">
+                About Us
+              </Link>
+              {/* Mobile user info */}
+              <div className="sm:hidden flex items-center space-x-3 px-3 py-2.5 border-t border-gray-200 dark:border-gray-700 mt-2 pt-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user.profileImage || "/placeholder.svg"} />
+                  <AvatarFallback>{user.firstName?.[0]?.toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.firstName}</span>
+              </div>
+            </nav>
           </div>
         </div>
 
@@ -660,7 +699,7 @@ export default function TouristDashboard() {
 
           {/* Greeting Section */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Welcome back, {user.firstName}!</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">Welcome back, {user.firstName}!</h1>
             <p className="text-gray-600 dark:text-gray-300">Manage your bookings and explore Sri Lanka.</p>
           </div>
 
@@ -675,7 +714,7 @@ export default function TouristDashboard() {
             }}
             className="w-full"
           >
-            <TabsList className="grid grid-cols-4 w-full mb-6">
+            <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full mb-8 h-auto p-2">
               <TabsTrigger value="bookings" className="relative">
                 My Bookings
                 {unreadCount > 0 && (
