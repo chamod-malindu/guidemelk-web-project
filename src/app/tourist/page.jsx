@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Search, Star, MapPin, Languages, Users, Heart, Eye, Calendar, Info} from "lucide-react";
+import { Search, MapPin, Languages, Users, Heart, Eye, Calendar, Info} from "lucide-react";
 import Link from "next/link";
 import TouristNavbar from '@/components/TouristNavbar';
 
@@ -18,6 +18,10 @@ export default function TouristHomePage() {
   const [user, setUser] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  const [guides, setGuides] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -45,144 +49,39 @@ export default function TouristHomePage() {
     fetchUser();
   }, []);
 
+  // Fetch real guides from API
+  useEffect(() => {
+    const fetchGuides = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch("/api/guides");
+        if (!res.ok) {
+          throw new Error(`Failed to fetch guides: ${res.status}`);
+        }
+        const data = await res.json();
+        // Only show verified guides
+        const verifiedGuides = (data.guides || []).filter(g => g.isEmailVerified);
+        setGuides(verifiedGuides);
+      } catch (err) {
+        console.error("Error fetching guides:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchGuides();
+  }, []);
 
-  const guides = [
-    {
-      id: 1,
-      name: "Kasun Perera",
-      location: "Colombo & Western Province",
-      rating: 4.9,
-      reviews: 127,
-      price: 45,
-      image: "/img/depositphotos_312917418-stock-photo-young-handsome-indian-businessman-isolated.jpg",
-      specialties: ["Cultural Tours", "City Tours", "Food Tours"],
-      languages: ["English", "Sinhala", "Tamil"],
-      experience: "8 years",
-      description: "Experienced guide specializing in cultural and city tours around Colombo.",
-      verified: true,
-      responseTime: "Within 2 hours",
-      totalBookings: 245,
-    },
-    {
-      id: 2,
-      name: "Nimal Silva",
-      location: "Kandy & Central Province",
-      rating: 4.8,
-      reviews: 89,
-      price: 40,
-      image: "/img/360_F_367709239_wWNdUSrtEvG6psATqu1sO9AkKUXALpR8.jpg",
-      specialties: ["Temple Tours", "Nature Walks", "Tea Plantation"],
-      languages: ["English", "Sinhala", "German"],
-      experience: "6 years",
-      description: "Nature enthusiast with deep knowledge of Kandy's temples and tea culture.",
-      verified: true,
-      responseTime: "Within 4 hours",
-      totalBookings: 156,
-    },
-    {
-      id: 3,
-      name: "Priya Fernando",
-      location: "Galle & Southern Province",
-      rating: 5.0,
-      reviews: 156,
-      price: 50,
-      image: "/img/360_F_612738927_LIcFCiKHQhHq9R1QhkVRKvT6RelYUmgv.jpg",
-      specialties: ["Beach Tours", "Historical Sites", "Wildlife"],
-      languages: ["English", "Sinhala", "French"],
-      experience: "10 years",
-      description: "Expert in southern coast attractions, history, and wildlife experiences.",
-      verified: true,
-      responseTime: "Within 1 hour",
-      totalBookings: 312,
-    },
-    {
-      id: 4,
-      name: "Rajesh Kumar",
-      location: "Sigiriya & North Central",
-      rating: 4.7,
-      reviews: 73,
-      price: 42,
-      image: "img/cheerful-indian-businessman-smiling-closeup-portrait-jobs-career-campaign_53876-129416 (1).avif",
-      specialties: ["Archaeological Sites", "Adventure Tours", "Photography"],
-      languages: ["English", "Hindi", "Sinhala"],
-      experience: "5 years",
-      description: "Adventure guide specializing in ancient sites and photography tours.",
-      verified: false,
-      responseTime: "Within 6 hours",
-      totalBookings: 98,
-    },
-    {
-      id: 5,
-      name: "Chaminda Wickramasinghe",
-      location: "Ella & Hill Country",
-      rating: 4.9,
-      reviews: 134,
-      price: 48,
-      image: "/img/smiling-young-male-professional-standing-with-arms-crossed-while-making-eye-contact-against-isolated-background_662251-838.avif",
-      specialties: ["Hiking", "Tea Tours", "Scenic Views"],
-      languages: ["English", "Sinhala", "Japanese"],
-      experience: "7 years",
-      description: "Mountain guide with expertise in hill country attractions and hiking trails.",
-      verified: true,
-      responseTime: "Within 3 hours",
-      totalBookings: 203,
-    },
-    {
-      id: 6,
-      name: "Amara Jayawardena",
-      location: "Anuradhapura & Ancient Cities",
-      rating: 4.6,
-      reviews: 67,
-      price: 38,
-      image: "/img/young-indian-male-blue-dress-600nw-2071805621.webp",
-      specialties: ["Ancient History", "Archaeological Tours", "Buddhist Sites"],
-      languages: ["English", "Sinhala"],
-      experience: "4 years",
-      description: "History enthusiast specializing in ancient Sri Lankan civilization and Buddhist heritage.",
-      verified: true,
-      responseTime: "Within 5 hours",
-      totalBookings: 89,
-    },
-  ];
+  // Build dynamic filter options from fetched guides
+  const locations = ["All Locations", ...Array.from(new Set(guides.map(g => g.location).filter(Boolean))).sort()];
 
-  const locations = [
-    "All Locations",
-    "Colombo & Western Province",
-    "Kandy & Central Province",
-    "Galle & Southern Province",
-    "Sigiriya & North Central",
-    "Ella & Hill Country",
-    "Anuradhapura & Ancient Cities",
-  ];
-
-  const specialties = [
-    "All Specialties",
-    "Cultural Tours",
-    "City Tours",
-    "Food Tours",
-    "Temple Tours",
-    "Nature Walks",
-    "Tea Plantation",
-    "Beach Tours",
-    "Historical Sites",
-    "Wildlife",
-    "Adventure Tours",
-    "Photography",
-    "Archaeological Sites",
-    "Hiking",
-    "Tea Tours",
-    "Scenic Views",
-    "Ancient History",
-    "Buddhist Sites",
-  ];
+  const specialties = ["All Specialties", ...Array.from(new Set(guides.flatMap(g => g.specialties || []))).sort()];
 
   const priceRanges = ["All Prices", "Under $40", "$40 - $50", "Over $50"];
 
   const sortOptions = [
-    { value: "rating", label: "Highest Rated" },
     { value: "price-low", label: "Price: Low to High" },
     { value: "price-high", label: "Price: High to Low" },
-    { value: "reviews", label: "Most Reviews" },
     { value: "experience", label: "Most Experienced" },
   ];
 
@@ -200,22 +99,25 @@ export default function TouristHomePage() {
 
   const filteredAndSortedGuides = guides
     .filter((guide) => {
+      const fullName = `${guide.firstName || ''} ${guide.lastName || ''}`.toLowerCase();
       const matchesSearch =
-        guide.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        guide.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        guide.specialties.some((specialty) => specialty.toLowerCase().includes(searchTerm.toLowerCase()));
+        !searchTerm ||
+        fullName.includes(searchTerm.toLowerCase()) ||
+        (guide.location || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (guide.specialties || []).some((specialty) => specialty.toLowerCase().includes(searchTerm.toLowerCase()));
 
       const matchesLocation =
         selectedLocation === "" || selectedLocation === "All Locations" || guide.location === selectedLocation;
 
       const matchesSpecialty =
-        selectedSpecialty === "" || selectedSpecialty === "All Specialties" || guide.specialties.includes(selectedSpecialty);
+        selectedSpecialty === "" || selectedSpecialty === "All Specialties" || (guide.specialties || []).includes(selectedSpecialty);
 
       const matchesPrice = (() => {
         if (priceRange === "" || priceRange === "All Prices") return true;
-        if (priceRange === "Under $40") return guide.price < 40;
-        if (priceRange === "$40 - $50") return guide.price >= 40 && guide.price <= 50;
-        if (priceRange === "Over $50") return guide.price > 50;
+        const price = guide.pricePerDay || 0;
+        if (priceRange === "Under $40") return price < 40;
+        if (priceRange === "$40 - $50") return price >= 40 && price <= 50;
+        if (priceRange === "Over $50") return price > 50;
         return true;
       })();
 
@@ -223,18 +125,12 @@ export default function TouristHomePage() {
     })
     .sort((a, b) => {
       switch (sortBy) {
-        case "rating":
-          return b.rating - a.rating;
         case "price-low":
-          return a.price - b.price;
+          return (a.pricePerDay || 0) - (b.pricePerDay || 0);
         case "price-high":
-          return b.price - a.price;
-        case "reviews":
-          return b.reviews - a.reviews;
+          return (b.pricePerDay || 0) - (a.pricePerDay || 0);
         case "experience":
-          const aExperience = Number.parseInt(a.experience);
-          const bExperience = Number.parseInt(b.experience);
-          return bExperience - aExperience;
+          return (b.experience || 0) - (a.experience || 0);
         default:
           return 0;
       }
@@ -351,7 +247,7 @@ export default function TouristHomePage() {
         <section className="mb-12">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">Top Rated Local Guides</h2>
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
               <div className="sm:col-span-2 lg:col-span-2 xl:col-span-2 relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <input
@@ -398,141 +294,159 @@ export default function TouristHomePage() {
                   </option>
                 ))}
               </select>
-
-              <select
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                {sortOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6">
-            <p className="text-gray-600 dark:text-gray-300">
-              Showing {filteredAndSortedGuides.length} guide{filteredAndSortedGuides.length !== 1 ? "s" : ""}
-            </p>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              Sorted by: {sortOptions.find((option) => option.value === sortBy)?.label}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {filteredAndSortedGuides.map((guide) => (
-              <div
-                key={guide.id}
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
-              >
-                <div className="relative">
-                  <img src={guide.image || "/placeholder.svg"} alt={guide.name} className="w-full h-64 object-cover" />
-                  <div className="absolute top-4 right-4 bg-white dark:bg-gray-800 px-3 py-1 rounded-full text-lg font-semibold text-green-600 dark:text-green-400">
-                    ${guide.price}/day
-                  </div>
-                  <div className="absolute top-4 left-4 flex space-x-2">
-                    {guide.verified && (
-                      <div className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium">Verified</div>
-                    )}
-                  </div>
-                  <div className="absolute bottom-4 right-4 flex space-x-2">
-                    <button
-                      onClick={() => toggleLike(guide.id)}
-                      className={`p-2 rounded-full ${
-                        likedGuides.has(guide.id)
-                          ? "bg-red-500 text-white"
-                          : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300"
-                      } hover:scale-110 transition-transform`}
-                    >
-                      <Heart className={`h-4 w-4 ${likedGuides.has(guide.id) ? "fill-current" : ""}`} />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{guide.name}</h3>
-                    <div className="flex items-center">
-                      <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                      <span className="ml-1 text-sm font-medium">{guide.rating}</span>
-                      <span className="ml-1 text-sm text-gray-500 dark:text-gray-400">({guide.reviews})</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center text-gray-600 dark:text-gray-300 mb-3">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    <span className="text-sm">{guide.location}</span>
-                  </div>
-
-                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">{guide.description}</p>
-
-                  <div className="mb-4">
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {guide.specialties.slice(0, 2).map((specialty, index) => (
-                        <span
-                          key={index}
-                          className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded-full"
-                        >
-                          {specialty}
-                        </span>
-                      ))}
-                      {guide.specialties.length > 2 && (
-                        <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs px-2 py-1 rounded-full">
-                          +{guide.specialties.length - 2} more
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    <div className="flex items-center">
-                      <Languages className="h-4 w-4 mr-1" />
-                      <span>{guide.languages.length} languages</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Users className="h-4 w-4 mr-1" />
-                      <span>{guide.experience} experience</span>
-                    </div>
-                  </div>
-
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-                    <div className="flex justify-between">
-                      <span>Response time: {guide.responseTime}</span>
-                      <span>{guide.totalBookings} bookings</span>
-                    </div>
-                  </div>
-
-                  <div className="flex space-x-2">
-                    <Link
-                      href={`/details/${guide.id}`} // Corrected path to point to /details/[id]
-                      className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-center text-sm font-medium"
-                    >
-                      <Eye className="h-4 w-4 inline mr-1" />
-                      View Profile
-                    </Link>
-                    <Link
-                      href={`/messages?guide=${guide.id}`}
-                      className="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white py-2 px-4 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-center text-sm font-medium"
-                    >
-                      Message
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {filteredAndSortedGuides.length === 0 && (
+          {/* Loading State */}
+          {loading && (
             <div className="text-center py-12">
-              <div className="text-gray-400 dark:text-gray-500 mb-4">
-                <Search className="h-16 w-16 mx-auto" />
-              </div>
-              <p className="text-gray-500 dark:text-gray-400 text-lg mb-2">No guides found matching your criteria.</p>
-              <p className="text-gray-400 dark:text-gray-500">Try adjusting your search or filters.</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-300">Loading guides...</p>
             </div>
+          )}
+
+          {/* Error State */}
+          {error && !loading && (
+            <div className="text-center py-12">
+              <p className="text-red-600 dark:text-red-400 text-lg mb-2">Failed to load guides</p>
+              <p className="text-gray-500 dark:text-gray-400 mb-4">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          )}
+
+          {/* Guides List */}
+          {!loading && !error && (
+            <>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6">
+                <p className="text-gray-600 dark:text-gray-300">
+                  Showing {filteredAndSortedGuides.length} verified guide{filteredAndSortedGuides.length !== 1 ? "s" : ""}
+                </p>
+                <div className="flex items-center gap-3">
+                  <label className="text-sm text-gray-500 dark:text-gray-400">Sort by:</label>
+                  <select
+                    className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                  >
+                    {sortOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-12">
+                {filteredAndSortedGuides.map((guide) => (
+                  <div
+                    key={guide._id}
+                    className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                  >
+                    <div className="relative">
+                      <img
+                        src={guide.profileImage || "/placeholder.svg"}
+                        alt={`${guide.firstName} ${guide.lastName}`}
+                        className="w-full h-40 object-cover"
+                      />
+                      <div className="absolute top-3 right-3 bg-white dark:bg-gray-800 px-2 py-0.5 rounded-full text-sm font-semibold text-green-600 dark:text-green-400">
+                        ${guide.pricePerDay || 'N/A'}/day
+                      </div>
+                      <div className="absolute top-3 left-3 flex space-x-2">
+                        {guide.isEmailVerified && (
+                          <div className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium">Verified</div>
+                        )}
+                      </div>
+                      <div className="absolute bottom-3 right-3 flex space-x-2">
+                        <button
+                          onClick={() => toggleLike(guide._id)}
+                          className={`p-2 rounded-full ${
+                            likedGuides.has(guide._id)
+                              ? "bg-red-500 text-white"
+                              : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                          } hover:scale-110 transition-transform`}
+                        >
+                          <Heart className={`h-4 w-4 ${likedGuides.has(guide._id) ? "fill-current" : ""}`} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="p-4">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
+                          {guide.firstName} {guide.lastName}
+                        </h3>
+                      </div>
+
+                      <div className="flex items-center text-gray-600 dark:text-gray-300 mb-2">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        <span className="text-xs">{guide.location || "Location not specified"}</span>
+                      </div>
+
+                      <p className="text-gray-600 dark:text-gray-300 text-xs mb-3 line-clamp-2">
+                        {guide.bio || "No description available"}
+                      </p>
+
+                      {guide.specialties && guide.specialties.length > 0 && (
+                        <div className="mb-3">
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {guide.specialties.slice(0, 2).map((specialty, index) => (
+                              <span
+                                key={index}
+                                className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded-full"
+                              >
+                                {specialty}
+                              </span>
+                            ))}
+                            {guide.specialties.length > 2 && (
+                              <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs px-2 py-1 rounded-full">
+                                +{guide.specialties.length - 2} more
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-300 mb-3">
+                        <div className="flex items-center">
+                          <Languages className="h-3.5 w-3.5 mr-1" />
+                          <span>{guide.languages?.length || 0} languages</span>
+                        </div>
+                        <div className="flex items-center">
+                          <Users className="h-3.5 w-3.5 mr-1" />
+                          <span>{guide.experience || 0} years exp.</span>
+                        </div>
+                      </div>
+
+                      <div className="flex space-x-2">
+                        <Link
+                          href={`/guides/${guide._id}`}
+                          className="flex-1 bg-blue-600 text-white py-1.5 px-3 rounded-lg hover:bg-blue-700 transition-colors text-center text-xs font-medium"
+                        >
+                          <Eye className="h-4 w-4 inline mr-1" />
+                          View Profile
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {filteredAndSortedGuides.length === 0 && (
+                <div className="text-center py-12">
+                  <div className="text-gray-400 dark:text-gray-500 mb-4">
+                    <Search className="h-16 w-16 mx-auto" />
+                  </div>
+                  <p className="text-gray-500 dark:text-gray-400 text-lg mb-2">No guides found matching your criteria.</p>
+                  <p className="text-gray-400 dark:text-gray-500">Try adjusting your search or filters.</p>
+                </div>
+              )}
+            </>
           )}
         </section>
 
