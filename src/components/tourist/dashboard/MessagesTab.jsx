@@ -24,7 +24,7 @@ export default function MessagesTab({ userDetails, messages }) {
             return (
               <div
                 key={chat._id}
-                className="flex justify-between items-center p-4 border rounded-lg"
+                className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-4 border rounded-lg"
               >
                 <div>
                   <p className="font-medium">
