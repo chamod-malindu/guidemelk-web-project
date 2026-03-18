@@ -36,13 +36,13 @@ export default function Home() {
 
       <main>
         <section
-          className="bg-hero-bg relative h-[70vh] flex items-center justify-center text-center overflow-hidden from-indigo-500 to-purple-600 dark:from-indigo-800 dark:to-purple-900 shadow-lg rounded-b-3xl mx-4 mt-4 bg-cover bg-left"
+          className="bg-hero-bg relative h-[50vh] sm:h-[60vh] md:h-[70vh] flex items-center justify-center text-center overflow-hidden from-indigo-500 to-purple-600 dark:from-indigo-800 dark:to-purple-900 shadow-lg rounded-b-3xl mx-2 sm:mx-4 mt-2 sm:mt-4 bg-cover bg-left"
         >
           <div className="relative z-10 p-6 max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-6xl font-extrabold text-white leading-tight mb-4 animate-fade-in-up">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-4 animate-fade-in-up">
               Explore Sri Lanka with Local Experts
             </h1>
-            <p className="text-xl text-white font-semibold mb-8 animate-fade-in-up animation-delay-300 mt-[48px]">
+            <p className="text-base sm:text-lg md:text-xl text-white font-semibold mb-6 sm:mb-8 animate-fade-in-up animation-delay-300 mt-6 sm:mt-[48px]">
               Connect with passionate local guides for authentic and unforgettable experiences.
             </p>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6 animate-fade-in-up animation-delay-600">
@@ -56,11 +56,11 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-16 px-6 md:px-12 bg-white dark:bg-gray-900">
-          <h2 className="text-4xl font-bold text-center mb-12 text-gray-800 dark:text-gray-100 animate-fade-in">
+        <section className="py-10 sm:py-16 px-4 sm:px-6 md:px-12 bg-white dark:bg-gray-900">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12 text-gray-800 dark:text-gray-100 animate-fade-in">
             Why Choose Guidemelk?
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-10 max-w-6xl mx-auto">
             <div className="bg-gray-100 dark:bg-gray-800 p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-2 animate-fade-in animation-delay-200">
               <div className="flex justify-center mb-4">
                 <MapPin size={48} className="text-indigo-500 dark:text-indigo-400" />
@@ -91,11 +91,11 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-16 px-6 md:px-12 bg-gray-50 dark:bg-gray-900">
-          <h2 className="text-4xl font-bold text-center mb-12 text-gray-800 dark:text-gray-100 animate-fade-in">
-            Explore Sri Lanka's Most Popular Destinations
+        <section className="py-10 sm:py-16 px-4 sm:px-6 md:px-12 bg-gray-50 dark:bg-gray-900">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12 text-gray-800 dark:text-gray-100 animate-fade-in">
+            Explore Sri Lanka&apos;s Most Popular Destinations
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 max-w-6xl mx-auto">
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 animate-fade-in animation-delay-200">
               <img src="/img/kandy.jpg" alt="Kandy, Sri Lanka" className="w-full h-48 object-cover" />
               <div className="p-6">
@@ -139,11 +139,11 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-16 px-6 md:px-12 bg-white dark:bg-gray-900">
-          <h2 className="text-4xl font-bold text-center mb-12 text-gray-800 dark:text-gray-100 animate-fade-in">
+        <section className="py-10 sm:py-16 px-4 sm:px-6 md:px-12 bg-white dark:bg-gray-900">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12 text-gray-800 dark:text-gray-100 animate-fade-in">
             Upcoming Events in Sri Lanka (August 2025)
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
             <div className="bg-gray-100 dark:bg-gray-800 p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-2 animate-fade-in animation-delay-200">
               <div className="flex justify-center mb-4">
                 <CalendarDays size={48} className="text-purple-500 dark:text-purple-400" />
@@ -200,12 +200,12 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-16 px-6 md:px-12 bg-indigo-50 dark:bg-gray-800 rounded-t-3xl mx-4 mb-4 shadow-inner">
+        <section className="py-10 sm:py-16 px-4 sm:px-6 md:px-12 bg-indigo-50 dark:bg-gray-800 rounded-t-3xl mx-2 sm:mx-4 mb-2 sm:mb-4 shadow-inner">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl font-bold text-indigo-800 dark:text-indigo-200 mb-6 animate-fade-in">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-indigo-800 dark:text-indigo-200 mb-6 animate-fade-in">
               Ready to Explore or Share Your Knowledge?
             </h2>
-            <p className="text-xl text-indigo-700 dark:text-indigo-300 mb-8 animate-fade-in animation-delay-200">
+            <p className="text-base sm:text-lg md:text-xl text-indigo-700 dark:text-indigo-300 mb-8 animate-fade-in animation-delay-200">
               Join the Guidemelk community today and unlock amazing opportunities.
             </p>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6 animate-fade-in animation-delay-400">
@@ -220,8 +220,8 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="bg-gray-800 dark:bg-gray-950 text-gray-300 py-8 px-6 md:px-12 rounded-t-xl">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+      <footer className="bg-gray-800 dark:bg-gray-950 text-gray-300 py-8 px-4 sm:px-6 md:px-12 rounded-t-xl">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
           <div>
             <h3 className="text-xl font-bold text-white mb-4">Guidemelk</h3>
             <p className="text-gray-400">Your gateway to authentic Sri Lankan experiences.</p>

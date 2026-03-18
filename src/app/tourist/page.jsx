@@ -339,20 +339,20 @@ export default function TouristHomePage() {
       />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-4">
             Discover Sri Lanka
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto">
             Your ultimate guide to exploring the Pearl of the Indian Ocean. Find top destinations, upcoming events,
             and connect with expert local guides for an unforgettable journey.
           </p>
         </div>
 
         <section className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">Top Rated Local Guides</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">Top Rated Local Guides</h2>
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-              <div className="lg:col-span-2 relative">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+              <div className="sm:col-span-2 lg:col-span-2 xl:col-span-2 relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <input
                   type="text"
@@ -413,7 +413,7 @@ export default function TouristHomePage() {
             </div>
           </div>
 
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6">
             <p className="text-gray-600 dark:text-gray-300">
               Showing {filteredAndSortedGuides.length} guide{filteredAndSortedGuides.length !== 1 ? "s" : ""}
             </p>
@@ -537,7 +537,7 @@ export default function TouristHomePage() {
         </section>
 
         <section className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">
             Top Sri Lanka Tourist Destinations
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -571,7 +571,7 @@ export default function TouristHomePage() {
         </section>
 
         <section className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">
             Upcoming Events & Cultural Festivals
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -601,7 +601,7 @@ export default function TouristHomePage() {
         </section>
 
         <section className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">
             Essential Travel Tips for Sri Lanka
           </h2>
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
@@ -617,8 +617,8 @@ export default function TouristHomePage() {
         </section>
       </main>
 
-      <footer className="bg-gray-800 dark:bg-gray-950 text-gray-300 py-8 px-6 md:px-12 rounded-t-xl">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+      <footer className="bg-gray-800 dark:bg-gray-950 text-gray-300 py-8 px-4 sm:px-6 md:px-12 rounded-t-xl">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
           <div>
             <h3 className="text-xl font-bold text-white mb-4">Guidemelk</h3>
             <p className="text-gray-400">Your gateway to authentic Sri Lankan experiences.</p>

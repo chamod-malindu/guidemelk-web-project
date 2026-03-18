@@ -337,8 +337,8 @@ export default function FindGuidePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-50 mb-4">Find Your Perfect Guide</h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-50 mb-4">Find Your Perfect Guide</h1>
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
             Browse through our verified professional tour guides and find the perfect match for your Sri Lankan adventure
           </p>
         </div>
@@ -461,7 +461,7 @@ export default function FindGuidePage() {
         </div>
 
         {/* Results count */}
-        <div className="mb-6 flex justify-between items-center">
+        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <p className="text-gray-600 dark:text-white">
             Showing {filteredGuides.length} verified guide{filteredGuides.length !== 1 ? "s" : ""}
           </p>
@@ -490,7 +490,7 @@ export default function FindGuidePage() {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
             {filteredGuides.map((guide) => (
               <div
                 key={guide._id}
