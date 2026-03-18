@@ -206,5 +206,12 @@ Through its innovative features — from real-time communication to verified pro
   <img src="public/screenshots/chat.png" alt="Payment Options" width="800" />
 </p>
 
-> ⭐ If you find this project useful or inspiring, please consider starring the repo and following our journey. Thank you!
+---
+
+## ⚠️ License Notice
+
+This project is protected under a custom license.
+It is intended for educational and portfolio use only.
+
+Unauthorized commercial use, hosting, or redistribution is strictly prohibited.
 
