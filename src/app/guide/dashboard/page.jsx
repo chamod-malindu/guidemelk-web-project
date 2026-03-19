@@ -3,8 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+
 import {
   BarChart3,
   DollarSign,
@@ -17,6 +16,11 @@ import {
   User,
   CalendarIcon,
   Package,
+  LogOut,
+  Menu,
+  X,
+  Sun,
+  Moon,
 } from "lucide-react"
 import { useRouter } from "next/navigation";
 import { io } from "socket.io-client"; 
@@ -38,7 +42,9 @@ export default function GuideDashboard() {
   const socketRef = useRef(null); // separate chat socket
 
   const [activeTab, setActiveTab] = useState("overview");
-  const [isAvailable, setIsAvailable] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [chats, setChats] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
@@ -73,6 +79,35 @@ export default function GuideDashboard() {
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [loadingPayments, setLoadingPayments] = useState(false);
   const [paymentError, setPaymentError] = useState("");
+
+  // Unavailable dates (manually set by guide)
+  const [unavailableDates, setUnavailableDates] = useState(new Set());
+
+  // Initialize dark mode from localStorage
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  // Fetch saved unavailable dates from API
+  useEffect(() => {
+    async function fetchUnavailableDates() {
+      try {
+        const res = await fetch("/api/guide/unavailable-dates", { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          setUnavailableDates(new Set(data.unavailableDates || []));
+        }
+      } catch (err) {
+        console.error("Error fetching unavailable dates:", err);
+      }
+    }
+    fetchUnavailableDates();
+  }, []);
 
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
@@ -347,6 +382,33 @@ export default function GuideDashboard() {
   
   
 
+  const handleLogout = async () => {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    try {
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+      localStorage.removeItem("user");
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: "user",
+          newValue: null,
+          url: window.location.href,
+          storageArea: localStorage,
+        })
+      );
+      setCurrentUser(null);
+      toast.success("Logged out successfully.", { duration: 2000 });
+      setTimeout(() => {
+        router.replace("/login");
+      }, 2000);
+    } catch (error) {
+      console.error("Logout failed:", error);
+      toast.error("Logout failed. Please try again.");
+    } finally {
+      setLoggingOut(false);
+    }
+  };
+
   if (!currentUser) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -478,16 +540,16 @@ const NotificationDropdown = () => {
 
           {/* Dropdown content */}
           <div
-            className="absolute top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 w-80"
+            className="absolute top-full mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-50 w-80"
             style={{
               left: '100%',
               marginLeft: '8px',
               transform: 'translateX(-50px)',
             }}
           >
-            <div className="p-3 border-b border-gray-200">
+            <div className="p-3 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-gray-900">Notifications</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Notifications</h3>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -503,18 +565,18 @@ const NotificationDropdown = () => {
 
             <div className="max-h-96 overflow-y-auto">
               {notifications.length === 0 ? (
-                <div className="p-6 text-center text-gray-500">
-                  <Bell className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                <div className="p-6 text-center text-gray-500 dark:text-gray-400">
+                  <Bell className="h-8 w-8 mx-auto mb-2 text-gray-300 dark:text-gray-600" />
                   <p>No notifications</p>
                 </div>
               ) : (
                 notifications.map((notification, index) => (
                   <div
                     key={index}
-                    className="p-3 border-b border-gray-100 hover:bg-gray-50"
+                    className="p-3 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
-                    <p className="text-sm text-gray-800">{notification.message}</p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-sm text-gray-800 dark:text-gray-200">{notification.message}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       {new Date(notification.timestamp).toLocaleString()}
                     </p>
                   </div>
@@ -554,91 +616,160 @@ const handleDeleteAccount = () => {
 };
 
 
+  const sidebarNavItems = [
+    { id: "overview", label: "Overview", icon: BarChart3 },
+    { id: "profile", label: "Profile Management", icon: User },
+    {
+      id: "bookings",
+      label: "Booking Management",
+      icon: Package,
+      badge: unreadBookingsCount,
+    },
+    { id: "messages", label: "Messages & Chat", icon: MessageSquare },
+    { id: "earnings", label: "Earnings & Payments", icon: DollarSign },
+    { id: "reviews", label: "Ratings & Reviews", icon: Star, badge: unreadReviewsCount },
+    { id: "calendar", label: "Availability Calendar", icon: CalendarIcon },
+    { id: "support", label: "Support & Disputes", icon: HelpCircle },
+    { id: "settings", label: "Settings", icon: Settings },
+  ];
+
+  const handleNavClick = (item) => {
+    setActiveTab(item.id);
+    if (item.id === 'bookings' && unreadBookingsCount > 0) setUnreadBookingsCount(0);
+    if (item.id === 'reviews' && unreadReviewsCount > 0) setUnreadReviewsCount(0);
+    setIsSidebarOpen(false);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col lg:flex-row">
+
+      {/* Mobile Top Bar */}
+      <div className="lg:hidden bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+        <div className="flex items-center justify-between px-4 h-14">
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            aria-label="Open sidebar"
+          >
+            <Menu size={24} />
+          </button>
+          <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate">
+            {currentUser ? `Hi, ${currentUser.firstName}` : "Dashboard"}
+          </h1>
+          <NotificationDropdown />
+        </div>
+      </div>
+
+      {/* Sidebar Overlay (mobile) */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar Navigation */}
-      <div className="w-64 bg-white shadow-sm border-r">
-        <div className="p-6 border-b">
+      <div
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-gray-800 shadow-lg border-r dark:border-gray-700 transform transition-transform duration-300 ease-in-out flex flex-col
+          lg:relative lg:translate-x-0 lg:w-64 lg:shadow-sm
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+      >
+        {/* Sidebar Header */}
+        <div className="p-4 sm:p-6 border-b flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">
-                {currentUser ? `Welcome ${currentUser.firstName}!` : "Welcome!"}
+            <div className="min-w-0 flex-1">
+              <h2 className="text-lg lg:text-xl font-bold text-gray-900 dark:text-gray-100 break-words">
+                {currentUser ? `Welcome, ${currentUser.firstName}!` : "Welcome!"}
               </h2>
             </div>
-            <div className="flex items-center space-x-2">
-              {/* ADD NOTIFICATION DROPDOWN */}
-              <NotificationDropdown />
+            <div className="flex items-center space-x-1 flex-shrink-0">
+              <div className="hidden lg:block">
+                <NotificationDropdown />
+              </div>
               <Button size="sm" variant="outline" onClick={() => setIsPreviewMode(true)}>
                 <Eye className="h-4 w-4" />
               </Button>
+              <button
+                onClick={() => setIsSidebarOpen(false)}
+                className="lg:hidden p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                aria-label="Close sidebar"
+              >
+                <X size={20} />
+              </button>
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <Switch checked={isAvailable} onCheckedChange={setIsAvailable} id="availability" />
-            <Label htmlFor="availability" className="text-sm">
-              {isAvailable ? "Available" : "Unavailable"}
-            </Label>
+            <button
+              onClick={() => {
+                const isDark = document.documentElement.classList.contains("dark");
+                if (isDark) {
+                  document.documentElement.classList.remove("dark");
+                  localStorage.setItem("theme", "light");
+                } else {
+                  document.documentElement.classList.add("dark");
+                  localStorage.setItem("theme", "dark");
+                }
+              }}
+              className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label="Toggle dark mode"
+            >
+              <Sun className="h-4 w-4 hidden dark:block" />
+              <Moon className="h-4 w-4 block dark:hidden" />
+            </button>
+            <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">
+              Dark Mode
+            </span>
           </div>
         </div>
 
-        <nav className="p-4 space-y-1">
-        {[
-          { id: "overview", label: "Overview", icon: BarChart3 },
-          { id: "profile", label: "Profile Management", icon: User },
-          {
-            id: "bookings",
-            label: "Booking Management",
-            icon: Package,
-            badge: unreadBookingsCount, 
-          },
-          { id: "messages", label: "Messages & Chat", icon: MessageSquare },
-          { id: "earnings", label: "Earnings & Payments", icon: DollarSign },
-          { id: "reviews", label: "Ratings & Reviews", icon: Star, badge: unreadReviewsCount },
-          { id: "calendar", label: "Availability Calendar", icon: CalendarIcon },
-          { id: "support", label: "Support & Disputes", icon: HelpCircle },
-          { id: "settings", label: "Settings", icon: Settings },
-        ].map((item) => {
-          const Icon = item.icon
-          return (
-            <button
-              key={item.id}
-              onClick={() => {
-                setActiveTab(item.id);
-              
-                if (item.id === 'bookings' && unreadBookingsCount > 0) {
-                  setUnreadBookingsCount(0);
-                }                
-                if (item.id === 'reviews' && unreadReviewsCount > 0) {
-                  setUnreadReviewsCount(0);
-                }
-              }}
-              
-              className={`w-full flex items-center justify-between px-3 py-2 text-left rounded-lg transition-colors ${
-                activeTab === item.id
-                  ? "bg-blue-50 text-blue-700 border border-blue-200"
-                  : "text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              <div className="flex items-center">
-                <Icon className="h-5 w-5 mr-3" />
-                <span className="text-sm font-medium">{item.label}</span>
-              </div>
-              {item.badge && item.badge > 0 && (
-                <Badge variant="destructive" className="h-5 text-xs">
-                  {item.badge > 99 ? '99+' : item.badge}
-                </Badge>
-              )}
-            </button>
-          )
-        })}
+        {/* Nav Items */}
+        <nav className="p-4 space-y-1 flex-1 overflow-y-auto">
+          {sidebarNavItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item)}
+                className={`w-full flex items-center justify-between px-3 py-2 text-left rounded-lg transition-colors ${
+                  activeTab === item.id
+                    ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                }`}
+              >
+                <div className="flex items-center">
+                  <Icon className="h-5 w-5 mr-3" />
+                  <span className="text-sm font-medium">{item.label}</span>
+                </div>
+                {item.badge && item.badge > 0 && (
+                  <Badge variant="destructive" className="h-5 text-xs">
+                    {item.badge > 99 ? '99+' : item.badge}
+                  </Badge>
+                )}
+              </button>
+            );
+          })}
         </nav>
+
+        {/* Logout Button at Sidebar Bottom */}
+        <div className="p-4 border-t flex-shrink-0">
+          <button
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="w-full flex items-center px-3 py-2.5 text-left rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors font-medium text-sm disabled:opacity-50"
+          >
+            <LogOut className="h-5 w-5 mr-3" />
+            {loggingOut ? "Logging out..." : "Log Out"}
+          </button>
+        </div>
       </div>
+
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
-        <div className="p-8">
+        <div className="p-4 sm:p-6 lg:p-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
               {activeTab === "overview" && "Dashboard Overview"}
               {activeTab === "profile" && "Profile Management"}
               {activeTab === "bookings" && "Booking Management"}
@@ -726,7 +857,39 @@ const handleDeleteAccount = () => {
           {/* Calendar Tab */}
           {activeTab === "calendar" && (
             <div className="space-y-6">
-              <AvailabilityCalendar />
+              <AvailabilityCalendar
+                bookings={bookings}
+                unavailableDates={unavailableDates}
+                onToggleUnavailable={async (dateKey) => {
+                  // Optimistic update
+                  const next = new Set(unavailableDates);
+                  if (next.has(dateKey)) {
+                    next.delete(dateKey);
+                  } else {
+                    next.add(dateKey);
+                  }
+                  setUnavailableDates(next);
+
+                  // Save to API
+                  try {
+                    const res = await fetch("/api/guide/unavailable-dates", {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      credentials: "include",
+                      body: JSON.stringify({ unavailableDates: Array.from(next) }),
+                    });
+                    if (!res.ok) {
+                      toast.error("Failed to save unavailable date");
+                      // Revert on failure
+                      setUnavailableDates(unavailableDates);
+                    }
+                  } catch (err) {
+                    console.error("Error saving unavailable dates:", err);
+                    toast.error("Failed to save unavailable date");
+                    setUnavailableDates(unavailableDates);
+                  }
+                }}
+              />
             </div>
           )}
 

@@ -27,16 +27,16 @@ export default function GuideMessagesCard({ currentUser, chats }) {
               return (
                 <div
                   key={chat._id}
-                  className="flex justify-between items-center p-4 border rounded-lg"
+                  className="flex justify-between items-center p-4 border dark:border-gray-700 rounded-lg"
                 >
                   <div>
-                    <p className="font-medium">
+                    <p className="font-medium dark:text-gray-100">
                       Chat with:{" "}
                       {otherUser
                         ? `${otherUser.firstName} ${otherUser.lastName}`
                         : "Unknown"}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       {chat.lastMessage || "No messages yet"}
                     </p>
                   </div>
@@ -54,7 +54,7 @@ export default function GuideMessagesCard({ currentUser, chats }) {
             })}
           </div>
         ) : (
-          <p className="text-gray-500">No active chats found.</p>
+          <p className="text-gray-500 dark:text-gray-400">No active chats found.</p>
         )}
       </CardContent>
     </Card>

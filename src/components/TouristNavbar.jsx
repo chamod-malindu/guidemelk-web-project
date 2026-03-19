@@ -113,6 +113,7 @@ export default function TouristNavbar() {
   const navLinks = [
     { href: '/tourist', label: 'Home' },
     { href: '/findGuide', label: 'Find a Guide' },
+    { href: '/site-reviews', label: 'Reviews' },
     { href: '/about', label: 'About Us' },
     { href: '/tourist/dashboard', label: 'Dashboard' },
   ];

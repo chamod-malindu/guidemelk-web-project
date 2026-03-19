@@ -62,6 +62,7 @@ const userSchema = new mongoose.Schema({
     default: 'active' 
   },  
   country: String,
+  unavailableDates: [String], // YYYY-MM-DD strings for guide unavailability
   isBlocked : {
     type: Boolean,
     default: false 

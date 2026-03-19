@@ -16,7 +16,7 @@ export default function SupportSection() {
         <CardContent className="space-y-4">
           <div>
             <Label htmlFor="disputeType">Dispute Type</Label>
-            <select className="w-full p-2 border rounded-lg">
+            <select className="w-full p-2 border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
               <option>Payment Issue</option>
               <option>Tourist Behavior</option>
               <option>Booking Cancellation</option>
@@ -34,10 +34,10 @@ export default function SupportSection() {
           </div>
           <div>
             <Label htmlFor="evidence">Upload Evidence</Label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-              <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-600">Click to upload files or drag and drop</p>
-              <p className="text-xs text-gray-500">PNG, JPG, PDF up to 10MB</p>
+            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
+              <Upload className="h-8 w-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+              <p className="text-sm text-gray-600 dark:text-gray-400">Click to upload files or drag and drop</p>
+              <p className="text-xs text-gray-500 dark:text-gray-500">PNG, JPG, PDF up to 10MB</p>
             </div>
           </div>
           <Button>Submit Dispute</Button>
@@ -50,9 +50,9 @@ export default function SupportSection() {
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Active Disputes</h3>
-            <p className="text-gray-600">You don't have any ongoing disputes at the moment.</p>
+            <Shield className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No Active Disputes</h3>
+            <p className="text-gray-600 dark:text-gray-400">You don't have any ongoing disputes at the moment.</p>
           </div>
         </CardContent>
       </Card>
@@ -63,9 +63,9 @@ export default function SupportSection() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 border rounded-lg">
-              <h4 className="font-medium mb-2">Getting Started Guide</h4>
-              <p className="text-sm text-gray-600 mb-3">
+            <div className="p-4 border dark:border-gray-700 rounded-lg">
+              <h4 className="font-medium dark:text-gray-100 mb-2">Getting Started Guide</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                 Learn how to optimize your profile and attract more bookings
               </p>
               <Button variant="outline" size="sm">
@@ -73,9 +73,9 @@ export default function SupportSection() {
                 Read Guide
               </Button>
             </div>
-            <div className="p-4 border rounded-lg">
-              <h4 className="font-medium mb-2">Contact Support</h4>
-              <p className="text-sm text-gray-600 mb-3">Get help from our support team</p>
+            <div className="p-4 border dark:border-gray-700 rounded-lg">
+              <h4 className="font-medium dark:text-gray-100 mb-2">Contact Support</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Get help from our support team</p>
               <Button variant="outline" size="sm">
                 <Mail className="h-4 w-4 mr-2" />
                 Email Support

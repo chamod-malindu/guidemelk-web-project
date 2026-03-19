@@ -19,7 +19,7 @@ export default function ProfilePhotoCard({ currentUser, setCurrentUser }) {
             );
           }}
         />
-        <p className="text-xs text-gray-600 mt-2">JPG, PNG up to 5MB</p>
+        <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">JPG, PNG up to 5MB</p>
       </CardContent>
     </Card>
   );

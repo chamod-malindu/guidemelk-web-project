@@ -12,19 +12,19 @@ export default function EarningsSummary({ earnings }) {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">This Month</p>
-              <p className="text-3xl font-bold text-blue-600">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">This Month</p>
+              <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
                 ${earnings.thisMonth.toFixed(2)}
               </p>
             </div>
-            <div className="p-3 bg-blue-50 rounded-full">
-              <DollarSign className="h-6 w-6 text-blue-600" />
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-full">
+              <DollarSign className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
 
           <div className="mt-4">
-            <div className="flex items-center text-xs text-gray-600">
-              <span className="text-green-600 mr-1">↗</span>
+            <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
+              <span className="text-green-600 dark:text-green-400 mr-1">↗</span>
               <span>
                 +
                 {earnings.thisMonth > earnings.lastMonth
@@ -46,13 +46,13 @@ export default function EarningsSummary({ earnings }) {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Last Month</p>
-              <p className="text-3xl font-bold text-gray-900">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Last Month</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                 ${earnings.lastMonth.toFixed(2)}
               </p>
             </div>
-            <div className="p-3 bg-gray-50 rounded-full">
-              <Calendar className="h-6 w-6 text-gray-600" />
+            <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-full">
+              <Calendar className="h-6 w-6 text-gray-600 dark:text-gray-400" />
             </div>
           </div>
 
@@ -66,7 +66,7 @@ export default function EarningsSummary({ earnings }) {
               }
               className="h-2"
             />
-            <p className="text-xs text-gray-600 mt-2">Previous period earnings</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">Previous period earnings</p>
           </div>
         </CardContent>
       </Card>
@@ -76,19 +76,19 @@ export default function EarningsSummary({ earnings }) {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Earnings</p>
-              <p className="text-3xl font-bold text-green-600">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Earnings</p>
+              <p className="text-3xl font-bold text-green-600 dark:text-green-400">
                 ${earnings.totalEarnings.toFixed(2)}
               </p>
             </div>
-            <div className="p-3 bg-green-50 rounded-full">
-              <Award className="h-6 w-6 text-green-600" />
+            <div className="p-3 bg-green-50 dark:bg-green-900/30 rounded-full">
+              <Award className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
 
           <div className="mt-4">
             <Progress value={100} className="h-2" />
-            <p className="text-xs text-gray-600 mt-2">All-time earnings</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">All-time earnings</p>
           </div>
         </CardContent>
       </Card>
