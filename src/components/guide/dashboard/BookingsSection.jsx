@@ -28,34 +28,34 @@ export default function BookingsSection({
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-yellow-600">
+            <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
               {bookingStats.pending || 0}
             </div>
-            <p className="text-sm text-gray-600">Pending</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Pending</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
               {bookingStats.confirmed || 0}
             </div>
-            <p className="text-sm text-gray-600">Confirmed</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Confirmed</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
               {bookingStats.completed || 0}
             </div>
-            <p className="text-sm text-gray-600">Completed</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Completed</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-red-600">
+            <div className="text-2xl font-bold text-red-600 dark:text-red-400">
               {(bookingStats.cancelled || 0) + (bookingStats.declined || 0)}
             </div>
-            <p className="text-sm text-gray-600">Cancelled/Declined</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Cancelled/Declined</p>
           </CardContent>
         </Card>
       </div>
@@ -64,14 +64,14 @@ export default function BookingsSection({
       {loadingBookings && (
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your bookings...</p>
+          <p className="text-gray-600 dark:text-gray-400">Loading your bookings...</p>
         </div>
       )}
 
       {/* Error State */}
       {bookingError && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-          <p className="text-red-600">❌ {bookingError}</p>
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-center">
+          <p className="text-red-600 dark:text-red-400">❌ {bookingError}</p>
           <Button 
             variant="outline" 
             size="sm" 
@@ -87,8 +87,8 @@ export default function BookingsSection({
       {!loadingBookings && !bookingError && bookings.length === 0 && (
         <div className="text-center py-12">
           <div className="text-6xl mb-4">📅</div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">No Bookings Yet</h3>
-          <p className="text-gray-500 mb-4">
+          <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">No Bookings Yet</h3>
+          <p className="text-gray-500 dark:text-gray-400 mb-4">
             Your booking requests will appear here once tourists start booking your tours.
           </p>
           <Button onClick={() => setActiveTab("profile")}>
@@ -116,7 +116,7 @@ export default function BookingsSection({
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <div className="flex items-center space-x-2 mb-2">
-                          <h3 className="text-lg font-semibold">
+                          <h3 className="text-lg font-semibold dark:text-gray-100">
                             {booking.tourist?.firstName} {booking.tourist?.lastName}
                           </h3>
                           <Badge className={getStatusColor(booking.status)}>
@@ -124,7 +124,7 @@ export default function BookingsSection({
                           </Badge>
                         </div>
                         {/* Payment status for guide */}
-                        <div className="text-sm text-gray-600 mb-2">
+                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                           {booking.paymentStatus === "partial" && booking.advanceAmount
                             ? `Advance paid: $${booking.advanceAmount} | Remaining: $${(booking.totalCost - booking.advanceAmount).toFixed(2)}`
                             : booking.paymentStatus === "processed"
@@ -133,18 +133,18 @@ export default function BookingsSection({
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-green-600">${booking.totalCost}</div>
+                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">${booking.totalCost}</div>
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                       <div>
-                        <p className="text-sm font-medium text-gray-600">Date</p>
-                        <p className="text-sm">{new Date(booking.date).toLocaleDateString()}</p>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Date</p>
+                        <p className="text-sm dark:text-gray-200">{new Date(booking.date).toLocaleDateString()}</p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-600">Duration</p>
-                        <p className="text-sm">
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Duration</p>
+                        <p className="text-sm dark:text-gray-200">
                           {booking.duration === 21 ? "3 weeks" : 
                           booking.duration === 30 ? "1 month" : 
                           booking.duration === 60 ? "2 months" : 
@@ -153,13 +153,13 @@ export default function BookingsSection({
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-600">Group Size</p>
-                        <p className="text-sm">{booking.groupSize} {booking.groupSize === 1 ? "person" : "people"}</p>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Group Size</p>
+                        <p className="text-sm dark:text-gray-200">{booking.groupSize} {booking.groupSize === 1 ? "person" : "people"}</p>
                       </div>
                     </div>
                     
                     <div className="mb-4">
-                      <p className="text-sm font-medium text-gray-600 mb-1">Destinations</p>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Destinations</p>
                       <div className="flex flex-wrap gap-1">
                         {booking.destinations?.map((destination, index) => (
                           <Badge key={index} variant="secondary" className="text-xs">
@@ -171,14 +171,14 @@ export default function BookingsSection({
                     
                     {booking.specialRequests && (
                       <div className="mb-4">
-                        <p className="text-sm font-medium text-gray-600 mb-1">Special Requests</p>
-                        <p className="text-sm text-gray-700 bg-gray-50 p-2 rounded">
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Special Requests</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 p-2 rounded">
                           {booking.specialRequests}
                         </p>
                       </div>
                     )}
                     
-                    <div className="flex items-center text-xs text-gray-500">
+                    <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
                       <Clock className="h-3 w-3 mr-1" />
                       <span>Requested {new Date(booking.createdAt).toLocaleDateString()}</span>
                     </div>
@@ -249,8 +249,8 @@ export default function BookingsSection({
                 )}
 
                 {booking.status === "declined" && booking.declineReason && (
-                  <div className="bg-red-50 border border-red-200 rounded p-3">
-                    <p className="text-sm text-red-600">
+                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded p-3">
+                    <p className="text-sm text-red-600 dark:text-red-400">
                       <strong>Decline Reason:</strong> {booking.declineReason}
                     </p>
                   </div>
@@ -259,8 +259,8 @@ export default function BookingsSection({
 
               {/* Process Tracker */}
               <div className="lg:col-span-1">
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 mb-4">Booking Process</h4>
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                  <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-4">Booking Process</h4>
                   <div className="space-y-4">
                     {booking.processSteps?.map((step, index) => (
                       <div key={index} className="flex items-start space-x-3">
@@ -270,19 +270,19 @@ export default function BookingsSection({
                           ) : index === booking.processSteps.findIndex(s => !s.completed) ? (
                             <Circle className="h-5 w-5 text-blue-500 fill-current" />
                           ) : (
-                            <Circle className="h-5 w-5 text-gray-300" />
+                            <Circle className="h-5 w-5 text-gray-300 dark:text-gray-500" />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className={`text-sm font-medium ${
-                            step.completed ? "text-green-700" : 
-                            index === booking.processSteps.findIndex(s => !s.completed) ? "text-blue-700" : 
-                            "text-gray-500"
+                            step.completed ? "text-green-700 dark:text-green-400" : 
+                            index === booking.processSteps.findIndex(s => !s.completed) ? "text-blue-700 dark:text-blue-400" : 
+                            "text-gray-500 dark:text-gray-400"
                           }`}>
                             {step.step}
                           </p>
                           {step.completedAt && (
-                            <p className="text-xs text-gray-500 mt-1">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                               {new Date(step.completedAt).toLocaleDateString()}
                             </p>
                           )}
