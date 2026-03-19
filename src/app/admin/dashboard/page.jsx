@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react';
-import { Sun, Moon, LayoutDashboard, BarChart, LineChart, Users, User, LogOut, Search, UserCheck, UserX, Shield, ShieldOff, HelpCircle } from 'lucide-react';
+import { Sun, Moon, LayoutDashboard, BarChart, LineChart, Users, User, LogOut, Search, UserCheck, UserX, Shield, ShieldOff, HelpCircle, MessageSquare, Star, Menu, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 
@@ -13,6 +13,15 @@ export default function AdminDashboard() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [userTab, setUserTab] = useState('tourists');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const [siteReviews, setSiteReviews] = useState([]);
+  const [loadingSiteReviews, setLoadingSiteReviews] = useState(false);
+  const [siteReviewsError, setSiteReviewsError] = useState('');
+
+  const [guideReviews, setGuideReviews] = useState([]);
+  const [loadingGuideReviews, setLoadingGuideReviews] = useState(false);
+  const [guideReviewsError, setGuideReviewsError] = useState('');
 
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -130,6 +139,32 @@ export default function AdminDashboard() {
         })
         .catch(() => setUsersError('Failed to fetch users'))
         .finally(() => setLoadingUsers(false));
+    }
+
+    if (activeSection === 'site-reviews') {
+      setLoadingSiteReviews(true);
+      setSiteReviewsError('');
+      fetch('/api/admin/site-reviews')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) setSiteReviews(data.reviews);
+          else setSiteReviewsError(data.error || 'Failed to load site reviews');
+        })
+        .catch(err => setSiteReviewsError(err.message))
+        .finally(() => setLoadingSiteReviews(false));
+    }
+
+    if (activeSection === 'guide-reviews') {
+      setLoadingGuideReviews(true);
+      setGuideReviewsError('');
+      fetch('/api/admin/guide-reviews')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) setGuideReviews(data.reviews);
+          else setGuideReviewsError(data.error || 'Failed to load guide reviews');
+        })
+        .catch(err => setGuideReviewsError(err.message))
+        .finally(() => setLoadingGuideReviews(false));
     }
   }, [activeSection]);
   
@@ -259,6 +294,45 @@ export default function AdminDashboard() {
       setLoggingOut(false);
       toast.success('Logged out successfully');
     }, 1000);
+  };
+
+  const handleSiteReviewAction = async (id, action) => {
+    try {
+      if (action === 'delete') {
+        const res = await fetch(`/api/admin/site-reviews/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) {
+          setSiteReviews(prev => prev.filter(r => r._id !== id));
+          toast.success('Site review deleted');
+        } else throw new Error(data.error);
+      } else {
+        const res = await fetch(`/api/admin/site-reviews/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: action })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setSiteReviews(prev => prev.map(r => r._id === id ? { ...r, status: action } : r));
+          toast.success(`Site review ${action}`);
+        } else throw new Error(data.error);
+      }
+    } catch (err) {
+      toast.error(err.message || 'Action failed');
+    }
+  };
+
+  const handleGuideReviewDelete = async (id) => {
+    try {
+      const res = await fetch(`/api/admin/guide-reviews/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setGuideReviews(prev => prev.filter(r => r._id !== id));
+        toast.success('Guide review deleted');
+      } else throw new Error(data.error);
+    } catch (err) {
+      toast.error(err.message || 'Action failed');
+    }
   };
 
   // Handles user actions (block, unblock, activate, deactivate)
@@ -1059,22 +1133,123 @@ export default function AdminDashboard() {
           </div>
         );
 
+      case 'site-reviews':
+        return (
+          <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+            <h3 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Site Reviews Management</h3>
+            <p className="text-gray-700 dark:text-gray-300 mb-6">Manage user reviews for the platform.</p>
+            {loadingSiteReviews ? <p className="text-gray-800 dark:text-gray-200">Loading...</p> : siteReviewsError ? <p className="text-red-500">{siteReviewsError}</p> : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">User</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rating</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Comment</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {siteReviews.map((review) => (
+                      <tr key={review._id}>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                          {review.user?.firstName} {review.user?.lastName} <br/><span className="text-xs text-gray-500">{review.user?.email}</span>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{review.rating} / 5</td>
+                        <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate" title={review.comment}>{review.comment}</td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm">
+                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${review.status === 'approved' ? 'bg-green-100 text-green-800' : review.status === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                            {review.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium flex gap-2">
+                          <button onClick={() => handleSiteReviewAction(review._id, 'approved')} disabled={review.status === 'approved'} className={`text-green-600 hover:text-green-900 ${review.status === 'approved' ? 'opacity-50 cursor-not-allowed' : ''}`}>Approve</button>
+                          <button onClick={() => handleSiteReviewAction(review._id, 'rejected')} disabled={review.status === 'rejected'} className={`text-yellow-600 hover:text-yellow-900 ${review.status === 'rejected' ? 'opacity-50 cursor-not-allowed' : ''}`}>Reject</button>
+                          <button onClick={() => handleSiteReviewAction(review._id, 'delete')} className="text-red-600 hover:text-red-900 pl-2 border-l border-gray-300 dark:border-gray-600">Delete</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        );
+
+      case 'guide-reviews':
+        return (
+          <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+            <h3 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-100">Guide Reviews Management</h3>
+            <p className="text-gray-700 dark:text-gray-300 mb-6">Manage reviews tourists left for guides.</p>
+            {loadingGuideReviews ? <p className="text-gray-800 dark:text-gray-200">Loading...</p> : guideReviewsError ? <p className="text-red-500">{guideReviewsError}</p> : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tourist</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Guide</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rating</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Comment</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {guideReviews.map((review) => (
+                      <tr key={review._id}>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                          {review.tourist?.firstName} {review.tourist?.lastName}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                          {review.guide?.firstName} {review.guide?.lastName}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{review.rating} / 5</td>
+                        <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate" title={review.comment}>{review.comment}</td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                          <button onClick={() => handleGuideReviewDelete(review._id)} className="text-red-600 hover:text-red-900">Delete</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        );
+
       default:
         return null;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col md:flex-row">
+      
+      {/* Mobile Header */}
+      <div className="md:hidden bg-white dark:bg-gray-800 p-4 flex justify-between items-center shadow-md z-20">
+        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">Admin Panel</h2>
+        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-gray-600 dark:text-gray-300">
+          {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+      </div>
+
+      {/* Main Content Overlay for Mobile */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-10 md:hidden mt-[64px]"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className="w-64 bg-white dark:bg-gray-800 shadow-lg">
-        <div className="p-6">
+      <div className={`fixed md:static inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 shadow-lg z-10 transform transition-transform duration-300 ease-in-out flex flex-col ${isMobileMenuOpen ? 'translate-x-0 mt-[64px] md:mt-0 h-[calc(100vh-64px)] md:h-screen' : '-translate-x-full md:translate-x-0 h-screen'} overflow-y-auto`}>
+        <div className="hidden md:block p-6 flex-shrink-0">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Admin Panel</h2>
         </div>
         
-        <nav className="mt-6">
+        <nav className="mt-2 md:mt-6 flex-1 pb-24">
           <button
-            onClick={() => setActiveSection('overview')}
+            onClick={() => { setActiveSection('overview'); setIsMobileMenuOpen(false); }}
             className={`w-full flex items-center px-6 py-3 text-left transition-colors ${
               activeSection === 'overview'
                 ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 border-r-4 border-indigo-500'
@@ -1086,7 +1261,7 @@ export default function AdminDashboard() {
           </button>
 
           <button
-            onClick={() => setActiveSection('transactions')}
+            onClick={() => { setActiveSection('transactions'); setIsMobileMenuOpen(false); }}
             className={`w-full flex items-center px-6 py-3 text-left transition-colors ${
               activeSection === 'transactions'
                 ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 border-r-4 border-indigo-500'
@@ -1098,7 +1273,7 @@ export default function AdminDashboard() {
           </button>
           
           <button
-            onClick={() => setActiveSection('users')}
+            onClick={() => { setActiveSection('users'); setIsMobileMenuOpen(false); }}
             className={`w-full flex items-center px-6 py-3 text-left transition-colors ${
               activeSection === 'users'
                 ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 border-r-4 border-indigo-500'
@@ -1108,8 +1283,33 @@ export default function AdminDashboard() {
             <Users className="mr-3 h-5 w-5" />
             User Management
           </button>
+          
           <button
-            onClick={() => setActiveSection('analysis')}
+            onClick={() => { setActiveSection('site-reviews'); setIsMobileMenuOpen(false); }}
+            className={`w-full flex items-center px-6 py-3 text-left transition-colors ${
+              activeSection === 'site-reviews'
+                ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 border-r-4 border-indigo-500'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            <MessageSquare className="mr-3 h-5 w-5" />
+            Site Reviews
+          </button>
+
+          <button
+            onClick={() => { setActiveSection('guide-reviews'); setIsMobileMenuOpen(false); }}
+            className={`w-full flex items-center px-6 py-3 text-left transition-colors ${
+              activeSection === 'guide-reviews'
+                ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 border-r-4 border-indigo-500'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            <Star className="mr-3 h-5 w-5" />
+            Guide Reviews
+          </button>
+          
+          <button
+            onClick={() => { setActiveSection('analysis'); setIsMobileMenuOpen(false); }}
             className={`w-full flex items-center px-6 py-3 text-left transition-colors ${
               activeSection === 'analysis'
                 ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 border-r-4 border-indigo-500'
@@ -1121,7 +1321,7 @@ export default function AdminDashboard() {
           </button>
 
           <button
-            onClick={() => setActiveSection('disputes')}
+            onClick={() => { setActiveSection('disputes'); setIsMobileMenuOpen(false); }}
             className={`w-full flex items-center px-6 py-3 text-left transition-colors ${
               activeSection === 'disputes'
                 ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 border-r-4 border-indigo-500'
@@ -1133,7 +1333,7 @@ export default function AdminDashboard() {
           </button>
           
           <button
-            onClick={() => setActiveSection('profile')}
+            onClick={() => { setActiveSection('profile'); setIsMobileMenuOpen(false); }}
             className={`w-full flex items-center px-6 py-3 text-left transition-colors ${
               activeSection === 'profile'
                 ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 border-r-4 border-indigo-500'
@@ -1145,7 +1345,7 @@ export default function AdminDashboard() {
           </button>
         </nav>
         
-        <div className="absolute bottom-0 w-64 p-6">
+        <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 p-6 border-t border-gray-200 dark:border-gray-700">
           <button
             onClick={toggleDarkMode}
             className="w-full flex items-center justify-center px-4 py-2 mb-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
@@ -1165,7 +1365,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-8">
+      <div className="flex-1 p-4 sm:p-8 w-full md:w-auto h-[calc(100vh-68px)] md:h-screen overflow-y-auto">
         {renderContent()}
       </div>
     </div>
