@@ -59,6 +59,7 @@ export default function HomeNavbar({ isDarkMode, toggleDarkMode }) {
     { href: '/', label: 'Home' },
     { href: findGuideLink, label: 'Find a Guide' },
     { href: '/register', label: 'Become a Guide' },
+    { href: '/site-reviews', label: 'Reviews' },
     { href: '/about', label: 'About Us' },
   ];
 
