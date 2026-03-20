@@ -1,26 +1,17 @@
 import { NextResponse } from 'next/server';
-import { testConnection } from '@/lib/mongodb';
+import dbConnect from '@/lib/mongodb';
 
 export async function GET() {
   try {
     console.log('Testing database connection...');
-    const result = await testConnection();
+    await dbConnect();
     
-    if (result.success) {
-      console.log('✅ Connection test successful');
-      return NextResponse.json({
-        success: true,
-        message: 'Database connection successful',
-        details: result
-      });
-    } else {
-      console.log('Connection test failed');
-      return NextResponse.json({
-        success: false,
-        message: 'Database connection failed',
-        error: result.error
-      }, { status: 500 });
-    }
+    console.log('✅ Connection test successful');
+    return NextResponse.json({
+      success: true,
+      message: 'Database connection successful',
+    });
+
   } catch (error) {
     console.error('Connection test error:', error);
     return NextResponse.json({
