@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 import { useState, useEffect } from 'react';
 import { MapPin, BookOpen, ShieldCheck, CalendarDays } from 'lucide-react';
 import Link from 'next/link';
@@ -121,7 +122,7 @@ export default function Home() {
               <div className="p-6">
                 <h3 className="text-2xl font-semibold mb-2 text-gray-800 dark:text-gray-100">Nuwara Eliya</h3>
                 <p className="text-gray-600 dark:text-gray-300 text-sm">
-                  "Little England" of Sri Lanka, known for its picturesque tea plantations and cool climate.
+                  &quot;Little England&quot; of Sri Lanka, known for its picturesque tea plantations and cool climate.
                 </p>
                 <Link href="/login?type=tourist&location=nuwaraeliya" className="mt-4 inline-block text-indigo-600 dark:text-indigo-400 hover:underline">Find Guides in Nuwara Eliya &rarr;</Link>
               </div>
@@ -153,7 +154,7 @@ export default function Home() {
                 **Dates:** July 30th - August 9th, 2025
               </p>
               <p className="text-center text-gray-600 dark:text-gray-300">
-                Sri Lanka's grandest Buddhist festival, featuring elaborate processions of dancers, musicians, and decorated elephants, culminating in the magnificent Randoli Perahera.
+                Sri Lanka&apos;s grandest Buddhist festival, featuring elaborate processions of dancers, musicians, and decorated elephants, culminating in the magnificent Randoli Perahera.
               </p>
               <div className="flex justify-center space-x-2 mt-4">
                 <Link href="https://kandyesalaperahera.com/" className="px-4 py-2 border border-indigo-600 text-indigo-600 dark:text-indigo-400 rounded-full hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-400 dark:hover:text-gray-900 transition-colors duration-300 text-sm">
