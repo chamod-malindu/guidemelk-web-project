@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import React, { Suspense } from "react";
 import RegisterFormClient from "./RegisterFormClient";
 
 export default async function RegisterFormPage() {
@@ -13,5 +14,9 @@ export default async function RegisterFormPage() {
     }
   }
   */
-  return <RegisterFormClient />;
+  return (
+    <Suspense fallback={<div />}>
+      <RegisterFormClient />
+    </Suspense>
+  );
 }
