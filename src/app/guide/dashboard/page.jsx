@@ -24,6 +24,10 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation";
 import { io } from "socket.io-client"; 
+// Use current origin in browser, otherwise fall back to env or localhost
+const SOCKET_ORIGIN = typeof window !== "undefined"
+  ? window.location.origin
+  : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 import ProfileManagementSection from "@/components/guide/dashboard/ProfileManagementSection";
 import toast from "react-hot-toast";
 import DashboardStatsSection from "@/components/guide/dashboard/DashboardStatsSection";
@@ -156,7 +160,7 @@ export default function GuideDashboard() {
     if (!currentUser?._id && !currentUser?.id) return;
     const userId = currentUser._id || currentUser.id;
   
-    notificationSocketRef.current = io("http://localhost:3000", {
+    notificationSocketRef.current = io(SOCKET_ORIGIN, {
       path: "/api/socket",
       transports: ["websocket", "polling"],
     });
@@ -310,7 +314,7 @@ export default function GuideDashboard() {
     if (!id || chats.length === 0) return;
     if (socketRef.current) return; 
 
-    socketRef.current = io("http://localhost:3000", {
+    socketRef.current = io(SOCKET_ORIGIN, {
       path: "/api/socket",
       transports: ["websocket", "polling"],
     });

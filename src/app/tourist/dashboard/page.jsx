@@ -27,6 +27,11 @@ import { useRouter } from "next/navigation";
 import { io } from "socket.io-client";
 import toast from "react-hot-toast";
 
+// Use current origin in browser, otherwise fall back to env or localhost
+const SOCKET_ORIGIN = typeof window !== "undefined"
+  ? window.location.origin
+  : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
 // App wrappers / modals / subcomponents
 import AuthWrapper from "@/components/AuthWrapper";
 import PaymentModal from "@/components/PaymentModal";
@@ -420,7 +425,7 @@ export default function TouristDashboard() {
     if (!getUserId()) return;
     const userId = getUserId();
 
-    notificationSocketRef.current = io("http://localhost:3000", {
+    notificationSocketRef.current = io(SOCKET_ORIGIN, {
       path: "/api/socket",
       transports: ["websocket", "polling"],
     });
