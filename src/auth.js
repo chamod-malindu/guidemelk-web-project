@@ -15,7 +15,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
-  secret: process.env.AUTH_SECRET,
+  // Support both AUTH_SECRET (older) and NEXTAUTH_SECRET (recommended)
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
   callbacks: {
     async jwt({ token, account, trigger }) {
       // Extract role from callback URL

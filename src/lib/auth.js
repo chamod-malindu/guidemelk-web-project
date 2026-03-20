@@ -1,9 +1,14 @@
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET;
+// Read secret from multiple possible env names to be resilient across deploys
+const JWT_SECRET = process.env.JWT_SECRET || process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
 
 // Create a JWT token with user info, expires in 1 day
 export function createToken(user) {
+  if (!JWT_SECRET) {
+    throw new Error('JWT secret is not configured. Please set JWT_SECRET or NEXTAUTH_SECRET in your environment.');
+  }
+
   return jwt.sign(
     {
       userId: user._id,
