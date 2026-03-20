@@ -1,5 +1,13 @@
 require('dotenv').config({ path: '.env.local' });
-console.log('[DEBUG] MONGODB_URI:', process.env.MONGODB_URI);
+
+// Do NOT print secrets to the terminal. Only indicate presence of the URI.
+if (process.env.NODE_ENV !== 'production') {
+  if (process.env.MONGODB_URI) {
+    console.log('[DEBUG] MONGODB_URI is set (value hidden)');
+  } else {
+    console.log('[WARN] MONGODB_URI is not set');
+  }
+}
 
 const { createServer } = require("http");
 const next = require("next");
