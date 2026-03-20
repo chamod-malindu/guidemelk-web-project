@@ -11,6 +11,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { io } from "socket.io-client";
 
+// Use the current origin in the browser when available, otherwise fall back to env or localhost
+const SOCKET_ORIGIN = typeof window !== "undefined"
+  ? window.location.origin
+  : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
 
 export default function ChatClient() {
   // ===== STATE VARIABLES =====
@@ -58,8 +63,8 @@ export default function ChatClient() {
         await fetch("/api/socket");
         await new Promise((resolve) => setTimeout(resolve, 500));
 
-        // Connect to Socket.IO server
-        socketRef.current = io("http://localhost:3000", {
+        // Connect to Socket.IO server (use dynamic origin so it works in prod and locally)
+        socketRef.current = io(SOCKET_ORIGIN, {
           path: "/api/socket",
           transports: ["websocket", "polling"],
           reconnection: true,

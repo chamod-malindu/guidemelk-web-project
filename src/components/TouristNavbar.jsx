@@ -9,6 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { io } from "socket.io-client";
 import axios from "axios";
 
+// Use current origin in browser, otherwise fall back to env or localhost
+const SOCKET_ORIGIN = typeof window !== "undefined"
+  ? window.location.origin
+  : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
 export default function TouristNavbar() {
   const [user, setUser] = useState(null);
   const [notifications, setNotifications] = useState([]);
@@ -68,7 +73,7 @@ export default function TouristNavbar() {
     if (!user?._id && !user?.id) return;
     const userId = user._id || user.id;
 
-    notificationSocketRef.current = io("http://localhost:3000", {
+    notificationSocketRef.current = io(SOCKET_ORIGIN, {
       path: "/api/socket",
       transports: ["websocket", "polling"],
     });
