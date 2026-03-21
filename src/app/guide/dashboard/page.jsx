@@ -24,10 +24,13 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation";
 import { io } from "socket.io-client"; 
-// Use current origin in browser, otherwise fall back to env or localhost
-const SOCKET_ORIGIN = typeof window !== "undefined"
-  ? window.location.origin
-  : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+// Prefer an explicit socket server URL in production (NEXT_PUBLIC_SOCKET_URL).
+// Otherwise use the current origin in the browser, then NEXT_PUBLIC_BASE_URL, then localhost.
+const SOCKET_ORIGIN =
+  process.env.NEXT_PUBLIC_SOCKET_URL ||
+  (typeof window !== "undefined"
+    ? window.location.origin
+    : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000");
 import ProfileManagementSection from "@/components/guide/dashboard/ProfileManagementSection";
 import toast from "react-hot-toast";
 import DashboardStatsSection from "@/components/guide/dashboard/DashboardStatsSection";
