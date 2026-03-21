@@ -294,7 +294,7 @@ import { X, CreditCard, Building, CheckCircle, Loader } from "lucide-react";
                         <Input
                           id="cardName"
                           type="text"
-                          placeholder="John Doe"
+                          placeholder="Noah Wilson"
                           value={formData.cardName}
                           onChange={(e) => handleInputChange('cardName', e.target.value)}
                           required
@@ -357,7 +357,7 @@ import { X, CreditCard, Building, CheckCircle, Loader } from "lucide-react";
                         <Input
                           id="accountHolder"
                           type="text"
-                          placeholder="John Doe"
+                          placeholder="Noah Wilson"
                           value={formData.accountHolder}
                           onChange={(e) => handleInputChange('accountHolder', e.target.value)}
                           required
@@ -386,7 +386,7 @@ import { X, CreditCard, Building, CheckCircle, Loader } from "lucide-react";
                         <Input
                           id="paypalEmail"
                           type="email"
-                          placeholder="john@example.com"
+                          placeholder="noah@example.com"
                           value={formData.paypalEmail}
                           onChange={(e) => handleInputChange('paypalEmail', e.target.value)}
                           required
